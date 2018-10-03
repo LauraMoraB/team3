@@ -8,9 +8,9 @@ import os
 import ImageModel as imMod
 from matplotlib import pyplot as plt
 
-addPath = 'dataset/train_2017/train/'
-addPathGt = 'dataset/train_2017/train/gt/'
-addPathMask = 'dataset/train_2017/train/mask/'
+addPath = 'datasets/train/'
+addPathGt = 'datasets/train/gt/'
+addPathMask = 'datasets/train/mask/'
 
 mask_location_list = []
 mask_list = []
