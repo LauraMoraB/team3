@@ -1,5 +1,3 @@
-__author__ = 'Zaius'
-
 
 import cv2
 import glob
