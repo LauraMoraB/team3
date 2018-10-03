@@ -8,9 +8,9 @@ import os
 import ImageModel as imMod
 from matplotlib import pyplot as plt
 
-addPath = 'dataset/train_2017/train/'
-addPathGt = 'dataset/train_2017/train/gt/'
-addPathMask = 'dataset/train_2017/train/mask/'
+addPath = 'datasets/train/'
+addPathGt = 'datasets/train/gt/'
+addPathMask = 'datasets/train/mask/'
 
 mask_location_list = []
 mask_list = []
@@ -126,20 +126,19 @@ def getGridOfImage():
 #        plt.imshow(cv2.cvtColor(areaFinal, cv2.COLOR_BGR2RGB))
 #        plt.suptitle(values[4])
 #        plt.show()
-
-def testMasks():
-    testImg = signal_C[0].imageGrid
-    plt.imshow(cv2.cvtColor(testImg, cv2.COLOR_BGR2RGB))
-    plt.show()
-    finalImg = signal_C[0].finalGrid
-    plt.imshow(cv2.cvtColor(finalImg, cv2.COLOR_BGR2RGB))
-    plt.show()
-    imgMask= signal_C[0].maskGrid
-    plt.imshow(cv2.cvtColor(imgMask, cv2.COLOR_BGR2RGB))
-    plt.show()
+#
+#def testMasks():
+#    testImg = signal_C[0].imageGrid
+#    plt.imshow(cv2.cvtColor(testImg, cv2.COLOR_BGR2RGB))
+#    plt.show()
+#    finalImg = signal_C[0].finalGrid
+#    plt.imshow(cv2.cvtColor(finalImg, cv2.COLOR_BGR2RGB))
+#    plt.show()
+#    imgMask= signal_C[0].maskGrid
+#    plt.imshow(cv2.cvtColor(imgMask, cv2.COLOR_BGR2RGB))
+#    plt.show()
 
 getGridOfImage()
-testMasks()
 
 
 
