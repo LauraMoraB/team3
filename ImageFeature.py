@@ -120,20 +120,19 @@ def getGridOfImage():
 #        plt.imshow(cv2.cvtColor(areaFinal, cv2.COLOR_BGR2RGB))
 #        plt.suptitle(values[4])
 #        plt.show()
-
-def testMasks():
-    testImg = signal_C[0].imageGrid
-    plt.imshow(cv2.cvtColor(testImg, cv2.COLOR_BGR2RGB))
-    plt.show()
-    finalImg = signal_C[0].finalGrid
-    plt.imshow(cv2.cvtColor(finalImg, cv2.COLOR_BGR2RGB))
-    plt.show()
-    imgMask= signal_C[0].maskGrid
-    plt.imshow(cv2.cvtColor(imgMask, cv2.COLOR_BGR2RGB))
-    plt.show()
+#
+#def testMasks():
+#    testImg = signal_C[0].imageGrid
+#    plt.imshow(cv2.cvtColor(testImg, cv2.COLOR_BGR2RGB))
+#    plt.show()
+#    finalImg = signal_C[0].finalGrid
+#    plt.imshow(cv2.cvtColor(finalImg, cv2.COLOR_BGR2RGB))
+#    plt.show()
+#    imgMask= signal_C[0].maskGrid
+#    plt.imshow(cv2.cvtColor(imgMask, cv2.COLOR_BGR2RGB))
+#    plt.show()
 
 getGridOfImage()
-testMasks()
 
 
 
