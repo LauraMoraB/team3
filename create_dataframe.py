@@ -1,3 +1,9 @@
+
+# coding: utf-8
+
+# In[197]:
+
+
 import cv2
 from matplotlib import pyplot as plt
 import numpy as np
@@ -24,13 +30,7 @@ def load_annotations(annot_file):
         
     return annotations
 
-
-
-def create_df(path_images, path_masks, path_gt):
-    path_ds_images=path_images
-    path_ds_masks=path_masks
-    path_ds_gt=path_gt
-    
+def create_df(path_ds_images, path_ds_masks, path_ds_gt):
     listImages =[]
     listMask=[]
     listGT=[]
@@ -44,13 +44,27 @@ def create_df(path_images, path_masks, path_gt):
         listMask.append(mask)
 
     for annot in os.listdir(path_ds_gt):
-        listGT.append(load_annotations(path_ds_gt+"/"+annot)[0]) #se pone 0 al final para quitar la dimension de mas
+        listGT.append(load_annotations(path_ds_gt+"/"+annot))
         
-    # Create DataFrame from lists
-    col = ['UpLeft(Y)','UpLeft(X)','DownRight(Y)','DownRight(X)','Type']
-    df = pd.DataFrame(listGT,columns=col)
-    df['Imagen']=listImages
-    df['Mask']=listMask
-    
+        
+    col = ['UpLeft(Y)','UpLeft(X)','DownRight(Y)','DownRight(X)','Type', "Image", "Mask"]
+    df = pd.DataFrame(columns=col)
+    list=[]
+    image = 0
+    gt= 0
+    dins =0
+    for i in listGT:
+        for j in range(len(listGT[image])):
+            list = listGT[image][dins]
+            list.append(listImages[image])
+            list.append(listMask[image])
+            df.loc[gt] = list
+            dins = dins + 1
+            gt = gt + 1
+        dins = 0
+        del list[:]
+        list = []
+        image = image + 1
+
     return df
 
