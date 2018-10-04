@@ -12,7 +12,7 @@ path_masks = "./datasets/train/mask/"
 path_gt = "./datasets/train/gt/"
 df = create_df(path_images,path_masks,path_gt)
 
-img = cv2.imread('./datasets/train/'+df.get_value(0, 'Imagen'),1)
+img = cv2.imread('./datasets/train/'+df.get_value(0, 'Image'),1)
 mask = cv2.imread('./datasets/train/mask/'+df.get_value(0, 'Mask'),0)
 masked_img = cv2.bitwise_and(img,img,mask = mask)
 
