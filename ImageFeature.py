@@ -39,28 +39,23 @@ def getPartialName(txtname):
     maskName = nameFileList[0] +"."+ nameFileList[1]
     return maskName
 
-#def getCompleteMergedImage():
-#    for imageName in glob.glob(addPath+ '*.jpg'):
-#        rgbImg = cv2.imread(imageName)
-#        maskName = getMaskFileName(imageName)
-#        maskImg = cv2.imread(maskName)
-#        
-#        mergedImg = rgbImg * maskImg
-#
-#        txtname = getGtFileName(imageName)
-#        txtfile = open(txtname, "r")
-#        content = txtfile.readlines()
-#        values = []
-#        for x in content:
-#            values = x.split(" ")    
-#        areaFinalImg = mergedImg[int(float(values[0])):int(float(values[2])), int(float(values[1])):int(float(values[3]))]
-#        
-#        partialName = getPartialName(imageName)
-#
-#        plt.imshow(cv2.cvtColor(areaFinalImg, cv2.COLOR_BGR2RGB))
-#        plt.suptitle(values[4]+ "_"+ partialName)
-#        plt.show()
+def load_annotations(annot_file):
+    # Annotations are stored in text files containing
+    # the coordinates of the corners (top-left and bottom-right) of
+    # the bounding box plus an alfanumeric code indicating the signal type:
+    # tly, tlx, bry,brx, code
+    annotations = []
+    signs       = [] 
 
+    for line in open(annot_file).read().splitlines():
+
+        annot_values = line.split()
+        annot_values = [x.strip() for x in annot_values]
+        for ii in range(4):
+            annot_values[ii] = float(annot_values[ii])
+        annotations.append(annot_values)
+        
+    return annotations
 
 def getGridOfMask(imageName):
     
@@ -72,10 +67,10 @@ def getGridOfMask(imageName):
         values = x.split(" ")
         
     maskName = getMaskFileName(imageName)
-    mask = cv2.imread(maskName,1)
+    mask = cv2.imread(maskName,0)
     area = mask[int(float(values[0])):int(float(values[2])), int(float(values[1])):int(float(values[3]))]
-    fillRatioOnes = np.count_nonzero(area[:,:,0])
-    sizeMatrix = np.shape(area[:,:,0])
+    fillRatioOnes = np.count_nonzero(area)
+    sizeMatrix = np.shape(area)
     fillRatioZeros = sizeMatrix[0]*sizeMatrix[1]
     fillRatio = fillRatioOnes/fillRatioZeros
     
@@ -99,8 +94,8 @@ def getGridOfImage():
         imageTrain = cv2.imread(imageName,1)
         areaImg = imageTrain[int(float(values[0])):int(float(values[2])), int(float(values[1])):int(float(values[3]))]
         fillRatio, formFactor, areaMask = getGridOfMask(imageName)
-        
-        areaFinal = areaImg * areaMask
+        areaFinal = cv2.bitwise_and(areaImg,areaImg, mask = areaMask)
+        #areaFinal = areaImg * areaMask
         
         partialName = getPartialName(imageName)
         typeSignal = values[4].rstrip()
