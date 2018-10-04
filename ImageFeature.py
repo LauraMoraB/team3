@@ -5,6 +5,7 @@ import glob
 import numpy as np
 import os
 import ImageModel as imMod
+from collections import defaultdict
 from matplotlib import pyplot as plt
 
 addPath = 'datasets/train/'
@@ -13,14 +14,6 @@ addPathMask = 'datasets/train/mask/'
 
 mask_location_list = []
 mask_list = []
-image_list =  []
-
-signal_A = []
-signal_B = []
-signal_C = []
-signal_D = []
-signal_E = []
-signal_F = []
         
 def getMaskFileName(txtname):
     pathList = txtname.split(os.sep)
@@ -46,7 +39,6 @@ def load_annotations(annot_file):
     # the bounding box plus an alfanumeric code indicating the signal type:
     # tly, tlx, bry,brx, code
     annotations = []
-    signs       = [] 
 
     for line in open(annot_file).read().splitlines():
 
@@ -83,8 +75,9 @@ def getGridOfMask(imageName):
     return fillRatio, formFactor, area
         
 def getGridOfImage():
-    for imageName in glob.glob(addPath+'*.jpg'):
-        
+    
+    image_dict = defaultdict(list)
+    for imageName in glob.glob(addPath+'*.jpg'):      
         txtname = getGtFileName(imageName)
         txtfile = open(txtname, "r")
         content = txtfile.readlines()
@@ -100,39 +93,26 @@ def getGridOfImage():
         
         partialName = getPartialName(imageName)
         typeSignal = values[4].rstrip()
-        bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal)
-        image_list.append(bean)
-        if typeSignal  == 'A':
-            signal_A.append(bean)
-        elif typeSignal == 'B':
-            signal_B.append(bean)
-        elif typeSignal == 'C':
-            signal_C.append(bean)
-        elif typeSignal == 'D':
-            signal_D.append(bean)
-        elif typeSignal == 'E':
-            signal_E.append(bean)
-        elif typeSignal == 'F':
-            signal_F.append(bean)
-        else:
-            print("NONE of type:"+typeSignal+":")
-            
-#        plt.imshow(cv2.cvtColor(areaFinal, cv2.COLOR_BGR2RGB))
-#        plt.suptitle(values[4])
-#        plt.show()
-#
-#def testMasks():
-#    testImg = signal_C[0].imageGrid
-#    plt.imshow(cv2.cvtColor(testImg, cv2.COLOR_BGR2RGB))
-#    plt.show()
-#    finalImg = signal_C[0].finalGrid
-#    plt.imshow(cv2.cvtColor(finalImg, cv2.COLOR_BGR2RGB))
-#    plt.show()
-#    imgMask= signal_C[0].maskGrid
-#    plt.imshow(cv2.cvtColor(imgMask, cv2.COLOR_BGR2RGB))
-#    plt.show()
+        bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal)       
+        image_dict[typeSignal].append(bean)
+    
+    return image_dict
 
-getGridOfImage()
+def testMasks(img):
+    testImg = img.imageGrid
+    plt.imshow(cv2.cvtColor(testImg, cv2.COLOR_BGR2RGB))
+    plt.show()
+    finalImg = img.finalGrid
+    plt.imshow(cv2.cvtColor(finalImg, cv2.COLOR_BGR2RGB))
+    plt.show()
+
+
+if __name__ == '__main__':
+    try:
+        testMasks(image_dict['A'][0])    
+    except NameError:
+        getGridOfImage()
+        testMasks(image_dict['A'][0])
 
 
 
