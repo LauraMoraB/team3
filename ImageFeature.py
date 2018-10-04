@@ -50,15 +50,10 @@ def load_annotations(annot_file):
         
     return annotations
 
-def getGridOfMask(imageName):
-    
-    txtname = getGtFileName(imageName)
-    txtfile = open(txtname, "r")
-    content = txtfile.readlines()
-    values = []
-    for x in content:
-        values = x.split(" ")
-        
+
+
+def getGridOfMask(imageName, values):
+          
     maskName = getMaskFileName(imageName)
     mask = cv2.imread(maskName,0)
     area = mask[int(float(values[0])):int(float(values[2])), int(float(values[1])):int(float(values[3]))]
@@ -75,26 +70,21 @@ def getGridOfMask(imageName):
     return fillRatio, formFactor, area
         
 def getGridOfImage():
-    
     image_dict = defaultdict(list)
     for imageName in glob.glob(addPath+'*.jpg'):      
         txtname = getGtFileName(imageName)
-        txtfile = open(txtname, "r")
-        content = txtfile.readlines()
-        values = []
-        for x in content:
-            values = x.split(" ")
-    
-        imageTrain = cv2.imread(imageName,1)
-        areaImg = imageTrain[int(float(values[0])):int(float(values[2])), int(float(values[1])):int(float(values[3]))]
-        fillRatio, formFactor, areaMask = getGridOfMask(imageName)
-        areaFinal = cv2.bitwise_and(areaImg,areaImg, mask = areaMask)
-        #areaFinal = areaImg * areaMask
-        
-        partialName = getPartialName(imageName)
-        typeSignal = values[4].rstrip()
-        bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal)       
-        image_dict[typeSignal].append(bean)
+        content = load_annotations(txtname)
+        for values in content: 
+            imageTrain = cv2.imread(imageName,1)
+            areaImg = imageTrain[int(float(values[0])):int(float(values[2])), int(float(values[1])):int(float(values[3]))]
+            fillRatio, formFactor, areaMask = getGridOfMask(imageName, values)
+            areaFinal = cv2.bitwise_and(areaImg,areaImg, mask = areaMask)           
+            #areaFinal = areaImg * areaMask
+            
+            partialName = getPartialName(imageName)
+            typeSignal = values[4].rstrip()
+            bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal)       
+            image_dict[typeSignal].append(bean)
     
     return image_dict
 
@@ -108,11 +98,12 @@ def testMasks(img):
 
 
 if __name__ == '__main__':
+    imgType = 'C'
     try:
-        testMasks(image_dict['A'][0])    
+        testMasks(image_dict[imgType][0])    
     except NameError:
-        getGridOfImage()
-        testMasks(image_dict['A'][0])
+        image_dict = getGridOfImage()
+        testMasks(image_dict[imgType][0])
 
 
 
