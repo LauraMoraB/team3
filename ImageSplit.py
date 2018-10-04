@@ -10,4 +10,4 @@ from matplotlib import pyplot as plt
 import ImageModel as imMod
 from ImageFeature import getGridOfImage 
 
-getGridOfImage()
+image_dict = getGridOfImage()
