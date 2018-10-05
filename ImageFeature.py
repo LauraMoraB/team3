@@ -69,9 +69,6 @@ def testMasks(img):
     plt.show()
 
 
-# In[89]:
-
-
 if __name__ == '__main__':
     imgType = 'C'
     try:
