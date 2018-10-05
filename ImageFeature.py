@@ -70,10 +70,10 @@ def testMasks(img):
 
 
 if __name__ == '__main__':
+    print(image_dict[imgType][0])
     imgType = 'C'
     try:
         testMasks(image_dict[imgType][0])    
     except NameError:
         image_dict = getGridOfImage()
         testMasks(image_dict[imgType][0])
-
