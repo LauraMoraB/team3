@@ -117,7 +117,7 @@ def colorSegmentation(img):
     
 def getHistogram(img):
 
-    testImg = img.completeImg
+    testImg = img.finalGrid
     color = ('b','g','r')
     for i,col in enumerate(color):
         histr = cv2.calcHist([testImg],[i],None,[256],[0,256])
@@ -126,10 +126,12 @@ def getHistogram(img):
     plt.show()
 
 if __name__ == '__main__':
-    imgType = 'D'
+    imgTypes = ('A','B','C','D','E','F')
     try:
-        for i in 
-        getHistogram(image_dict[imgType][20])
+        for imgType in imgTypes:
+            numberOfItems = np.shape(image_dict[imgType])
+            for imageNumber in range(0, numberOfItems[0]-1):
+                getHistogram(image_dict[imgType][imageNumber])
 #        colorSegmentation(image_dict[imgType][20]) 
 #        testMasks(image_dict[imgType][0])    
     except NameError:
