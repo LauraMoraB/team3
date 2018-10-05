@@ -29,7 +29,6 @@ def computeStats(image_dict):
     return (fillRatio_dict, formFactor_dict)
         
 
-    
 
 if __name__ == '__main__':
     imgType = 'C'        
