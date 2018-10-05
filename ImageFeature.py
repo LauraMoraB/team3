@@ -82,7 +82,7 @@ def getGridOfImage():
             
             partialName = getPartialName(imageName)
             typeSignal = values[4].rstrip()
-            bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal)       
+            bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal, imageTrain)       
             image_dict[typeSignal].append(bean)
     
     return image_dict
@@ -94,12 +94,44 @@ def testMasks(img):
     finalImg = img.finalGrid
     plt.imshow(cv2.cvtColor(finalImg, cv2.COLOR_BGR2RGB))
     plt.show()
+    completeImg = img.completeImg
+    plt.imshow(cv2.cvtColor(completeImg, cv2.COLOR_BGR2RGB))
+    plt.show()
 
+
+def colorSegmentation(img):
+    
+    croped = img.finalGrid
+    plt.imshow(croped)
+    plt.show()
+    
+    upper_red = np.array([130,255,255])
+    lower_red = np.array([110,50,50])
+    
+    testCropHSV = cv2.cvtColor(croped, cv2.COLOR_BGR2HSV)
+    
+    mask = cv2.inRange(testCropHSV, lower_red, upper_red)
+    result = cv2.bitwise_and(croped, croped, mask = mask)
+    plt.imshow(result)
+    plt.show()
+    
+def getHistogram(img):
+
+    testImg = img.completeImg
+    color = ('b','g','r')
+    for i,col in enumerate(color):
+        histr = cv2.calcHist([testImg],[i],None,[256],[0,256])
+        plt.plot(histr,color = col)
+        plt.xlim([0,256])
+    plt.show()
 
 if __name__ == '__main__':
-    imgType = 'C'
+    imgType = 'D'
     try:
-        testMasks(image_dict[imgType][0])    
+        for i in 
+        getHistogram(image_dict[imgType][20])
+#        colorSegmentation(image_dict[imgType][20]) 
+#        testMasks(image_dict[imgType][0])    
     except NameError:
         image_dict = getGridOfImage()
         testMasks(image_dict[imgType][0])
