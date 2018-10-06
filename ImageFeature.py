@@ -79,7 +79,6 @@ def getGridOfImage():
             areaImg = imageTrain[int(float(values[0])):int(float(values[2])), int(float(values[1])):int(float(values[3]))]
             fillRatio, formFactor, areaMask = getGridOfMask(imageName, values)
             areaFinal = cv2.bitwise_and(areaImg,areaImg, mask = areaMask)           
-            #areaFinal = areaImg * areaMask
             
             partialName = getPartialName(imageName)
             typeSignal = values[4].rstrip()
@@ -102,36 +101,51 @@ def testMasks(img):
 
 
 def colorSegmentation(image_dict):
-    imgTypes = ('A','B','C','D','E','F')
+#    imgTypes = ('A','B','C','D','E','F')
+    imgTypes = ('D')
+    kernel = np.ones((6,6),np.uint8)
+
     for imgType in imgTypes:
         numberOfItems = np.shape(image_dict[imgType])
         for imageNumber in range(0, numberOfItems[0]-1):
             img = image_dict[imgType][imageNumber]
     
-            croped = img.finalGrid
-            plt.imshow(croped)
-            plt.show()
+            croped = img.completeImg
+#            plt.imshow(croped)
+#            plt.show()
             testCropHSV = cv2.cvtColor(croped, cv2.COLOR_BGR2HSV)
     
             hsv_rang= (
-                 np.array([130,255,255]), np.array([110,50,50]) 
-                 ,np.array([1, 75, 75]), np.array([9, 225, 225])
-                 ,np.array([21, 100, 75]), np.array([25, 255, 255])
+                 np.array([0,65,75]), np.array([12, 255, 255]) #RED
+                 ,np.array([240,65,75]), np.array([255, 255, 255]) #DARK RED
+                 ,np.array([100,150,0]), np.array([140, 255, 255]) #BLUE
+                 ,np.array([100,150,0]), np.array([140, 255, 255]) #BLUE
+
             )
             size_hsv_rang = np.size(hsv_rang,0)
             for i in range(0, size_hsv_rang-1,2):
                 lower = hsv_rang[i]
-                upper = hsv_rang[i+1]     
-                mask = cv2.inRange(testCropHSV, upper, lower)
-                result = cv2.bitwise_and(croped, croped, mask = mask)
-                blur = cv2.blur(result, (5, 5), 0)
-                imgray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
-                ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
-                heir, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                
-                plt.imshow(result)
-                plt.show()
+                upper = hsv_rang[i+1] 
+                for j in range (0,1):
+                    mask = cv2.inRange(testCropHSV, lower, upper)
+                    if (j == 0):
+                        maskMorph = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+                    else:
+                        maskMorph = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
 
+                    bitwiseRes = cv2.bitwise_and(testCropHSV, testCropHSV, mask = maskMorph)
+                    blur = cv2.blur(bitwiseRes, (5, 5), 0)            
+                    imgray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
+                    
+                    ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
+                    heir, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                    
+                    croped = cv2.drawContours(croped, contours, -1 ,(0,255,0), 3)
+             
+            plt.imshow(croped)
+            plt.show()
+
+    
 def getHistogram(image_dict):
     imgTypes = ('A','B','C','D','E','F')
     for imgType in imgTypes:
