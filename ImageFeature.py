@@ -78,73 +78,14 @@ def getGridOfImage():
             imageTrain = cv2.imread(imageName,1)
             areaImg = imageTrain[int(float(values[0])):int(float(values[2])), int(float(values[1])):int(float(values[3]))]
             fillRatio, formFactor, areaMask = getGridOfMask(imageName, values)
-            areaFinal = cv2.bitwise_and(areaImg,areaImg, mask = areaMask)   
-
-#            #analisis de forma 
-#            ret,thresh = cv2.threshold(img,127,255,0)
-#            im2,contours,hierarchy = cv2.findContours(thresh, 1, 2)
-#            cnt = contours[0]
-#            M = cv2.moments(cnt)
-#            print( M )
-#            cx = int(M['m10']/M['m00'])
-#            cy = int(M['m01']/M['m00'])
-#            area = cv2.contourArea(cnt)
-#            perimeter = cv2.arcLength(cnt,True)
-#            epsilon = 0.1*cv2.arcLength(cnt,True)
-#            approx = cv2.approxPolyDP(cnt,epsilon,True)
-#            hull = cv2.convexHull(cnt)
-#            k = cv2.isContourConvex(cnt)
-#            x,y,w,h = cv2.boundingRect(cnt)
-#            cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,0),2)
-#            rect = cv.minAreaRect(cnt)
-#            box = cv2.boxPoints(rect)
-#            box = np.int0(box)
-#            cv2.drawContours(img,[box],0,(0,0,255),2)
-#            #fin analisis de forma
-            
-            
-            
+            areaFinal = cv2.bitwise_and(areaImg,areaImg, mask = areaMask)           
+            #areaFinal = areaImg * areaMask
             
             partialName = getPartialName(imageName)
             typeSignal = values[4].rstrip()
             bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal)       
             image_dict[typeSignal].append(bean)
-            
-            #analisis de color
-            imagen=areaFinal
-            
-            hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
-          
-            #Rango de colores detectados:
-            #Verdes:
-            verde_bajos = np.array([49,50,50], dtype=np.uint8)
-            verde_altos = np.array([100, 255, 210], dtype=np.uint8)
-            #Amarillos:
-            amarillo_bajos = np.array([16,76,72], dtype=np.uint8)
-            amarillo_altos = np.array([30, 255, 210], dtype=np.uint8)
-          
-            #Detectar los pixeles de la imagen que esten dentro del rango de verdes
-            mascara_verde = cv2.inRange(hsv, verde_bajos, verde_altos)
-             
-            #Detectar los pixeles de la imagen que esten dentro del rango de amarillos
-            mascara_amarillo = cv2.inRange(hsv, amarillo_bajos, amarillo_altos)
-          
-            #Filtrar el ruido aplicando un OPEN seguido de un CLOSE
-            kernel = np.ones((6,6),np.uint8)
-            mascara_verde = cv2.morphologyEx(mascara_verde, cv2.MORPH_CLOSE, kernel)
-            mascara_verde = cv2.morphologyEx(mascara_verde, cv2.MORPH_OPEN, kernel)
-            mascara_amarillo = cv2.morphologyEx(mascara_amarillo, cv2.MORPH_CLOSE, kernel)
-            mascara_amarillo = cv2.morphologyEx(mascara_amarillo, cv2.MORPH_OPEN, kernel)
-         
-            #Unir las dos mascaras con el comando cv2.add()
-            mask = cv2.add(mascara_amarillo, mascara_verde)
-         
-            #Mostrar la imagen de la webcam y la mascara verde
-            cv2.imshow('verde', mask)
-            cv2.imshow('Camara', imagen)
-            tecla = cv2.waitKey(5) & 0xFF
-            if tecla == 27:
-                break           
+    
     return image_dict
 
 def testMasks(img):
@@ -163,5 +104,6 @@ if __name__ == '__main__':
     except NameError:
         image_dict = getGridOfImage()
         testMasks(image_dict[imgType][0])
+
 
 
