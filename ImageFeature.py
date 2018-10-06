@@ -33,6 +33,7 @@ def getPartialName(txtname):
     maskName = nameFileList[0] +"."+ nameFileList[1]
     return maskName
 
+
 def load_annotations(annot_file):
     # Annotations are stored in text files containing
     # the coordinates of the corners (top-left and bottom-right) of
