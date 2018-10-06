@@ -101,12 +101,15 @@ def testMasks(img):
 
 def colorSegmentation(img):
     
-    croped = img.finalGrid
+    croped = img.completeImg
     plt.imshow(croped)
     plt.show()
     
-    upper_red = np.array([130,255,255])
-    lower_red = np.array([110,50,50])
+    hsv_rang= (
+         np.array([130,255,255]), np.array([110,50,50]) #ROJO
+         ,np.array([130,255,255]), np.array([110,50,50])
+         ,np.array([130,255,255]), np.array([110,50,50])
+    )
     
     testCropHSV = cv2.cvtColor(croped, cv2.COLOR_BGR2HSV)
     
@@ -115,24 +118,26 @@ def colorSegmentation(img):
     plt.imshow(result)
     plt.show()
     
-def getHistogram(img):
-
-    testImg = img.finalGrid
-    color = ('b','g','r')
-    for i,col in enumerate(color):
-        histr = cv2.calcHist([testImg],[i],None,[256],[0,256])
-        plt.plot(histr,color = col)
-        plt.xlim([0,256])
-    plt.show()
+def getHistogram(image_dict):
+    imgTypes = ('A','B','C','D','E','F')
+    for imgType in imgTypes:
+        numberOfItems = np.shape(image_dict[imgType])
+        for imageNumber in range(0, numberOfItems[0]-1):
+            img = image_dict[imgType][imageNumber]
+            testImg = img.finalGrid
+            color = ('b','g','r')
+            for i,col in enumerate(color):
+                histr = cv2.calcHist([testImg],[i],None,[256],[1,256])
+                plt.plot(histr,color = col)
+                plt.xlim([0,256])
+            plt.show()
 
 if __name__ == '__main__':
     imgTypes = ('A','B','C','D','E','F')
     try:
-        for imgType in imgTypes:
-            numberOfItems = np.shape(image_dict[imgType])
-            for imageNumber in range(0, numberOfItems[0]-1):
-                getHistogram(image_dict[imgType][imageNumber])
-#        colorSegmentation(image_dict[imgType][20]) 
+
+        getHistogram(image_dict)
+#        colorSegmentation(image_dict[imgTypes[4]][20]) 
 #        testMasks(image_dict[imgType][0])    
     except NameError:
         image_dict = getGridOfImage()
