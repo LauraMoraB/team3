@@ -1,3 +1,10 @@
+
+# coding: utf-8
+
+# In[58]:
+
+
+# %load ImageFeature.py
 import cv2
 import glob
 import numpy as np
@@ -11,7 +18,7 @@ addPath = 'datasets/train/'
 addPathGt = 'datasets/train/gt/'
 addPathMask = 'datasets/train/mask/'
 
-# Dataframe
+# Create Dataframe
 df = create_df(addPath, addPathMask, addPathGt)
 
 def getPartialName(txtname):
@@ -35,12 +42,13 @@ def getGridOfMask(imageName, i):
     else:
         formFactor = abs(sizeMatrix[1]/sizeMatrix[0])
 
-    return fillRatio, formFactor, area
+    return fillRatio, formFactor, area#, areaSign
 
 def getGridOfImage():
     image_dict = defaultdict(list)
     fillRatioL = []
     formFactorL = []
+    areaSignL=[]
     
     for i in range(len(df)): 
         imageName=df["Image"].iloc[i]
@@ -80,7 +88,6 @@ def compute_histogram_type(signal_type):
     for i in range((len(image_dict[signal_type]))):
         img = image_dict[signal_type][i]
         testImg = img.finalGrid
-        cropimg = img.imageGrid
 
         hsv = cv2.cvtColor(testImg, cv2.COLOR_BGR2HSV)
 
@@ -88,10 +95,9 @@ def compute_histogram_type(signal_type):
 
         hueL.append(np.ndarray.flatten(hue))
         satL.append(np.ndarray.flatten(sat))
-        valL.append(np.ndarray.flatten(val))    
-    
+        valL.append(np.ndarray.flatten(val))
+        
     return hueL, satL, valL
-
 
 if __name__ == '__main__':
     imgType = 'C'
@@ -101,28 +107,28 @@ if __name__ == '__main__':
         image_dict = getGridOfImage()
         testMasks(image_dict[imgType][0])
 
-    image_dict, df = getGridOfImage()
+    # save    
     df.to_csv('dataset.csv', encoding='utf-8', index=False)
-    hueTotal=[]
-    satTotal=[]
-    valTotal=[]
-    for file in df.Type.unique():
-        hue_type, sat_type, val_type = compute_histogram_type(file)
-        hueTotal.append(hue_type)
-        satTotal.append(sat_type)
-        valTotal.append(val_type)
 
-    # Show histograms
+    # TIPU A
+    hue_a, sat_a, val_a = compute_histogram_type("A")
+    hue_b, sat_b, val_b = compute_histogram_type("B")
+    hue_c, sat_c, val_c = compute_histogram_type("C")
+    hue_d, sat_d, val_d = compute_histogram_type("D")
+    hue_e, sat_e, val_e = compute_histogram_type("E")
+    hue_f, sat_f, val_f = compute_histogram_type("F")
+
+    #Plot histogram
     plt.figure(figsize=(10,8))
     plt.subplot(311)                             
     plt.subplots_adjust(hspace=.5)
-    plt.title("Hue")
-    plt.hist(hueTotal, bins=180)
+    plt.title("Hue A")
+    plt.hist(hue_a, bins='auto')
     plt.subplot(312)                             
-    plt.title("Saturation")
-    plt.hist(satTotal, bins=128)
+    plt.title("Saturation A")
+    plt.hist(sat_a, bins='auto')
     plt.subplot(313)
-    plt.title("Luminosity Value")
-    plt.hist(valTotal, bins=128)
+    plt.title("Luminosity A")
+    plt.hist(val_a, bins='auto')
     plt.show()
 
