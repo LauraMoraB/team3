@@ -94,12 +94,12 @@ def compute_histogram_type(signal_type):
 
 
 if __name__ == '__main__':
-#    imgType = 'C'
-#    try:
-#        testMasks(image_dict[imgType][0])    
-#    except NameError:
-#        image_dict = getGridOfImage()
-#        testMasks(image_dict[imgType][0])
+    imgType = 'C'
+    try:
+        testMasks(image_dict[imgType][0])    
+    except NameError:
+        image_dict = getGridOfImage()
+        testMasks(image_dict[imgType][0])
 
     image_dict, df = getGridOfImage()
     df.to_csv('dataset.csv', encoding='utf-8', index=False)
