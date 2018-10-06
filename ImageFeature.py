@@ -86,17 +86,17 @@ def compute_histogram_type(signal_type):
         sat = np.ndarray.flatten(sat).tolist()
         val = np.ndarray.flatten(val).tolist()
 
-        (iImg, jImg, kImg) = np.shape(testImg)
-        i = iImg
-        for line in reversed(testImg):
-            j = jImg
-            for pixel in reversed(line):
-                if all(x > 245 for x in pixel) or all(x < 10 for x in pixel):             
-                    hue.pop(i*j -1)
-                    sat.pop(i*j -1)
-                    val.pop(i*j -1)
-                j -= 1
-            i -= 1
+#        (iImg, jImg, kImg) = np.shape(testImg)
+#        i = iImg
+#        for line in reversed(testImg):
+#            j = jImg
+#            for pixel in reversed(line):
+#                if all(x > 245 for x in pixel) or all(x < 10 for x in pixel):             
+#                    hue.pop(i*j -1)
+#                    sat.pop(i*j -1)
+#                    val.pop(i*j -1)
+#                j -= 1
+#            i -= 1
 
         hueL.extend(hue)
         satL.extend(sat)
@@ -123,19 +123,18 @@ if __name__ == '__main__':
     plt.subplot(311)                             
     plt.subplots_adjust(hspace=.5)
     plt.title("Hue")
-    plt.hist(hue_type, bins='auto')
+    plt.hist(hue_type, bins='auto',normed=1)
     plt.subplot(312)                             
     plt.title("Saturation")
-    plt.hist(sat_type, bins='auto')
+    plt.hist(sat_type, bins='auto',normed=1)
     plt.subplot(313)
     plt.title("Luminosity Value")
-    plt.hist(val_type, bins='auto')
+    plt.hist(val_type, bins='auto',normed=1)
     plt.show()
 
     plt.figure(2)
 
-    plt.hist2d(hue_type, sat_type, bins=10, range=[[0,255],[0,255]], norm=LogNorm())
-    plt.colorbar()
-    plt.show()
+    plt.hist2d(hue_type, sat_type, bins=10, range=[[0,255],[0,255]],normed=1, norm=LogNorm())
+
 
 
