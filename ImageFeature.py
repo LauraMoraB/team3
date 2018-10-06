@@ -98,7 +98,7 @@ def testMasks(img):
 
 
 if __name__ == '__main__':
-    imgType = 'C'
+    imgType = 'B'
     try:
         testMasks(image_dict[imgType][0])    
     except NameError:
