@@ -109,3 +109,39 @@ if __name__ == '__main__':
 
 
 
+<<<<<<< HEAD
+=======
+if __name__ == '__main__':
+    imgType = 'C'
+    try:
+        testMasks(image_dict[imgType][0])    
+    except NameError:
+        image_dict = getGridOfImage()
+        testMasks(image_dict[imgType][0])
+
+    image_dict, df = getGridOfImage()
+    df.to_csv('dataset.csv', encoding='utf-8', index=False)
+    hueTotal=[]
+    satTotal=[]
+    valTotal=[]
+    for file in df.Type.unique():
+        hue_type, sat_type, val_type = compute_histogram_type(file)
+        hueTotal.append(hue_type)
+        satTotal.append(sat_type)
+        valTotal.append(val_type)
+
+    # Show histograms
+    plt.figure(figsize=(10,8))
+    plt.subplot(311)                             
+    plt.subplots_adjust(hspace=.5)
+    plt.title("Hue")
+    plt.hist(hueTotal, bins=180)
+    plt.subplot(312)                             
+    plt.title("Saturation")
+    plt.hist(satTotal, bins=128)
+    plt.subplot(313)
+    plt.title("Luminosity Value")
+    plt.hist(valTotal, bins=128)
+    plt.show()
+
+>>>>>>> laura-dev
