@@ -35,13 +35,12 @@ def getGridOfMask(imageName, i):
     else:
         formFactor = abs(sizeMatrix[1]/sizeMatrix[0])
 
-    return fillRatio, formFactor, area#, areaSign
+    return fillRatio, formFactor, area
 
 def getGridOfImage():
     image_dict = defaultdict(list)
     fillRatioL = []
     formFactorL = []
-    areaSignL=[]
     
     for i in range(len(df)): 
         imageName=df["Image"].iloc[i]
