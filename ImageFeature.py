@@ -6,6 +6,7 @@ import os
 import ImageModel as imMod
 from collections import defaultdict
 from matplotlib import pyplot as plt
+import pandas as pd
 
 addPath = 'datasets/train/'
 addPathGt = 'datasets/train/gt/'
@@ -99,25 +100,38 @@ def testMasks(img):
     plt.show()
 
 
-def colorSegmentation(img):
+
+def colorSegmentation(image_dict):
+    imgTypes = ('A','B','C','D','E','F')
+    for imgType in imgTypes:
+        numberOfItems = np.shape(image_dict[imgType])
+        for imageNumber in range(0, numberOfItems[0]-1):
+            img = image_dict[imgType][imageNumber]
     
-    croped = img.completeImg
-    plt.imshow(croped)
-    plt.show()
+            croped = img.finalGrid
+            plt.imshow(croped)
+            plt.show()
+            testCropHSV = cv2.cvtColor(croped, cv2.COLOR_BGR2HSV)
     
-    hsv_rang= (
-         np.array([130,255,255]), np.array([110,50,50]) #ROJO
-         ,np.array([130,255,255]), np.array([110,50,50])
-         ,np.array([130,255,255]), np.array([110,50,50])
-    )
-    
-    testCropHSV = cv2.cvtColor(croped, cv2.COLOR_BGR2HSV)
-    
-    mask = cv2.inRange(testCropHSV, lower_red, upper_red)
-    result = cv2.bitwise_and(croped, croped, mask = mask)
-    plt.imshow(result)
-    plt.show()
-    
+            hsv_rang= (
+                 np.array([130,255,255]), np.array([110,50,50]) 
+                 ,np.array([1, 75, 75]), np.array([9, 225, 225])
+                 ,np.array([21, 100, 75]), np.array([25, 255, 255])
+            )
+            size_hsv_rang = np.size(hsv_rang,0)
+            for i in range(0, size_hsv_rang-1,2):
+                lower = hsv_rang[i]
+                upper = hsv_rang[i+1]     
+                mask = cv2.inRange(testCropHSV, upper, lower)
+                result = cv2.bitwise_and(croped, croped, mask = mask)
+                blur = cv2.blur(result, (5, 5), 0)
+                imgray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
+                ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
+                heir, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                
+                plt.imshow(result)
+                plt.show()
+
 def getHistogram(image_dict):
     imgTypes = ('A','B','C','D','E','F')
     for imgType in imgTypes:
@@ -136,8 +150,8 @@ if __name__ == '__main__':
     imgTypes = ('A','B','C','D','E','F')
     try:
 
-        getHistogram(image_dict)
-#        colorSegmentation(image_dict[imgTypes[4]][20]) 
+#        getHistogram(image_dict)
+        colorSegmentation(image_dict) 
 #        testMasks(image_dict[imgType][0])    
     except NameError:
         image_dict = getGridOfImage()
