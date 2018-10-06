@@ -22,10 +22,6 @@ from sklearn.model_selection import train_test_split
 
 df = pd.read_csv('dataset.csv')
 
-
-# In[158]:
-
-
 def computeStats(image_dict):
     #Stadistical study for the different signal types in order to properly
     #split the training set into two sets,  ~70% and ~30% with the best 
@@ -64,19 +60,14 @@ def split_by_type():
     col = ['UpLeft(Y)','UpLeft(X)','DownRight(Y)','DownRight(X)','Type', "Image", "Mask", "FillRatio", "FormFactor"]
     train = pd.DataFrame(columns=col)
     validation = pd.DataFrame(columns=col)
-    #mean_value = df["FillRatio"].sum() / len(df["FillRatio"])
     for type in df.Type.unique():
         typeDf = df[df.Type == type]
-        train1, validation1 = train_test_split(typeDf, test_size=0.23)
+        train1, validation1 = train_test_split(typeDf, test_size=0.3)
        
         train = pd.concat([train, train1],ignore_index=True)
         validation = pd.concat([validation, validation1],ignore_index=True)        
     
     return train, validation
-
-
-# In[159]:
-
 
 if __name__ == '__main__':
     train,validation = split_by_type()

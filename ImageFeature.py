@@ -16,8 +16,6 @@ df = create_df(addPath, addPathMask, addPathGt)
 
 def getPartialName(txtname):
     pathList =txtname.split(".")
-    #pathList = txtname.split(os.sep)
-    #nameFileList = pathList[1].split(".")
     maskName = pathList[0] +"."+ pathList[1]
     return maskName
 
@@ -36,7 +34,6 @@ def getGridOfMask(imageName,i):
         formFactor = abs(sizeMatrix[1]/sizeMatrix[0])
         
     return fillRatio, formFactor, area
-
 
 def getGridOfImage():
     image_dict = defaultdict(list)
@@ -70,7 +67,6 @@ def testMasks(img):
 
 
 if __name__ == '__main__':
-    print(image_dict[imgType][0])
     imgType = 'C'
     try:
         testMasks(image_dict[imgType][0])    
