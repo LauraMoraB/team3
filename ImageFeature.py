@@ -81,9 +81,8 @@ def compute_histogram_type(signal_type):
     for i in range((len(image_dict[signal_type]))):
         img = image_dict[signal_type][i]
         testImg = img.finalGrid
-        cropimg = img.imageGrid
 
-        testImg = cv2.cvtColor(testImg, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(testImg, cv2.COLOR_BGR2HSV)
 
         hue, sat, val = hsv[:,:,0], hsv[:,:,1], hsv[:,:,2]
 
@@ -104,26 +103,27 @@ if __name__ == '__main__':
 
     image_dict, df = getGridOfImage()
     df.to_csv('dataset.csv', encoding='utf-8', index=False)
-    hueTotal=[]
-    satTotal=[]
-    valTotal=[]
-    for file in df.Type.unique():
-        hue_type, sat_type, val_type = compute_histogram_type(file)
-        hueTotal.append(hue_type)
-        satTotal.append(sat_type)
-        valTotal.append(val_type)
-
-    # Show histograms
+    hue_type, sat_type, val_type = compute_histogram_type("B")
+#    hueTotal=[]
+#    satTotal=[]
+#    valTotal=[]
+#    for file in df.Type.unique():
+#        hue_type, sat_type, val_type = compute_histogram_type(file)
+#        hueTotal.append(hue_type)
+#        satTotal.append(sat_type)
+#        valTotal.append(val_type)
+#
+#    # Show histograms
     plt.figure(figsize=(10,8))
     plt.subplot(311)                             
     plt.subplots_adjust(hspace=.5)
     plt.title("Hue")
-    plt.hist(hueTotal, bins=180)
+    plt.hist(hue_type, bins='auto')
     plt.subplot(312)                             
     plt.title("Saturation")
-    plt.hist(satTotal, bins=128)
+    plt.hist(sat_type, bins='auto')
     plt.subplot(313)
     plt.title("Luminosity Value")
-    plt.hist(valTotal, bins=128)
+    plt.hist(val_type, bins='auto')
     plt.show()
 
