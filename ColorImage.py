@@ -20,10 +20,10 @@ def pixelescolorDetection(imagen, colorType,signalType, name):
     print(name)
 
     if colorType == "red":
-        rojo_bajos1 = np.array([0,65,75], dtype=np.uint8)
-        rojo_altos1 = np.array([12, 255, 255], dtype=np.uint8)
-        rojo_bajos2 = np.array([240,65,75], dtype=np.uint8)
-        rojo_altos2 = np.array([256, 255, 255], dtype=np.uint8)
+        rojo_bajos1 = np.array([0,50,60], dtype=np.uint8)
+        rojo_altos1 = np.array([20, 255, 255], dtype=np.uint8)
+        rojo_bajos2 = np.array([300,75,60], dtype=np.uint8)
+        rojo_altos2 = np.array([360, 255, 255], dtype=np.uint8)
         print("rojo_altos2")
         #Detectar los pixeles de la imagen que esten dentro del rango de rojos
         mascara_rojo1 = cv2.inRange(imagen, rojo_bajos1, rojo_altos1)
@@ -63,9 +63,9 @@ def pixelescolorDetection(imagen, colorType,signalType, name):
 
         
     elif colorType == "blue":
-        blue_1 = np.array([100,150,0], dtype=np.uint8)
+        blue_1 = np.array([100,50,40], dtype=np.uint8)
         blue_2 = np.array([140, 255, 255], dtype=np.uint8)
-        
+   
         #Detectar los pixeles de la imagen que esten dentro del rango de rojos
         mascara_blue  = cv2.inRange(imagen, blue_1, blue_2)
         
@@ -108,7 +108,7 @@ def computeColor(image_dict, spaceType, colorType):
             if spaceType=="HSV":    
                 #plt.imsave("./Resultados/"+signalType+"/"+channelGrid.name+'imghsv.jpg', imghsv)
                 maskcolor=pixelescolorDetection(imghsv,colorType,signalType,channelGrid.name)
-                #plt.imsave("./Resultados/"+signalType+"/"+channelGrid.name+'maskcolor.jpg', maskcolor)
+                plt.imsave("./Resultados/"+signalType+"/"+channelGrid.name+'maskcolor.jpg', maskcolor)
 
                 # Bitwise-AND mask and original image
                 restimghsv = cv2.bitwise_and(imghsv,imghsv, mask= maskcolor)
