@@ -1,11 +1,10 @@
-import cv2
-import glob
 import numpy as np
-import os
 import ImageModel as imMod
-from matplotlib import pyplot as plt
+from matplotlib.colors import LogNorm
+import matplotlib.pyplot as plt
 from create_dataframe import create_df
 from collections import defaultdict
+import cv2
 
 addPath = 'datasets/train/'
 addPathGt = 'datasets/train/gt/'
@@ -80,15 +79,31 @@ def compute_histogram_type(signal_type):
     for i in range((len(image_dict[signal_type]))):
         img = image_dict[signal_type][i]
         testImg = img.finalGrid
-
+                
         hsv = cv2.cvtColor(testImg, cv2.COLOR_BGR2HSV)
-
         hue, sat, val = hsv[:,:,0], hsv[:,:,1], hsv[:,:,2]
+        hue = np.ndarray.flatten(hue).tolist()
+        sat = np.ndarray.flatten(sat).tolist()
+        val = np.ndarray.flatten(val).tolist()
 
-        hueL.append(np.ndarray.flatten(hue))
-        satL.append(np.ndarray.flatten(sat))
-        valL.append(np.ndarray.flatten(val))    
-    
+        (iImg, jImg, kImg) = np.shape(testImg)
+        i = iImg
+        for line in reversed(testImg):
+            j = jImg
+            for pixel in reversed(line):
+                if all(x > 245 for x in pixel) or all(x < 10 for x in pixel):             
+                    hue.pop(i*j -1)
+                    sat.pop(i*j -1)
+                    val.pop(i*j -1)
+                j -= 1
+            i -= 1
+
+        hueL.extend(hue)
+        satL.extend(sat)
+        valL.extend(val)    
+        
+
+  
     return hueL, satL, valL
 
 
@@ -97,22 +112,13 @@ if __name__ == '__main__':
     try:
         testMasks(image_dict[imgType][0])    
     except NameError:
-        image_dict = getGridOfImage()
+        (image_dict, df) = getGridOfImage()
         testMasks(image_dict[imgType][0])
 
-    image_dict, df = getGridOfImage()
     df.to_csv('dataset.csv', encoding='utf-8', index=False)
     hue_type, sat_type, val_type = compute_histogram_type("B")
-#    hueTotal=[]
-#    satTotal=[]
-#    valTotal=[]
-#    for file in df.Type.unique():
-#        hue_type, sat_type, val_type = compute_histogram_type(file)
-#        hueTotal.append(hue_type)
-#        satTotal.append(sat_type)
-#        valTotal.append(val_type)
-#
-#    # Show histograms
+    # Show histograms
+    plt.figure(1)
     plt.figure(figsize=(10,8))
     plt.subplot(311)                             
     plt.subplots_adjust(hspace=.5)
@@ -125,4 +131,11 @@ if __name__ == '__main__':
     plt.title("Luminosity Value")
     plt.hist(val_type, bins='auto')
     plt.show()
+
+    plt.figure(2)
+
+    plt.hist2d(hue_type, sat_type, bins=10, range=[[0,255],[0,255]], norm=LogNorm())
+    plt.colorbar()
+    plt.show()
+
 

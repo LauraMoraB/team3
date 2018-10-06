@@ -1,15 +1,5 @@
-
-# coding: utf-8
-
-# In[197]:
-
-
-import cv2
-from matplotlib import pyplot as plt
-import numpy as np
 import pandas as pd
 import os
-import csv
 
 
 def load_annotations(annot_file):
@@ -18,7 +8,6 @@ def load_annotations(annot_file):
     # the bounding box plus an alfanumeric code indicating the signal type:
     # tly, tlx, bry,brx, code
     annotations = []
-    signs       = [] 
 
     for line in open(annot_file).read().splitlines():
 
