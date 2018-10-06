@@ -35,13 +35,12 @@ def getGridOfMask(imageName, i):
     else:
         formFactor = abs(sizeMatrix[1]/sizeMatrix[0])
 
-    return fillRatio, formFactor, area#, areaSign
+    return fillRatio, formFactor, area
 
 def getGridOfImage():
     image_dict = defaultdict(list)
     fillRatioL = []
     formFactorL = []
-    areaSignL=[]
     
     for i in range(len(df)): 
         imageName=df["Image"].iloc[i]
@@ -83,7 +82,7 @@ def compute_histogram_type(signal_type):
         testImg = img.finalGrid
         cropimg = img.imageGrid
 
-        testImg = cv2.cvtColor(testImg, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(testImg, cv2.COLOR_BGR2HSV)
 
         hue, sat, val = hsv[:,:,0], hsv[:,:,1], hsv[:,:,2]
 
@@ -95,12 +94,12 @@ def compute_histogram_type(signal_type):
 
 
 if __name__ == '__main__':
-    imgType = 'C'
-    try:
-        testMasks(image_dict[imgType][0])    
-    except NameError:
-        image_dict = getGridOfImage()
-        testMasks(image_dict[imgType][0])
+#    imgType = 'C'
+#    try:
+#        testMasks(image_dict[imgType][0])    
+#    except NameError:
+#        image_dict = getGridOfImage()
+#        testMasks(image_dict[imgType][0])
 
     image_dict, df = getGridOfImage()
     df.to_csv('dataset.csv', encoding='utf-8', index=False)
