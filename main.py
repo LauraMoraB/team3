@@ -8,6 +8,7 @@ from ColorImage import computeColor
 from ColorImage import compute_histogram_type  
 from ColorSegmentation import colorSegmentation
 from ColorSegmentation import colorSegmentation_test
+from collections import defaultdict
 
 import sys 
 import cv2

@@ -10,6 +10,8 @@ import pandas as pd
 import numpy as np
 import cv2
 from ImageFeature import getPartialName
+from collections import defaultdict
+
 
 
 def compute_stats(image_dict, plot = False):
@@ -87,11 +89,11 @@ def split_by_type(dataset, pathimages, pathmask):
     return train, validation
 
 
-def divide_dictionary(dictionary, dataFrame1, dataFrame2):
+def divide_dictionary(image_dict, dataFrame1, dataFrame2):
     dict1 = defaultdict(list)
     dict2 = defaultdict(list)
     
-    for typeSignal in dictionary:
+    for typeSignal in image_dict:
         type1 = dataFrame1[dataFrame1.Type == typeSignal]
         typeName1 = type1.Image.values.tolist()
         typeArea1 = type1.Area.values.tolist()
