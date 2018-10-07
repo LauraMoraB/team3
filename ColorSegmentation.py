@@ -52,8 +52,8 @@ def colorSegmentation(image_dict):
                             x,y,w,h = cv2.boundingRect(cnt)
                             getInsideGridSegmentation(x,y,w,h,croped, finalMask)
 
-            cv2.imwrite("./ResultMask/"+img.name+'.jpg', finalMask)
-            cv2.imwrite("./Resultados/"+img.name+'.jpg', croped)
+            cv2.imwrite("./ResultMask/"+img.name+'.png', finalMask)
+            #cv2.imwrite("./Resultados/"+img.name+'.jpg', croped)
             #plt.imsave("./ResultMask/"+img.name+'.jpg', finalMask)
             #plt.imsave("./Resultados/"+img.name+'.jpg', croped)
 
