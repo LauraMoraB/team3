@@ -114,7 +114,7 @@ def colorSegmentation(image_dict):
             
             sizeFinalImg  = np.shape(croped)
             
-            finalMask = np.zeros(sizeFinalImg[0], sizeFinalImg[1])
+            finalMask = np.zeros((sizeFinalImg[0], sizeFinalImg[1]))
             
             testCropHSV = cv2.cvtColor(croped, cv2.COLOR_BGR2HSV)
     
@@ -150,8 +150,7 @@ def colorSegmentation(image_dict):
 #                        plt.show()
 #                    croped = cv2.drawContours(croped, contours, -1 ,(0,255,0), 3)
             plt.imsave("./ResultMask/"+img.typeOfSign+"/"+img.name+'.jpg', finalMask)
-            
-#            plt.imsave("./Resultados/"+img.typeOfSign+"/"+img.name+'blur.jpg', finalMask)
+            plt.imsave("./Resultados/"+img.typeOfSign+"/"+img.name+'.jpg', croped)
 #            plt.imshow(croped)
 #            plt.title('clean')
 #            plt.show()
@@ -191,9 +190,10 @@ def getInsideGridSegmentation(x,y,w,h, cropedSegment, finalMask):
         if fillRatio > 0.5:
             ret, thresh = cv2.threshold(greyRes, 0, 1, cv2.THRESH_BINARY)
             finalMask[y:y+h,x:x+w] = thresh
-#            cropedSegment[y:y+h,x:x+w, 0]  =  thresh
-#            cropedSegment[y:y+h,x:x+w, 1]  =  thresh
-#            cropedSegment[y:y+h,x:x+w, 2]  =  thresh
+            ret1, thresh1 = cv2.threshold(greyRes, 0, 255, cv2.THRESH_BINARY)
+            cropedSegment[y:y+h,x:x+w, 0]  =  thresh1
+            cropedSegment[y:y+h,x:x+w, 1]  =  thresh1
+            cropedSegment[y:y+h,x:x+w, 2]  =  thresh1
 #            
 #            plt.imshow(cropedSegment)
 #            plt.title('Completa')
