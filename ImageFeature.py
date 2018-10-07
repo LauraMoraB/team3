@@ -49,7 +49,7 @@ def getGridOfImage(df, addPath, addPathMask, addPathGt):
         (xImg, yImg, zImg) = np.shape(areaFinal)
         area = xImg*yImg
         
-        bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal, area)       
+        bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal, area, imageTrain)       
         image_dict[typeSignal].append(bean)
                 
         areaL.append(area)

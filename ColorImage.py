@@ -33,7 +33,11 @@ def pixelescolorDetectionHSV(imagen, signalType, name):
     mask_red = pixelescolorDetectionHSV_individual(imagen, "red", signalType, name)
     mask_blue = pixelescolorDetectionHSV_individual(imagen, "blue", signalType, name)
     
+    #multipl = cv2.bitwise_and(mask_red, mask_red, mask=mask_blue)
+    
     mask = cv2.add(mask_red, mask_blue)
+    
+    #mask = cv2.subtract(suma, multipl)
     
     return mask
 
@@ -46,7 +50,6 @@ def pixelescolorDetectionHSV_individual(imagen, colorType,signalType, name):
         rojo_altos1 = np.array([20, 255, 255], dtype=np.uint8)
         rojo_bajos2 = np.array([300,75,60], dtype=np.uint8)
         rojo_altos2 = np.array([360, 255, 255], dtype=np.uint8)
-        print("rojo_altos2")
         
         #Detectar los pixeles de la imagen que esten dentro del rango de rojos
         mascara_rojo1 = cv2.inRange(imagen, rojo_bajos1, rojo_altos1)
@@ -93,7 +96,7 @@ def pixelescolorDetectionHSV_individual(imagen, colorType,signalType, name):
         #Filtrar el ruido aplicando un OPEN seguido de un CLOSE
         mascara_blue  = cv2.morphologyEx(mascara_blue, cv2.MORPH_CLOSE, kernel)
 
-        #Mascara de pixeles blancos
+        #Mascara de pixeles azules
         mask =  mascara_blue
         
     else:
@@ -119,7 +122,8 @@ def computeColor(image_dict, spaceType, tipoFiltro):
 
         for channelGrid in image_dict[signalType]:
             
-            imageRGB = cv2.cvtColor(channelGrid.finalGrid, cv2.COLOR_BGR2RGB)
+            imageRGB = cv2.cvtColor(channelGrid.completeImg, cv2.COLOR_BGR2RGB)
+            
             imghsv=changeSpaceColor(imageRGB, spaceType, signalType,channelGrid.name)
 
             if spaceType=="HSV":
@@ -130,12 +134,10 @@ def computeColor(image_dict, spaceType, tipoFiltro):
                     maskcolor=pixelescolorDetectionHSV_individual(imghsv,colorType,signalType,channelGrid.name)
                 
                 resultSpace = cv2.bitwise_and(imghsv,imghsv, mask= maskcolor)
-
             
-            SpaceColors_list.append(resultSpace)
-            MaskColors_list.append(maskcolor)
-
-        color_dict[signalType] = SpaceColors_list
+            #SpaceColors_list.append(resultSpace)
+            MaskColors_list.append([maskcolor,channelGrid.name])
+        
         color_dict[signalType] = MaskColors_list
         
     return color_dict
