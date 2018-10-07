@@ -8,6 +8,9 @@ from matplotlib import pyplot as plt
 from ImageFeature import getGridOfImage 
 import pandas as pd
 import numpy as np
+import cv2
+from ImageFeature import getPartialName
+
 
 def compute_stats(image_dict, plot = False):
     #Stadistical study for the different signal types in order to properly
@@ -52,7 +55,7 @@ def sort_by_mean(reference, data):
     return sortedReference
         
 
-def split_by_type(dataset):
+def split_by_type(dataset, pathimages, pathmask):
     col = ['UpLeft(Y)','UpLeft(X)','DownRight(Y)','DownRight(X)','Type', "Image", "Mask", "FillRatio", "FormFactor", "Area"]
     train = pd.DataFrame(columns=col)
     validation = pd.DataFrame(columns=col)
@@ -71,15 +74,48 @@ def split_by_type(dataset):
                 k = 0
             else:
                 k += 1
+                
+    # save validation images
+    for image in validation["Image"].tolist():  
+        
+        imageTrain = cv2.imread(pathimages+image,1)
+        maskTrain = cv2.imread(pathmask+image,1)
+        
+        partialname = getPartialName(image)
+        
+        cv2.imwrite("./datasets/validation/"+image, imageTrain)
+        cv2.imwrite("./datasets/validation/mask/mask."+partialname+".png", maskTrain)
+    
     return train, validation
 
-if __name__ == '__main__':
-    plot = False
-    try:
-        (train, validation) = split_by_type(df)
-    except NameError:
-        (image_dict, df) = getGridOfImage()
-        (train, validation) = split_by_type(df)
+
+def divide_dictionary(dictionary, dataFrame1, dataFrame2):
+    dict1 = defaultdict(list)
+    dict2 = defaultdict(list)
+    
+    for typeSignal in dictionary:
+        type1 = dataFrame1[dataFrame1.Type == typeSignal]
+        typeName1 = type1.Image.values.tolist()
+        typeArea1 = type1.Area.values.tolist()
+        type2 = dataFrame2[dataFrame2.Type == typeSignal]
+        typeName2 = type2.Image.values.tolist()
+        typeArea2 = type2.Area.values.tolist()
+        for signal in image_dict[typeSignal]:
+            if signal.name+'.jpg' in typeName1 and signal.area in typeArea1:
+                dict1[typeSignal].append(signal)
+            elif signal.name+'.jpg' in typeName2 and signal.area in typeArea2:
+                dict2[typeSignal].append(signal)
+                
+    return (dict1, dict2)
+
+
+#if __name__ == '__main__':
+#    plot = False
+#    try:
+#        (train, validation) = split_by_type(df)
+#    except NameError:
+#        (image_dict, df) = getGridOfImage()
+#        (train, validation) = split_by_type(df)
 
     
     

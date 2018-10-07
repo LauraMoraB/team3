@@ -10,7 +10,7 @@ from scipy.stats import norm
 from matplotlib import pyplot as plt
 from ImageFeature import getGridOfImage 
 
-def compute_histogram_type(signal_type):
+def compute_histogram_type(signal_type, image_dict):
     hueL=[]
     satL=[]
     valL=[]
