@@ -103,10 +103,11 @@ def colorSegmentation(image_dict):
 #    imgTypes = ('A','B','C','D','E','F')
     imgTypes = ('D')
     kernel = np.ones((6,6),np.uint8)
-
     for imgType in imgTypes:
         numberOfItems = np.shape(image_dict[imgType])
         for imageNumber in range(0, numberOfItems[0]-1):
+#        for imageNumber in range(0, 1):
+
             img = image_dict[imgType][imageNumber]
     
             croped = img.finalGrid
@@ -135,12 +136,46 @@ def colorSegmentation(image_dict):
                     
                     ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
                     heir, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                    
-                    croped = cv2.drawContours(croped, contours, -1 ,(0,255,0), 3)
-             
-            plt.imshow(croped)
-            plt.show()
+                    if contours:
+                        for cnt in contours:
+                            x,y,w,h = cv2.boundingRect(cnt)
+                            getInsideGridSegmentation(x,y,w,h,croped)
+#                            rectangleImg = cv2.rectangle(croped,(x,y),(x+w,y+h),(0,255,0),2)
+#                        plt.imshow(rectangleImg)
+#                        plt.show()
+#                    croped = cv2.drawContours(croped, contours, -1 ,(0,255,0), 3)
+#            plt.imshow(croped)
+#            plt.show()
+    
+def getInsideGridSegmentation(x,y,w,h, croped):
+    imageSegmented = croped[y:y+h,x:x+w]
+    testCropHSVSegmented = cv2.cvtColor(imageSegmented, cv2.COLOR_BGR2HSV)
+    hsv_rang_Seg= (
+         np.array([0,50,60]), np.array([20, 255, 255]) #RED
+         ,np.array([300,75,60]), np.array([350, 255, 255]) #DARK RED
+         ,np.array([100,50,40]), np.array([140, 255, 255]) #BLUE
+         ,np.array([0,0,0]), np.array([180, 255, 30]) #BLACK
+         ,np.array([0,0,200]), np.array([180, 255, 255]) #WHITE
+    )
+ 
+    ize_hsv_rang_seg = np.size(hsv_rang_Seg ,0)
+    for i in range(0, ize_hsv_rang_seg-1,2):
+        lower = hsv_rang_Seg[i]
+        upper = hsv_rang_Seg[i+1] 
+        mask = cv2.inRange(testCropHSVSegmented, lower, upper)
+#        if not maskConcatenated:
+#            maskConcatenated = mask
+#        else:
+#            maskConcatenated = cv2.add(maskConcatenated, mask)
 
+    bitwiseRes = cv2.bitwise_and(testCropHSVSegmented, testCropHSVSegmented, mask = mask)
+    cv2.imshow(bitwiseRes)
+    cv2.show()
+#    fillRatioOnes = np.count_nonzero(result)
+#    sizeMatrix = np.shape(result)
+#    fillRatioZeros = sizeMatrix[0]*sizeMatrix[1]
+#    fillRatio = fillRatioOnes/fillRatioZeros
+#    print(fillRatio)
     
 def getHistogram(image_dict):
     imgTypes = ('A','B','C','D','E','F')
@@ -158,6 +193,7 @@ def getHistogram(image_dict):
 
 if __name__ == '__main__':
     imgTypes = ('A','B','C','D','E','F')
+    imgType = imgTypes[0]
     try:
 
 #        getHistogram(image_dict)
