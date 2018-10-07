@@ -62,19 +62,11 @@ def split_by_type(dataset):
         k = 0
         for indexRef in reference:
             if(k == 2 or k == 5 or k == 8):
-<<<<<<< HEAD
-                # validationset
-                validation = validation.append(typeDf[typeDf.index.values == name])
-            else:
-                # trainset
-                train = train.append(typeDf[typeDf.index.values == name])
-=======
                 # validationnset
                 validation = validation.append(typeDf[typeDf.index == indexRef])
             else:
                 # setset
                 train = train.append(typeDf[typeDf.index == indexRef])
->>>>>>> 7e2e46795c93660bc9f293406f58a26ae31ae747
             if(k == 9):
                 k = 0
             else:
