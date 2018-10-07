@@ -10,6 +10,24 @@ from scipy.stats import norm
 from matplotlib import pyplot as plt
 from ImageFeature import getGridOfImage 
 
+def compute_histogram_type(signal_type):
+    hueL=[]
+    satL=[]
+    valL=[]
+    for i in range((len(image_dict[signal_type]))):
+        img = image_dict[signal_type][i]
+        testImg = img.finalGrid
+
+        hsv = cv2.cvtColor(testImg, cv2.COLOR_BGR2HSV)
+
+        hue, sat, val = hsv[:,:,0], hsv[:,:,1], hsv[:,:,2]
+
+        hueL.append(np.ndarray.flatten(hue))
+        satL.append(np.ndarray.flatten(sat))
+        valL.append(np.ndarray.flatten(val))
+        
+    return hueL, satL, valL
+
 def pixelescolorDetectionHSV(imagen, signalType, name):
     
     mask_red = pixelescolorDetectionHSV_individual(imagen, "red", signalType, name)
@@ -121,21 +139,6 @@ def computeColor(image_dict, spaceType, tipoFiltro):
         color_dict[signalType] = MaskColors_list
         
     return color_dict
-     
-
-
-
-if __name__ == '__main__':
-    #imgType = 'D' 
-    spaceType = 'HSV'  
-    colorType = 'mix'         
-    
-    try:
-        (color_dict) = computeColor(image_dict, spaceType, colorType) 
-
-    except NameError:
-        image_dict = getGridOfImage()
-        (color_dict) = computeColor(image_dict, spaceType, colorType) 
     
     
 

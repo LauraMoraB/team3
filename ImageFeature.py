@@ -27,7 +27,7 @@ def getGridOfMask(df, imageName, i, addPath, addPathMask, addPathGt):
     else:
         formFactor = abs(sizeMatrix[1]/sizeMatrix[0])
 
-    return fillRatio, formFactor, area#, areaSign
+    return fillRatio, formFactor, area
 
 def getGridOfImage(df, addPath, addPathMask, addPathGt):
     image_dict = defaultdict(list)
@@ -48,6 +48,7 @@ def getGridOfImage(df, addPath, addPathMask, addPathGt):
         typeSignal = df["Type"].iloc[i]
         (xImg, yImg, zImg) = np.shape(areaFinal)
         area = xImg*yImg
+        
         bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal, area)       
         image_dict[typeSignal].append(bean)
                 
@@ -68,34 +69,3 @@ def testMasks(img):
     finalImg = img.finalGrid
     plt.imshow(cv2.cvtColor(finalImg, cv2.COLOR_BGR2RGB))
     plt.show()
-
-def compute_histogram_type(signal_type):
-    hueL=[]
-    satL=[]
-    valL=[]
-    for i in range((len(image_dict[signal_type]))):
-        img = image_dict[signal_type][i]
-        testImg = img.finalGrid
-
-        hsv = cv2.cvtColor(testImg, cv2.COLOR_BGR2HSV)
-
-        hue, sat, val = hsv[:,:,0], hsv[:,:,1], hsv[:,:,2]
-
-        hueL.append(np.ndarray.flatten(hue))
-        satL.append(np.ndarray.flatten(sat))
-        valL.append(np.ndarray.flatten(val))
-        
-    return hueL, satL, valL
-
-if __name__ == '__main__':
-    addPath = 'datasets/train/'
-    addPathGt = 'datasets/train/gt/'
-    addPathMask = 'datasets/train/mask/'
-    imgType = 'C'
-    # Dataframe
-    df = create_df(addPath, addPathMask, addPathGt)
-    try:
-        testMasks(image_dict[imgType][0])    
-    except NameError:
-        (image_dict, df) = getGridOfImage(df, addPath, addPathMask, addPathGt)
-        testMasks(image_dict[imgType][0])

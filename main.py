@@ -1,9 +1,9 @@
 from ImageFeature import getGridOfImage
-from ImageFeature import compute_histogram_type  
 from ImageSplit import split_by_type 
 from ImageSplit import compute_stats
 from create_dataframe import create_df
 from ColorImage import computeColor
+from ColorImage import compute_histogram_type  
 
 addPath = 'datasets/train/'
 addPathGt = 'datasets/train/gt/'
@@ -27,17 +27,20 @@ except NameError:
 # After the split, the analysis is divided between Training and Validate
 if validate == "true":
     # Apply filters
-    #for image in validation.Image:
-    #   computeColor()
-    # Post-Processing Result
+    for image in validation.Image:
+       color_dict = computeColor(validation_dict, "HSV", mix)
+       
+    # Post-Processing Result ?
     
     # Decide if canditate is valid
     
     # Evaluate Model
-    print ("hi")
+    # Compute positives / negatives
+    
+    
 elif validate == "false":
     # compute histograms for training data from each imageType
     imageType="B"
-   # hue, sat, val = compute_histogram_type(imageType)
+    hue, sat, val = compute_histogram_type(imageType)
 else: 
     print ("Wrong entry")
