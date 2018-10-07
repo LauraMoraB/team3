@@ -17,14 +17,14 @@ addPathMask = 'datasets/train/mask/'
 
 # First, the whole DS is analized a organized in a data structe
 # to be used on the next steps
+# Then, DS is analized taking into account FR, FF and Area for each signal
 
-# Dataframe and Dictionary creation
-df = create_df(addPath, addPathMask, addPathGt)
-(image_dict, df) = getGridOfImage(df, addPath, addPathMask, addPathGt)
-
-# DS is analized taking into account FR, FF and Area for each signal
-plot = False
-(fillRatioStats, formFactorStats, areaStats) = compute_stats(image_dict, plot)
+try:
+    (fillRatioStats, formFactorStats, areaStats) = compute_stats(image_dict, plot = False)   
+except NameError:
+    df = create_df(addPath, addPathMask, addPathGt)
+    # Dataframe and Dictionary creation
+    (image_dict, df) = getGridOfImage(df, addPath, addPathMask, addPathGt)
 
 # Second the DS is split into two (70%, 30%) taking into account Size area
 (train, validation) = split_by_type(df)
