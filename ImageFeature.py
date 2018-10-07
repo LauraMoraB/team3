@@ -40,6 +40,7 @@ def getGridOfImage():
     image_dict = defaultdict(list)
     fillRatioL = []
     formFactorL = []
+    areaL = []
     
     for i in range(len(df)): 
         imageName=df["Image"].iloc[i]
@@ -57,11 +58,13 @@ def getGridOfImage():
         bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal, area)       
         image_dict[typeSignal].append(bean)
                 
+        areaL.append(area)
         fillRatioL.append(fillRatio)
         formFactorL.append(formFactor)
        
     df["FillRatio"]=fillRatioL
     df["FormFactor"]=formFactorL
+    df["Area"]=areaL
         
     return image_dict, df
     
