@@ -8,7 +8,6 @@ from matplotlib import pyplot as plt
 from ImageFeature import getGridOfImage 
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 
 def compute_stats(image_dict, plot = False):
     #Stadistical study for the different signal types in order to properly
@@ -25,12 +24,10 @@ def compute_stats(image_dict, plot = False):
             fillRatioList.append(signalGrid.fillRatio)
             formFactorList.append(signalGrid.formFactor)                    
             areaList.append(signalGrid.area)                    
-        compute_freq(signalType, fillRatioList, 'fillRatio', plot, 'green')
-        compute_freq(signalType, formFactorList, 'formFactor', plot, 'red')
-        compute_freq(signalType, areaList, 'area', plot, 'black')
-        fillRatioStats[signalType] = fillRatioList
-        formFactorStats[signalType] = formFactorList
-        areaStats[signalType] = areaList
+        fillRatioStats[signalType] = compute_freq(signalType, fillRatioList, 'fillRatio', plot, 'green')
+        formFactorStats[signalType] = compute_freq(signalType, formFactorList, 'formFactor', plot, 'red')
+        areaStats[signalType] = compute_freq(signalType, areaList, 'area', plot, 'black')
+
     return (fillRatioStats, formFactorStats, areaStats)
 
 def compute_freq(signalType, imgInfo, name, plot, color):        
@@ -63,14 +60,21 @@ def split_by_type(dataset):
         typeDf = dataset[dataset.Type == typeSignal]
         reference = sort_by_mean(typeDf.index.values.tolist(), typeDf.Area.tolist())
         k = 0
-        print(len(reference))
-        for name in reference:
+        for indexRef in reference:
             if(k == 2 or k == 5 or k == 8):
+<<<<<<< HEAD
                 # validationset
                 validation = validation.append(typeDf[typeDf.index.values == name])
             else:
                 # trainset
                 train = train.append(typeDf[typeDf.index.values == name])
+=======
+                # validationnset
+                validation = validation.append(typeDf[typeDf.index == indexRef])
+            else:
+                # setset
+                train = train.append(typeDf[typeDf.index == indexRef])
+>>>>>>> 7e2e46795c93660bc9f293406f58a26ae31ae747
             if(k == 9):
                 k = 0
             else:
@@ -80,13 +84,11 @@ def split_by_type(dataset):
 if __name__ == '__main__':
     plot = False
     try:
-#        (fillRatioStats, formFactorStats, areaStats) = compute_stats(image_dict, plot)   
         (train, validation) = split_by_type(df)
     except NameError:
         (image_dict, df) = getGridOfImage()
         (train, validation) = split_by_type(df)
 
-#        (fillRatioStats, formFactorStats, areaStats) = compute_stats(image_dict, plot)
     
     
         
