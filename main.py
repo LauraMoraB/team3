@@ -4,6 +4,7 @@ from ImageSplit import compute_stats
 from create_dataframe import create_df
 from ColorImage import computeColor
 from ColorImage import compute_histogram_type  
+from ColorSegmentation import colorSegmentation
 import sys 
 import cv2
 from collections import defaultdict
@@ -15,6 +16,7 @@ addPath = 'datasets/train/'
 addPathGt = 'datasets/train/gt/'
 addPathMask = 'datasets/train/mask/'
 validate = 'true'
+model = 2
 
 def divide_dictionary(dictionary, dataFrame1, dataFrame2):
     dict1 = defaultdict(list)
@@ -53,25 +55,24 @@ except NameError:
 # After the split, the analysis is divided between Training and Validate
 if validate == "true":
     # Apply filters
-    # from DF to Dictionary
-    color_dict = computeColor(validation_dict, "HSV", "mix")
-    
-    # Post-Processing Result ?
-    
-    # Decide if canditate is valid
-    
-    ## Evaluate Model
-    # Save images
-    # Directori amb els resultats obtinguts
-    dataset_output_masks = "m1-results/week1/validation/senseResta"
-    
-    for imageType in color_dict:
-        for image in color_dict[imageType]:
-            name = image[1]
-            cv2.imwrite(dataset_output_masks+name+".jpg", image[0])
-
-    # Directori amb les imatges reals + annotacions
-    dataset_image_directory = "datasets/train/validation/"
+    if model == 1: 
+        ############
+        ## MODEL 1 #
+        ############
+        color_dict = computeColor(validation_dict, "HSV", "mix")
+        ## Evaluate Model
+        # Save images
+        # Directori amb els resultats obtinguts
+        dataset_output_masks = "m1-results/week1/validation/senseResta"    
+        for imageType in color_dict:
+            for image in color_dict[imageType]:
+                name = image[1]
+                cv2.imwrite(dataset_output_masks+name+".jpg", image[0])
+    else:
+        ############
+        ## Model 2 #
+        ############
+        colorSegmentation(validation_dict)
     
    
 elif validate == "false":
