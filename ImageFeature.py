@@ -52,7 +52,9 @@ def getGridOfImage():
         partialName = getPartialName(imageName)
         
         typeSignal = df["Type"].iloc[i]
-        bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal)       
+        (xImg, yImg, zImg) = np.shape(areaFinal)
+        area = xImg*yImg
+        bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal, area)       
         image_dict[typeSignal].append(bean)
                 
         fillRatioL.append(fillRatio)
