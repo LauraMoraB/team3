@@ -111,14 +111,19 @@ def colorSegmentation(image_dict):
             img = image_dict[imgType][imageNumber]
     
             croped = img.completeImg
+            
+            sizeFinalImg  = np.shape(croped)
+            
+            finalMask = np.zeros(sizeFinalImg[0], sizeFinalImg[1])
+            
             testCropHSV = cv2.cvtColor(croped, cv2.COLOR_BGR2HSV)
     
             hsv_rang= (
                  np.array([0,50,60]), np.array([20, 255, 255]) #RED
                  ,np.array([300,75,60]), np.array([350, 255, 255]) #DARK RED
                  ,np.array([100,50,40]), np.array([140, 255, 255]) #BLUE
-
             )
+            
             size_hsv_rang = np.size(hsv_rang,0)
             for i in range(0, size_hsv_rang-1,2):
                 lower = hsv_rang[i]
@@ -139,17 +144,19 @@ def colorSegmentation(image_dict):
                     if contours:
                         for cnt in contours:
                             x,y,w,h = cv2.boundingRect(cnt)
-                            getInsideGridSegmentation(x,y,w,h,croped)
+                            getInsideGridSegmentation(x,y,w,h,croped, finalMask)
 #                            rectangleImg = cv2.rectangle(croped,(x,y),(x+w,y+h),(0,255,0),2)
 #                        plt.imshow(rectangleImg)
 #                        plt.show()
 #                    croped = cv2.drawContours(croped, contours, -1 ,(0,255,0), 3)
-            plt.imsave("./Resultados/"+img.typeOfSign+"/"+img.name+'blur.jpg', croped)
-            plt.imshow(croped)
-            plt.title('clean')
-            plt.show()
+            plt.imsave("./ResultMask/"+img.typeOfSign+"/"+img.name+'.jpg', finalMask)
+            
+#            plt.imsave("./Resultados/"+img.typeOfSign+"/"+img.name+'blur.jpg', finalMask)
+#            plt.imshow(croped)
+#            plt.title('clean')
+#            plt.show()
     
-def getInsideGridSegmentation(x,y,w,h, cropedSegment):
+def getInsideGridSegmentation(x,y,w,h, cropedSegment, finalMask):
     if w<h:
         aspect = w/h
     else:
@@ -181,18 +188,19 @@ def getInsideGridSegmentation(x,y,w,h, cropedSegment):
         sizeMatrix = np.shape(greyRes)
         fillRatioZeros = sizeMatrix[0]*sizeMatrix[1]
         fillRatio = fillRatioOnes/fillRatioZeros
-        if fillRatio > 0.7:
-            ret, thresh = cv2.threshold(greyRes, 0, 255, cv2.THRESH_BINARY)
-            cropedSegment[y:y+h,x:x+w, 0]  =  thresh
-            cropedSegment[y:y+h,x:x+w, 1]  =  thresh
-            cropedSegment[y:y+h,x:x+w, 2]  =  thresh
-            
-            plt.imshow(cropedSegment)
-            plt.title('Completa')
-            plt.show()
-            plt.imshow(greyRes)
-            plt.title(fillRatio)
-            plt.show()
+        if fillRatio > 0.5:
+            ret, thresh = cv2.threshold(greyRes, 0, 1, cv2.THRESH_BINARY)
+            finalMask[y:y+h,x:x+w] = thresh
+#            cropedSegment[y:y+h,x:x+w, 0]  =  thresh
+#            cropedSegment[y:y+h,x:x+w, 1]  =  thresh
+#            cropedSegment[y:y+h,x:x+w, 2]  =  thresh
+#            
+#            plt.imshow(cropedSegment)
+#            plt.title('Completa')
+#            plt.show()
+#            plt.imshow(greyRes)
+#            plt.title(fillRatio)
+#            plt.show()
 
     
 
