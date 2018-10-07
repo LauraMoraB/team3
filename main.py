@@ -16,6 +16,23 @@ addPathGt = 'datasets/train/gt/'
 addPathMask = 'datasets/train/mask/'
 validate = 'true'
 
+def divide_dictionary(dictionary, dataFrame1, dataFrame2):
+    dict1 = defaultdict(list)
+    dict2 = defaultdict(list)
+    for typeSignal in dictionary:
+        type1 = dataFrame1[dataFrame1.Type == typeSignal]
+        typeName1 = type1.Image.values.tolist()
+        typeArea1 = type1.Area.values.tolist()
+        type2 = dataFrame2[dataFrame2.Type == typeSignal]
+        typeName2 = type2.Image.values.tolist()
+        typeArea2 = type2.Area.values.tolist()
+        for signal in image_dict[typeSignal]:
+            if signal.name+'.jpg' in typeName1 and signal.area in typeArea1:
+                dict1[typeSignal].append(signal)
+            elif signal.name+'.jpg' in typeName2 and signal.area in typeArea2:
+                dict2[typeSignal].append(signal)    
+    return (dict1, dict2)
+
 # First, the whole DS is analized a organized in a data structure
 # to be used on the next steps
 # Then, DS is analized taking into account FR, FF and Area for each signal
@@ -31,22 +48,7 @@ except NameError:
 (train, validation) = split_by_type(df)
 
 # import into dictionary
-validation_dict = defaultdict(list)
-train_dict = defaultdict(list)
-
-for typeSignal in image_dict:
-    typeTrain = train[train.Type == typeSignal]
-    typeTrainList = typeTrain.Image.values.tolist()
-    typeValid = validation[validation.Type == typeSignal]
-    typeValidList = typeValid.Image.values.tolist()
-    
-    for signal in image_dict[typeSignal]:
-    
-        if signal.name+'.jpg' in typeTrainList:
-            train_dict[typeSignal].append(signal)
-        
-        elif signal.name+'.jpg' in typeValidList:
-            validation_dict[typeSignal].append(signal)
+(validation_dict, train_dict) = divide_dictionary(image_dict, validation, train)
             
 # After the split, the analysis is divided between Training and Validate
 if validate == "true":
