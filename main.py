@@ -41,8 +41,8 @@ test_df = create_df_test('datasets/test/')
 (train, validation) = split_by_type(df, addPath,addPathMask ) 
 
 # import into dictionary
-#(validation_dict, train_dict) = divide_dictionary(image_dict, validation, train)
-#            
+(validation_dict, train_dict) = divide_dictionary(image_dict, validation, train)
+            
 ## After the split, the analysis is divided between Training and Validate
 if validate == "true":
     # Apply filters

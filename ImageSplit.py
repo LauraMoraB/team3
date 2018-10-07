@@ -77,15 +77,13 @@ def split_by_type(dataset, pathimages, pathmask):
                 
     # save validation images
     for image in validation["Image"].tolist():  
-        
         imageTrain = cv2.imread(pathimages+image,1)
-        maskTrain = cv2.imread(pathmask+image,1)
-        
-        partialname = getPartialName(image)
-        
         cv2.imwrite("./datasets/validation/"+image, imageTrain)
-        cv2.imwrite("./datasets/validation/mask/mask."+partialname+".png", maskTrain)
-    
+        
+    for mask in validation["Mask"].tolist():
+        maskTrain = cv2.imread(pathmask+mask,1)
+        cv2.imwrite("./datasets/validation/mask/"+mask, maskTrain)
+        
     return train, validation
 
 
