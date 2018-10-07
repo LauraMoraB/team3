@@ -100,17 +100,17 @@ def testMasks(img):
 
 
 def colorSegmentation(image_dict):
-#    imgTypes = ('A','B','C','D','E','F')
-    imgTypes = ('D')
+    imgTypes = ('A','B','C','D','E','F')
+#    imgTypes = ('D')
     kernel = np.ones((6,6),np.uint8)
     for imgType in imgTypes:
         numberOfItems = np.shape(image_dict[imgType])
         for imageNumber in range(0, numberOfItems[0]-1):
-#        for imageNumber in range(0, 1):
+#        for imageNumber in range(9, 10):
 
             img = image_dict[imgType][imageNumber]
     
-            croped = img.finalGrid
+            croped = img.completeImg
             testCropHSV = cv2.cvtColor(croped, cv2.COLOR_BGR2HSV)
     
             hsv_rang= (
@@ -144,39 +144,68 @@ def colorSegmentation(image_dict):
 #                        plt.imshow(rectangleImg)
 #                        plt.show()
 #                    croped = cv2.drawContours(croped, contours, -1 ,(0,255,0), 3)
-#            plt.imshow(croped)
-#            plt.show()
+            plt.imsave("./Resultados/"+img.typeOfSign+"/"+img.name+'blur.jpg', croped)
+            plt.imshow(croped)
+            plt.title('clean')
+            plt.show()
     
-def getInsideGridSegmentation(x,y,w,h, croped):
-    imageSegmented = croped[y:y+h,x:x+w]
-    testCropHSVSegmented = cv2.cvtColor(imageSegmented, cv2.COLOR_BGR2HSV)
-    hsv_rang_Seg= (
-         np.array([0,50,60]), np.array([20, 255, 255]) #RED
-         ,np.array([300,75,60]), np.array([350, 255, 255]) #DARK RED
-         ,np.array([100,50,40]), np.array([140, 255, 255]) #BLUE
-         ,np.array([0,0,0]), np.array([180, 255, 30]) #BLACK
-         ,np.array([0,0,200]), np.array([180, 255, 255]) #WHITE
-    )
- 
-    ize_hsv_rang_seg = np.size(hsv_rang_Seg ,0)
-    for i in range(0, ize_hsv_rang_seg-1,2):
-        lower = hsv_rang_Seg[i]
-        upper = hsv_rang_Seg[i+1] 
-        mask = cv2.inRange(testCropHSVSegmented, lower, upper)
-#        if not maskConcatenated:
-#            maskConcatenated = mask
-#        else:
-#            maskConcatenated = cv2.add(maskConcatenated, mask)
+def getInsideGridSegmentation(x,y,w,h, cropedSegment):
+    if w<h:
+        aspect = w/h
+    else:
+        aspect = h/w
+    if w > 20 and h > 20 and aspect>0.75:
+        imageSegmented = cropedSegment[y:y+h,x:x+w]
+        testCropHSVSegmented = cv2.cvtColor(imageSegmented, cv2.COLOR_BGR2HSV)
+        hsv_rang_Seg= (
+             np.array([0,50,60]), np.array([20, 255, 255]) #RED
+             ,np.array([300,75,60]), np.array([350, 255, 255]) #DARK RED
+             ,np.array([100,50,40]), np.array([140, 255, 255]) #BLUE
+             ,np.array([0,0,0]), np.array([180, 255, 30]) #BLACK
+             ,np.array([0,0,200]), np.array([180, 255, 255]) #WHITE
+        )
+        ize_hsv_rang_seg = np.size(hsv_rang_Seg ,0)
+        for i in range(0, ize_hsv_rang_seg-1,2):
+            lower = hsv_rang_Seg[i]
+            upper = hsv_rang_Seg[i+1] 
+            mask = cv2.inRange(testCropHSVSegmented, lower, upper)
+            if i==0:
+                maskConcatenated = mask
+            else:
+                maskConcatenated = cv2.add(maskConcatenated, mask)
+        
+        bitwiseRes = cv2.bitwise_and(testCropHSVSegmented, testCropHSVSegmented, mask = maskConcatenated)
+    
+        greyRes  = cv2.cvtColor(bitwiseRes, cv2.COLOR_BGR2GRAY)
+        fillRatioOnes = np.count_nonzero(greyRes)
+        sizeMatrix = np.shape(greyRes)
+        fillRatioZeros = sizeMatrix[0]*sizeMatrix[1]
+        fillRatio = fillRatioOnes/fillRatioZeros
+        if fillRatio > 0.7:
+            ret, thresh = cv2.threshold(greyRes, 0, 255, cv2.THRESH_BINARY)
+            cropedSegment[y:y+h,x:x+w, 0]  =  thresh
+            cropedSegment[y:y+h,x:x+w, 1]  =  thresh
+            cropedSegment[y:y+h,x:x+w, 2]  =  thresh
+            
+            plt.imshow(cropedSegment)
+            plt.title('Completa')
+            plt.show()
+            plt.imshow(greyRes)
+            plt.title(fillRatio)
+            plt.show()
 
-    bitwiseRes = cv2.bitwise_and(testCropHSVSegmented, testCropHSVSegmented, mask = mask)
-    cv2.imshow(bitwiseRes)
-    cv2.show()
-#    fillRatioOnes = np.count_nonzero(result)
-#    sizeMatrix = np.shape(result)
-#    fillRatioZeros = sizeMatrix[0]*sizeMatrix[1]
-#    fillRatio = fillRatioOnes/fillRatioZeros
-#    print(fillRatio)
     
+
+if __name__ == '__main__':
+    imgTypes = ('A','B','C','D','E','F')
+    imgType = imgTypes[0]
+    try:
+        colorSegmentation(image_dict) 
+    except NameError:
+        image_dict = getGridOfImage()
+        colorSegmentation(image_dict) 
+
+
 def getHistogram(image_dict):
     imgTypes = ('A','B','C','D','E','F')
     for imgType in imgTypes:
@@ -190,19 +219,5 @@ def getHistogram(image_dict):
                 plt.plot(histr,color = col)
                 plt.xlim([0,256])
             plt.show()
-
-if __name__ == '__main__':
-    imgTypes = ('A','B','C','D','E','F')
-    imgType = imgTypes[0]
-    try:
-
-#        getHistogram(image_dict)
-        colorSegmentation(image_dict) 
-#        testMasks(image_dict[imgType][0])    
-    except NameError:
-        image_dict = getGridOfImage()
-        testMasks(image_dict[imgType][0])
-
-
 
 
