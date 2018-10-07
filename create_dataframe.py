@@ -57,3 +57,15 @@ def create_df(path_ds_images, path_ds_masks, path_ds_gt):
 
     return df
 
+def create_df_test(path_ds_images):
+    listImages =[]
+    # Import Data from directories
+    for filename in os.listdir(path_ds_images):
+        if filename.endswith(".jpg"):
+            listImages.append(filename)
+     
+    col = ["Image"]
+    df = pd.DataFrame(columns=col)
+    df["Image"] = listImages
+
+    return df

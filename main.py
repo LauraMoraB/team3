@@ -2,9 +2,11 @@ from ImageFeature import getGridOfImage
 from ImageSplit import split_by_type 
 from ImageSplit import compute_stats
 from create_dataframe import create_df
+from create_dataframe import create_df_test
 from ColorImage import computeColor
 from ColorImage import compute_histogram_type  
 from ColorSegmentation import colorSegmentation
+from ColorSegmentation import colorSegmentation_test
 import sys 
 import cv2
 from collections import defaultdict
@@ -35,9 +37,15 @@ def divide_dictionary(dictionary, dataFrame1, dataFrame2):
                 dict2[typeSignal].append(signal)    
     return (dict1, dict2)
 
+
+def read_test():
+    test = create_df_test('datasets/test/')
+    return test   
+ 
 # First, the whole DS is analized a organized in a data structure
 # to be used on the next steps
 # Then, DS is analized taking into account FR, FF and Area for each signal
+test_df = read_test()
 
 try:
     (fillRatioStats, formFactorStats, areaStats) = compute_stats(image_dict, plot = False)   
@@ -47,7 +55,7 @@ except NameError:
     (image_dict, df) = getGridOfImage(df, addPath, addPathMask, addPathGt)
 
 # Second the DS is split into two (70%, 30%) taking into account Size area
-(train, validation) = split_by_type(df)
+(train, validation) = split_by_type(df) 
 
 # import into dictionary
 (validation_dict, train_dict) = divide_dictionary(image_dict, validation, train)
@@ -72,7 +80,8 @@ if validate == "true":
         ############
         ## Model 2 #
         ############
-        colorSegmentation(validation_dict)
+        colorSegmentation_test(test_df, 'datasets/test/')
+        #colorSegmentation(validation_dict)
     
    
 elif validate == "false":
