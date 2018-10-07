@@ -6,7 +6,6 @@ import os
 import ImageModel as imMod
 from collections import defaultdict
 from matplotlib import pyplot as plt
-import pandas as pd
 
 addPath = 'datasets/train/'
 addPathGt = 'datasets/train/gt/'
@@ -110,16 +109,13 @@ def colorSegmentation(image_dict):
         for imageNumber in range(0, numberOfItems[0]-1):
             img = image_dict[imgType][imageNumber]
     
-            croped = img.completeImg
-#            plt.imshow(croped)
-#            plt.show()
+            croped = img.finalGrid
             testCropHSV = cv2.cvtColor(croped, cv2.COLOR_BGR2HSV)
     
             hsv_rang= (
-                 np.array([0,65,75]), np.array([12, 255, 255]) #RED
-                 ,np.array([240,65,75]), np.array([255, 255, 255]) #DARK RED
-                 ,np.array([100,150,0]), np.array([140, 255, 255]) #BLUE
-                 ,np.array([100,150,0]), np.array([140, 255, 255]) #BLUE
+                 np.array([0,50,60]), np.array([20, 255, 255]) #RED
+                 ,np.array([300,75,60]), np.array([350, 255, 255]) #DARK RED
+                 ,np.array([100,50,40]), np.array([140, 255, 255]) #BLUE
 
             )
             size_hsv_rang = np.size(hsv_rang,0)
