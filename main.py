@@ -28,7 +28,7 @@ except NameError:
 if validate == "true":
     # Apply filters
     #for image in validation.Image:
-     #   computeColor()
+    #   computeColor()
     # Post-Processing Result
     
     # Decide if canditate is valid
