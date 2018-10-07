@@ -1,74 +1,90 @@
-
-# coding: utf-8
-
-# In[90]:
-
-
-# %load ImageSplit.py
+# -*- coding: utf-8 -*-
 """
 Created on Thu Oct  4 19:52:08 2018
 
 @author: Aitor Sanchez
 """
-
-import numpy as np
-from scipy.stats import norm
 from matplotlib import pyplot as plt
 from ImageFeature import getGridOfImage 
-from create_dataframe import create_df
 import pandas as pd
-from sklearn import datasets, linear_model
-from sklearn.model_selection import train_test_split
+import numpy as np
 
-df = pd.read_csv('dataset.csv')
-
-def computeStats(image_dict):
+def compute_stats(image_dict, plot = False):
     #Stadistical study for the different signal types in order to properly
     #split the training set into two sets,  ~70% and ~30% with the best 
     #main features represented in both of them
-    fillRatio_dict = {}
-    formFactor_dict = {}
-    
+    fillRatioStats = {}
+    formFactorStats = {}
+    areaStats = {}
     for signalType in image_dict:
-        fillRatio_list = []
-        formFactor_list = []
-        
+        fillRatioList = []
+        formFactorList = []       
+        areaList = []       
         for signalGrid in image_dict[signalType]:
-            fillRatio_list.append(signalGrid.fillRatio)
-            formFactor_list.append(signalGrid.formFactor)
-            
-        fillRatio_dict[signalType] = fillRatio_list
-        formFactor_dict[signalType] = formFactor_list
+            fillRatioList.append(signalGrid.fillRatio)
+            formFactorList.append(signalGrid.formFactor)                    
+            areaList.append(signalGrid.area)                    
+        fillRatioStats[signalType] = compute_freq(signalType, fillRatioList, 'fillRatio', plot, 'green')
+        formFactorStats[signalType] = compute_freq(signalType, formFactorList, 'formFactor', plot, 'red')
+        areaStats[signalType] = compute_freq(signalType, areaList, 'area', plot, 'black')
+
+    return (fillRatioStats, formFactorStats, areaStats)
+
+def compute_freq(signalType, imgInfo, name, plot, color):        
+
+    if(plot == True):
+        plt.hist(imgInfo, bins=30, color=color)
+        plt.ylabel('f')
+        plt.xlabel(name)
+        plt.title('signalType '+signalType)
+        plt.show()
     
-    return (fillRatio_dict, formFactor_dict)
+    return (np.mean(imgInfo), np.std(imgInfo))
+
+def sort_by_mean(reference, data):
+    dataError = []
+    meanData = np.mean(data)
+
+    for value in data:
+        dataError.append(abs(value - meanData))
+    sortedReference = [x for _,x in sorted(zip(dataError, reference))]
+
+    return sortedReference
         
 
-def compute_freq(imgType):        
-    try:
-        (fillRatio_dict, formFactor_dict) = computeStats(image_dict)   
-    except NameError:
-        image_dict = getGridOfImage()
-        (fillRatio_dict, formFactor_dict) = computeStats(image_dict)
-    
-    plt.hist(fillRatio_dict[imgType])
-    plt.ylabel('frequencia')
-    plt.xlabel('fillRatio')
-    plt.title('signalType '+imgType)
-    plt.show()
-
-def split_by_type():
-    col = ['UpLeft(Y)','UpLeft(X)','DownRight(Y)','DownRight(X)','Type', "Image", "Mask", "FillRatio", "FormFactor"]
+def split_by_type(dataset):
+    col = ['UpLeft(Y)','UpLeft(X)','DownRight(Y)','DownRight(X)','Type', "Image", "Mask", "FillRatio", "FormFactor", "Area"]
     train = pd.DataFrame(columns=col)
     validation = pd.DataFrame(columns=col)
-    for type in df.Type.unique():
-        typeDf = df[df.Type == type]
-        train1, validation1 = train_test_split(typeDf, test_size=0.3)
-       
-        train = pd.concat([train, train1],ignore_index=True)
-        validation = pd.concat([validation, validation1],ignore_index=True)        
-    
+    for typeSignal in dataset.Type.unique():
+        typeDf = dataset[dataset.Type == typeSignal]
+        reference = sort_by_mean(typeDf.index.values.tolist(), typeDf.Area.tolist())
+        k = 0
+        for indexRef in reference:
+            if(k == 2 or k == 5 or k == 8):
+                # validationnset
+                validation = validation.append(typeDf[typeDf.index == indexRef])
+            else:
+                # setset
+                train = train.append(typeDf[typeDf.index == indexRef])
+            if(k == 9):
+                k = 0
+            else:
+                k += 1
     return train, validation
 
 if __name__ == '__main__':
-    train,validation = split_by_type()
+    plot = False
+    try:
+        (train, validation) = split_by_type(df)
+    except NameError:
+        (image_dict, df) = getGridOfImage()
+        (train, validation) = split_by_type(df)
 
+    
+    
+        
+        
+        
+        
+    
