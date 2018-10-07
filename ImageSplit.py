@@ -18,16 +18,19 @@ def compute_stats(image_dict, plot = False):
     formFactorStats = {}
     areaStats = {}
     for signalType in image_dict:
-        fillRatio_list = []
-        formFactor_list = []       
-        area_list = []       
+        fillRatioList = []
+        formFactorList = []       
+        areaList = []       
         for signalGrid in image_dict[signalType]:
-            fillRatio_list.append(signalGrid.fillRatio)
-            formFactor_list.append(signalGrid.formFactor)                    
-            area_list.append(signalGrid.area)                    
-        fillRatioStats[signalType] = compute_freq(signalType, fillRatio_list, 'fillRatio', plot, 'green')
-        formFactorStats[signalType] = compute_freq(signalType, formFactor_list, 'formFactor', plot, 'red')
-        areaStats[signalType] = compute_freq(signalType, area_list, 'area', plot, 'black')
+            fillRatioList.append(signalGrid.fillRatio)
+            formFactorList.append(signalGrid.formFactor)                    
+            areaList.append(signalGrid.area)                    
+        compute_freq(signalType, fillRatioList, 'fillRatio', plot, 'green')
+        compute_freq(signalType, formFactorList, 'formFactor', plot, 'red')
+        compute_freq(signalType, areaList, 'area', plot, 'black')
+        fillRatioStats[signalType] = fillRatioList
+        formFactorStats[signalType] = formFactorList
+        areaStats[signalType] = areaList
     return (fillRatioStats, formFactorStats, areaStats)
         
 def compute_freq(signalType, imgInfo, name, plot, color):        
@@ -67,10 +70,12 @@ def split_by_type(dataset):
 
 if __name__ == '__main__':
     df = pd.read_csv('dataset.csv')
-    train,validation = split_by_type(df)
+#    train,validation = split_by_type(df)
     plot = False
     try:
         (fillRatioStats, formFactorStats, areaStats) = compute_stats(image_dict, plot)   
     except NameError:
         (image_dict, df) = getGridOfImage()
         (fillRatioStats, formFactorStats, areaStats) = compute_stats(image_dict, plot)
+    sort_from_mean(np.arange(len(areaStats['A'])),areaStats['A'])
+    
