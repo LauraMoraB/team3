@@ -61,16 +61,16 @@ def split_by_type(dataset):
     validation = pd.DataFrame(columns=col)
     for typeSignal in dataset.Type.unique():
         typeDf = dataset[dataset.Type == typeSignal]
-        reference = sort_by_mean(typeDf.Image.tolist(), typeDf.Area.tolist())
+        reference = sort_by_mean(typeDf.index.values.tolist(), typeDf.Area.tolist())
         k = 0
         print(len(reference))
         for name in reference:
             if(k == 2 or k == 5 or k == 8):
-                # trainset
-                train = train.append(typeDf[typeDf.Image == name])
-            else:
                 # validationset
-                validation = validation.append(typeDf[typeDf.Image == name])
+                validation = validation.append(typeDf[typeDf.index.values == name])
+            else:
+                # trainset
+                train = train.append(typeDf[typeDf.index.values == name])
             if(k == 9):
                 k = 0
             else:
