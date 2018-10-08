@@ -68,4 +68,20 @@ def testMasks(img):
     plt.show()
     finalImg = img.finalGrid
     plt.imshow(cv2.cvtColor(finalImg, cv2.COLOR_BGR2RGB))
+<<<<<<< HEAD
     plt.show()
+
+
+if __name__ == '__main__':
+    imgType = 'C'
+    try:
+        testMasks(image_dict[imgType][0])    
+    except NameError:
+        image_dict = getGridOfImage()
+        testMasks(image_dict[imgType][0])
+
+
+
+=======
+    plt.show()
+>>>>>>> master
