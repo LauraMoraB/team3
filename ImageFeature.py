@@ -1,57 +1,52 @@
-import glob
 import numpy as np
 import ImageModel as imMod
 import matplotlib.pyplot as plt
-from create_dataframe import create_df
 from collections import defaultdict
 import cv2
 
 def getPartialName(txtname):
-    pathList =txtname.split(".")
+    #Returns Partian name for a given image data file of the dataset
+    # e.g. for forest.1034.png returs forest.1034
+    pathList = txtname.split(".")
     maskName = pathList[0] +"."+ pathList[1]
     return maskName
 
-def getGridOfMask(df, imageName, i, addPath, addPathMask, addPathGt):
-    maskName=df["Mask"].iloc[i]
-    mask = cv2.imread(addPathMask+maskName,0)
-    area = mask[int(df["UpLeft(Y)"].iloc[i]):int(df["DownRight(Y)"].iloc[i]), int(df["UpLeft(X)"].iloc[i]):int(df["DownRight(X)"].iloc[i])]
-    
-    fillRatioOnes = np.count_nonzero(area)
-    sizeMatrix = np.shape(area)
-    
-    fillRatioZeros = sizeMatrix[0]*sizeMatrix[1]
-    fillRatio = fillRatioOnes/fillRatioZeros
-    
-    if(sizeMatrix[0]<sizeMatrix[1]):    
-        formFactor = abs(sizeMatrix[0]/sizeMatrix[1])
-    else:
-        formFactor = abs(sizeMatrix[1]/sizeMatrix[0])
+def getFullImage(path, dfSingle):
+    return cv2.imread(path + dfSingle['Image'],1)
 
-    return fillRatio, formFactor, area
+def getCroppedImage(path, dfSingle):
+    image = getFullImage(path, dfSingle)
+    return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
+
+def getFullMask(path, dfSingle):
+    return cv2.imread(path+'mask' + dfSingle['Mask'],1)
+
+def getCroppedMask(path, dfSingle):
+    image = getFullMask(path, dfSingle)
+    return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
+
+def getMaskAspect(path, dfSingle):
+    crop = getCroppedMask(path+'mask', dfSingle)  
+
+    (imgX, imgY, imgZ) = np.shape(crop)
+    imgOnes = np.count_nonzero(crop)    
+    imgArea = imgX*imgY
+    imgFillRatio = imgOnes/imgArea
+    if(imgX < imgY):    
+        imgFormFactor = abs(imgX/imgY)
+    else:
+        imgFormFactor = abs(imgY/imgX)
+
+    return imgFillRatio, imgFormFactor, imgArea
 
 def getGridOfImage(df, addPath, addPathMask, addPathGt):
-    image_dict = defaultdict(list)
     fillRatioL = []
     formFactorL = []
     areaL = []
     
-    for i in range(len(df)): 
-        imageName=df["Image"].iloc[i]
-        imageTrain = cv2.imread(addPath+imageName,1)
-        areaImg = imageTrain[int(df["UpLeft(Y)"].iloc[i]):int(df["DownRight(Y)"].iloc[i]), int(df["UpLeft(X)"].iloc[i]):int(df["DownRight(X)"].iloc[i])]
-        
-        fillRatio, formFactor, areaMask = getGridOfMask(df, imageName, i, addPath, addPathMask, addPathGt)
-        
-        areaFinal = cv2.bitwise_and(areaImg,areaImg,mask = areaMask) # Imagen final con la señal solo
-        partialName = getPartialName(imageName)
-        
-        typeSignal = df["Type"].iloc[i]
-        (xImg, yImg, zImg) = np.shape(areaFinal)
-        area = xImg*yImg
-        
-        bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal, area, imageTrain)       
-        image_dict[typeSignal].append(bean)
-                
+    for i in range(len(df)):       
+        fillRatio, formFactor, area = getMaskAspect(df.iloc[i], addPathMask)        
+#        areaFinal = cv2.bitwise_and(areaImg,areaImg,mask = areaMask) # Imagen final con la señal solo                   
         areaL.append(area)
         fillRatioL.append(fillRatio)
         formFactorL.append(formFactor)
@@ -60,7 +55,7 @@ def getGridOfImage(df, addPath, addPathMask, addPathGt):
     df["FormFactor"]=formFactorL
     df["Area"]=areaL
         
-    return image_dict, df
+    return df
 
 def testMasks(img):
     testImg = img.imageGrid

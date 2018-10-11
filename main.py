@@ -36,48 +36,48 @@ except NameError:
     (image_dict, df) = getGridOfImage(df, addPath, addPathMask, addPathGt)
 
 # Test Dataset
-test_df = create_df_test('datasets/test/')
+#test_df = create_df_test('datasets/test/')
 # TRAIN AND VALIDATION
 # Second the DS is split into two (70%, 30%) taking into account Size area
-(train, validation) = split_by_type(df, addPath,addPathMask ) 
-
-# import into dictionary
-(validation_dict, train_dict) = divide_dictionary(image_dict, validation, train)
-            
-## After the split, the analysis is divided between Training and Validate
-if validate == "true":
-    # Apply filters
-    if model == 1: 
-        color_dict = computeColor(validation_dict, "HSV", "mix") 
-        dataset_output_masks = "m1-results/week1/validation/"    
-        for imageType in color_dict:
-            for image in color_dict[imageType]:
-                name = image[1]
-                cv2.imwrite(dataset_output_masks+name+".png", image[0])
-    else:
-        if test == 1:
-            colorSegmentation_test(test_df, 'datasets/test/')
-        else: 
-            colorSegmentation(validation_dict)
-    
-   
-elif validate == "false":
-    # compute histograms for training data from each imageType
-    imageType=["A","B","C","D","E","F"]
-    for i in imageType:
-        hue, sat, val = compute_histogram_type(i, train_dict)
-        #Plot histogram
-#        plt.figure(figsize=(10,8))
-#        plt.subplot()           
-#        plt.subplots_adjust(hspace=.5)
-#        plt.title("Hue")
-#        plt.hist(hue, bins='auto')
-#        plt.subplot(312)                             
-#        plt.title("Saturation")
-#        plt.hist(sat, bins='auto')
-#        plt.subplot(313)
-#        plt.title("Luminosity Value")
-#        plt.hist(val, bins='auto')
-        
-else: 
-    print ("Wrong entry")
+#(train, validation) = split_by_type(df, addPath,addPathMask ) 
+#
+## import into dictionary
+#(validation_dict, train_dict) = divide_dictionary(image_dict, validation, train)
+#            
+### After the split, the analysis is divided between Training and Validate
+#if validate == "true":
+#    # Apply filters
+#    if model == 1: 
+#        color_dict = computeColor(validation_dict, "HSV", "mix") 
+#        dataset_output_masks = "m1-results/week1/validation/"    
+#        for imageType in color_dict:
+#            for image in color_dict[imageType]:
+#                name = image[1]
+#                cv2.imwrite(dataset_output_masks+name+".png", image[0])
+#    else:
+#        if test == 1:
+#            colorSegmentation_test(test_df, 'datasets/test/')
+#        else: 
+#            colorSegmentation(validation_dict)
+#    
+#   
+#elif validate == "false":
+#    # compute histograms for training data from each imageType
+#    imageType=["A","B","C","D","E","F"]
+#    for i in imageType:
+#        hue, sat, val = compute_histogram_type(i, train_dict)
+#        #Plot histogram
+##        plt.figure(figsize=(10,8))
+##        plt.subplot()           
+##        plt.subplots_adjust(hspace=.5)
+##        plt.title("Hue")
+##        plt.hist(hue, bins='auto')
+##        plt.subplot(312)                             
+##        plt.title("Saturation")
+##        plt.hist(sat, bins='auto')
+##        plt.subplot(313)
+##        plt.title("Luminosity Value")
+##        plt.hist(val, bins='auto')
+#        
+#else: 
+#    print ("Wrong entry")
