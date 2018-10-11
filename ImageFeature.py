@@ -9,16 +9,15 @@ def getCroppedImage(path, dfSingle):
     return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
 
 def getFullMask(path, dfSingle):
-    return cv2.imread(path+'mask\\' + dfSingle['Mask'], 1)
+    return cv2.imread(path+'mask/' + dfSingle['Mask'], 0)
 
 def getCroppedMask(path, dfSingle):
-    image = getFullMask(path+'mask\\' + dfSingle, 1)
-    print('llego aqui')       
+    image = getFullMask(path, dfSingle)
     return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
 
 def getMaskAspect(path, dfSingle): 
     crop = getCroppedMask(path, dfSingle)  
-    (imgX, imgY, imgZ) = np.shape(crop)
+    (imgX, imgY) = np.shape(crop)
     imgOnes = np.count_nonzero(crop)    
     imgArea = imgX*imgY
     imgFillRatio = imgOnes/imgArea
