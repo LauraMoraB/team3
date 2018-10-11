@@ -1,15 +1,5 @@
 import numpy as np
-import ImageModel as imMod
-import matplotlib.pyplot as plt
-from collections import defaultdict
 import cv2
-
-def getPartialName(txtname):
-    #Returns Partian name for a given image data file of the dataset
-    # e.g. for forest.1034.png returs forest.1034
-    pathList = txtname.split(".")
-    maskName = pathList[0] +"."+ pathList[1]
-    return maskName
 
 def getFullImage(path, dfSingle):
     return cv2.imread(path + dfSingle['Image'],1)
@@ -19,15 +9,15 @@ def getCroppedImage(path, dfSingle):
     return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
 
 def getFullMask(path, dfSingle):
-    return cv2.imread(path+'mask' + dfSingle['Mask'],1)
+    return cv2.imread(path+'mask\\' + dfSingle['Mask'], 1)
 
 def getCroppedMask(path, dfSingle):
-    image = getFullMask(path, dfSingle)
+    image = getFullMask(path+'mask\\' + dfSingle, 1)
+    print('llego aqui')       
     return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
 
-def getMaskAspect(path, dfSingle):
-    crop = getCroppedMask(path+'mask', dfSingle)  
-
+def getMaskAspect(path, dfSingle): 
+    crop = getCroppedMask(path, dfSingle)  
     (imgX, imgY, imgZ) = np.shape(crop)
     imgOnes = np.count_nonzero(crop)    
     imgArea = imgX*imgY
@@ -39,13 +29,13 @@ def getMaskAspect(path, dfSingle):
 
     return imgFillRatio, imgFormFactor, imgArea
 
-def getGridOfImage(df, addPath, addPathMask, addPathGt):
+def getGridOfImage(df, path):
     fillRatioL = []
     formFactorL = []
     areaL = []
     
     for i in range(len(df)):       
-        fillRatio, formFactor, area = getMaskAspect(df.iloc[i], addPathMask)        
+        fillRatio, formFactor, area = getMaskAspect(path, df.iloc[i])    
 #        areaFinal = cv2.bitwise_and(areaImg,areaImg,mask = areaMask) # Imagen final con la señal solo                   
         areaL.append(area)
         fillRatioL.append(fillRatio)
@@ -56,11 +46,3 @@ def getGridOfImage(df, addPath, addPathMask, addPathGt):
     df["Area"]=areaL
         
     return df
-
-def testMasks(img):
-    testImg = img.imageGrid
-    plt.imshow(cv2.cvtColor(testImg, cv2.COLOR_BGR2RGB))
-    plt.show()
-    finalImg = img.finalGrid
-    plt.imshow(cv2.cvtColor(finalImg, cv2.COLOR_BGR2RGB))
-    plt.show()
