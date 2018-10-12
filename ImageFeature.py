@@ -1,22 +1,22 @@
 import numpy as np
 import cv2
 
-def getFullImage(path, dfSingle):
+def get_full_image(dfSingle, path):
     return cv2.imread(path + dfSingle['Image'],1)
 
-def getCroppedImage(path, dfSingle):
-    image = getFullImage(path, dfSingle)
+def get_cropped_image(dfSingle, path):
+    image = get_full_image(dfSingle, path)
     return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
 
-def getFullMask(path, dfSingle):
+def get_full_mask(dfSingle, path):
     return cv2.imread(path+'mask/' + dfSingle['Mask'], 0)
 
-def getCroppedMask(path, dfSingle):
-    image = getFullMask(path, dfSingle)
+def get_cropped_mask(dfSingle, path):
+    image = get_full_mask(dfSingle, path)
     return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
 
-def getMaskAspect(path, dfSingle): 
-    crop = getCroppedMask(path, dfSingle)  
+def get_mask_aspect(dfSingle, path): 
+    crop = get_cropped_mask(dfSingle, path)  
     (imgX, imgY) = np.shape(crop)
     imgOnes = np.count_nonzero(crop)    
     imgArea = imgX*imgY
@@ -28,14 +28,13 @@ def getMaskAspect(path, dfSingle):
 
     return imgFillRatio, imgFormFactor, imgArea
 
-def getGridOfImage(df, path):
+def get_ground_truth(df, path):
     fillRatioL = []
     formFactorL = []
     areaL = []
     
     for i in range(len(df)):       
-        fillRatio, formFactor, area = getMaskAspect(path, df.iloc[i])    
-#        areaFinal = cv2.bitwise_and(areaImg,areaImg,mask = areaMask) # Imagen final con la señal solo                   
+        fillRatio, formFactor, area = get_mask_aspect(df.iloc[i], path)    
         areaL.append(area)
         fillRatioL.append(fillRatio)
         formFactorL.append(formFactor)
@@ -45,3 +44,5 @@ def getGridOfImage(df, path):
     df["Area"]=areaL
         
     return df
+
+#        areaFinal = cv2.bitwise_and(areaImg,areaImg,mask = areaMask) # Imagen final con la señal solo                   

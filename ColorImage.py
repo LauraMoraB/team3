@@ -1,14 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Oct  6 09:31:44 2018
-
-@author: gaby1
-"""
 import cv2
 import numpy as np
-from scipy.stats import norm
-from matplotlib import pyplot as plt
-from ImageFeature import getGridOfImage 
+
 
 def compute_histogram_type(signal_type, image_dict):
     hueL=[]
@@ -28,10 +20,10 @@ def compute_histogram_type(signal_type, image_dict):
         
     return hueL, satL, valL
 
-def pixelescolorDetectionHSV(imagen, signalType, name):
+def pixeles_color_detection_HSV(imagen, signalType, name):
     
-    mask_red = pixelescolorDetectionHSV_individual(imagen, "red", signalType, name)
-    mask_blue = pixelescolorDetectionHSV_individual(imagen, "blue", signalType, name)
+    mask_red = pixeles_color_Detection_HSV_individual(imagen, "red", signalType, name)
+    mask_blue = pixeles_color_Detection_HSV_individual(imagen, "blue", signalType, name)
     
     #multipl = cv2.bitwise_and(mask_red, mask_red, mask=mask_blue)
     
@@ -41,7 +33,7 @@ def pixelescolorDetectionHSV(imagen, signalType, name):
     
     return mask
 
-def pixelescolorDetectionHSV_individual(imagen, colorType,signalType, name):
+def pixeles_color_Detection_HSV_individual(imagen, colorType,signalType, name):
     #Filtrar el ruido aplicando un OPEN seguido de un CLOSE
     kernel = np.ones((6,6),np.uint8)
     
@@ -103,7 +95,7 @@ def pixelescolorDetectionHSV_individual(imagen, colorType,signalType, name):
         print("Any color signal mask !")        
     return mask
 
-def changeSpaceColor(imagen, spaceType, signalType,name):
+def change_space_color(imagen, spaceType, signalType,name):
 #SOLO CAMBIO DE ESPACIO DE COLO LA IMAGEN ORIGINAL RECORTADA    
     if spaceType == "HSV":
         hsv = cv2.cvtColor(imagen, cv2.COLOR_RGB2HSV)
@@ -111,31 +103,27 @@ def changeSpaceColor(imagen, spaceType, signalType,name):
     else:
         return imagen
     
-def computeColor(image_dict, spaceType, tipoFiltro):
+def compute_color(image_dict, spaceType, tipoFiltro):
 
     color_dict = {}  
 
     
     for signalType in image_dict:
-        SpaceColors_list = []
         MaskColors_list = []
 
         for channelGrid in image_dict[signalType]:
             
             imageRGB = cv2.cvtColor(channelGrid.completeImg, cv2.COLOR_BGR2RGB)
             
-            imghsv=changeSpaceColor(imageRGB, spaceType, signalType,channelGrid.name)
+            imghsv=change_space_color(imageRGB, spaceType, signalType,channelGrid.name)
 
             if spaceType=="HSV":
                 
                 if tipoFiltro == "mix":
-                    maskcolor=pixelescolorDetectionHSV(imghsv,signalType,channelGrid.name)
+                    maskcolor=pixeles_color_detection_HSV(imghsv,signalType,channelGrid.name)
                 else:    
-                    maskcolor=pixelescolorDetectionHSV_individual(imghsv,colorType,signalType,channelGrid.name)
-                
-                resultSpace = cv2.bitwise_and(imghsv,imghsv, mask= maskcolor)
-            
-            #SpaceColors_list.append(resultSpace)
+                    maskcolor=pixeles_color_Detection_HSV_individual(imghsv,colorType,signalType,channelGrid.name)
+                           
             MaskColors_list.append([maskcolor,channelGrid.name])
         
         color_dict[signalType] = MaskColors_list

@@ -1,66 +1,58 @@
-from ImageFeature import getGridOfImage
-from ImageSplit import split_by_type
-from ImageSplit import divide_dictionary 
-from ImageSplit import compute_stats
-from create_dataframe import create_df
-from create_dataframe import create_df_test
-from ColorImage import computeColor
-from ColorImage import compute_histogram_type  
-from ColorSegmentation import colorSegmentation
-from ColorSegmentation import colorSegmentation_test
-from collections import defaultdict
+from ImageFeature import get_ground_truth
+from ImageSplit import split_by_type, compute_stats, plot_stats
+from createDataframe import create_df_train, create_df_test
+from ColorImage import compute_color, compute_histogram_type 
+from ColorSegmentation import color_segmentation
+#---> KEY PATHS  <----#
 
-import sys 
-import cv2
-from collections import defaultdict
-sys.path.insert(0, 'traffic_signs/')
+testPath = 'datasets/test/'
+trainPath = 'datasets/train/'
+trainGtPath = 'datasets/train/gt/'
+trainMaskPath = 'datasets/train/mask/'
+resultsPath = 'm1-results/week1/validation/'
 
-import traffic_sign_detection
+#---> CONFIGURATION  <----#
+LOAD_DATA = False
+PLOT = True
+VALIDATE = False
+TEST = 0
+MODEL = 2
 
-addPath = 'datasets/train/'
-addPathGt = 'datasets/train/gt/'
-addPathMask = 'datasets/train/mask/'
+#---> DATA PARSING AND SPLIT  <----#
+if(LOAD_DATA == True):
+# df is created by Parsing training image folders
+    df = create_df_train(trainPath, trainMaskPath, trainGtPath)
+    # df is updated computing provided groundtruth information
+    df = get_ground_truth(df, trainPath)
+    # df is created with test images
+    dfTest = create_df_test(testPath)
+    # stats are worked out over the df
+    dfStats = compute_stats(df)    
+    # ds is splited into two sets (70%, 30%) taking into account signal area size
+    (dfTrain, dfValidation) = split_by_type(df, trainPath, trainMaskPath) 
+    
+if(PLOT == True):
+    plot_stats(df)
 
-validate = 'false'
-test = 0
-model = 2
+#---> SEGMENTATION  <----#
+color_segmentation(dfTest, testPath)
 
-# First, the whole DS is analized a organized in a data structure
-# to be used on the next steps
-# Then, DS is analized taking into account FR, FF and Area for each signal
-try:
-    (fillRatioStats, formFactorStats, areaStats) = compute_stats(image_dict, plot = False)   
-except NameError:
-    df = create_df(addPath, addPathMask, addPathGt)
-    # Dataframe and Dictionary creation
-    (image_dict, df) = getGridOfImage(df, addPath, addPathMask, addPathGt)
-
-# Test Dataset
-#test_df = create_df_test('datasets/test/')
-# TRAIN AND VALIDATION
-# Second the DS is split into two (70%, 30%) taking into account Size area
-#(train, validation) = split_by_type(df, addPath,addPathMask ) 
-#
-## import into dictionary
-#(validation_dict, train_dict) = divide_dictionary(image_dict, validation, train)
-#            
-### After the split, the analysis is divided between Training and Validate
-#if validate == "true":
+#if validate == True:
 #    # Apply filters
 #    if model == 1: 
-#        color_dict = computeColor(validation_dict, "HSV", "mix") 
-#        dataset_output_masks = "m1-results/week1/validation/"    
+#        color_dict = computeColor(dfValidation, 'HSV', 'mix') 
+#        dataset_output_masks = resultsPath    
 #        for imageType in color_dict:
 #            for image in color_dict[imageType]:
 #                name = image[1]
-#                cv2.imwrite(dataset_output_masks+name+".png", image[0])
+#                cv2.imwrite(dataset_output_masks+name+'.png', image[0])
 #    else:
 #        if test == 1:
-#            colorSegmentation_test(test_df, 'datasets/test/')
+#            colorSegmentation_test(dfTest, testPath)
 #        else: 
-#            colorSegmentation(validation_dict)
-#    
-#   
+#            colorSegmentation(dfValidation)
+#
+
 #elif validate == "false":
 #    # compute histograms for training data from each imageType
 #    imageType=["A","B","C","D","E","F"]
