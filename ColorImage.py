@@ -1,5 +1,30 @@
 import cv2
 import numpy as np
+from ImageFeature import get_full_image, get_full_masked_image, get_cropped_masked_image
+from matplotlib import pyplot as plt
+
+
+#
+def RGB2HSV_list(image):
+    hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+    hue, sat, val = hsv[:,:,0], hsv[:,:,1], hsv[:,:,2]
+    return (hue.tolist(), sat.tolist(), val.tolist())
+
+
+
+def new_thresholds(df, path):
+    image = get_cropped_masked_image(df.iloc[0], path)
+    imageL = image.tolist()
+    hueL, satL, valL = RGB2HSV_list(image)
+    pxL = []
+    for px in imageL:
+        if(sum(px) >0):
+            pxL.append([hueL, satL])
+    return pxL
+    
+
+
+
 
 
 def compute_histogram_type(signal_type, image_dict):
@@ -95,13 +120,6 @@ def pixeles_color_Detection_HSV_individual(imagen, colorType,signalType, name):
         print("Any color signal mask !")        
     return mask
 
-def change_space_color(imagen, spaceType, signalType,name):
-#SOLO CAMBIO DE ESPACIO DE COLO LA IMAGEN ORIGINAL RECORTADA    
-    if spaceType == "HSV":
-        hsv = cv2.cvtColor(imagen, cv2.COLOR_RGB2HSV)
-        return hsv
-    else:
-        return imagen
     
 def compute_color(image_dict, spaceType, tipoFiltro):
 

@@ -6,14 +6,15 @@ def color_segmentation(df, path):
     kernel = np.ones((6,6),np.uint8)
     for i in range(len(df)):       
         # Gets images one by one
-        fullImage = get_full_image(df.iloc[i], path)    
-        imageName = df['Image'].iloc[i]     
+        dfSingle = df.iloc[i]
+        fullImage = get_full_image(dfSingle, path)    
+        imageName = dfSingle['Image']   
         # Prepares mask files
         sizeImg  = np.shape(fullImage)     
         fullMask = np.zeros((sizeImg[0], sizeImg[1]))
         # Color space change
         fullImage = cv2.cvtColor(fullImage, cv2.COLOR_BGR2HSV)
-
+        
         hsv_rang= (
              np.array([0,50,60]), np.array([20, 255, 255]) #RED
              ,np.array([300,75,60]), np.array([350, 255, 255]) #DARK RED
@@ -41,9 +42,9 @@ def color_segmentation(df, path):
                     for cnt in contours:
                         x,y,w,h = cv2.boundingRect(cnt)
                         get_inside_grid_segmentation(x, y, w, h, fullImage, fullMask)
-
-        cv2.imwrite("./ResultMask/"+imageName[:-3]+'png', fullMask)
-       
+                        
+        cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
+    
     
 def get_inside_grid_segmentation(x, y ,w, h, image, fullMask):
     if w<h:

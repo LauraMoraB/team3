@@ -1,19 +1,26 @@
 from ImageFeature import get_ground_truth
 from ImageSplit import split_by_type, compute_stats, plot_stats
 from createDataframe import create_df_train, create_df_test
-from ColorImage import compute_color, compute_histogram_type 
+#from ColorImage import compute_color, compute_histogram_type 
 from ColorSegmentation import color_segmentation
+from validation import validation
+
 #---> KEY PATHS  <----#
 
 testPath = 'datasets/test/'
 trainPath = 'datasets/train/'
 trainGtPath = 'datasets/train/gt/'
 trainMaskPath = 'datasets/train/mask/'
+
 resultsPath = 'm1-results/week1/validation/'
 
+pathToResults = "datasets/split/train/result/"
+pathToMasks = "datasets/split/train/mask/"
+validationPath = "datasets/split/validation/"
+
 #---> CONFIGURATION  <----#
-LOAD_DATA = False
-PLOT = True
+LOAD_DATA = True
+PLOT = False
 VALIDATE = False
 TEST = 0
 MODEL = 2
@@ -34,42 +41,6 @@ if(LOAD_DATA == True):
 if(PLOT == True):
     plot_stats(df)
 
-#---> SEGMENTATION  <----#
-color_segmentation(dfTest, testPath)
-
-#if validate == True:
-#    # Apply filters
-#    if model == 1: 
-#        color_dict = computeColor(dfValidation, 'HSV', 'mix') 
-#        dataset_output_masks = resultsPath    
-#        for imageType in color_dict:
-#            for image in color_dict[imageType]:
-#                name = image[1]
-#                cv2.imwrite(dataset_output_masks+name+'.png', image[0])
-#    else:
-#        if test == 1:
-#            colorSegmentation_test(dfTest, testPath)
-#        else: 
-#            colorSegmentation(dfValidation)
-#
-
-#elif validate == "false":
-#    # compute histograms for training data from each imageType
-#    imageType=["A","B","C","D","E","F"]
-#    for i in imageType:
-#        hue, sat, val = compute_histogram_type(i, train_dict)
-#        #Plot histogram
-##        plt.figure(figsize=(10,8))
-##        plt.subplot()           
-##        plt.subplots_adjust(hspace=.5)
-##        plt.title("Hue")
-##        plt.hist(hue, bins='auto')
-##        plt.subplot(312)                             
-##        plt.title("Saturation")
-##        plt.hist(sat, bins='auto')
-##        plt.subplot(313)
-##        plt.title("Luminosity Value")
-##        plt.hist(val, bins='auto')
-#        
-#else: 
-#    print ("Wrong entry")
+#---> VALIDATION DATA SEGMENTATION  <----#
+color_segmentation(dfValidation, validationPath)
+validation(dfValidation, validationPath)

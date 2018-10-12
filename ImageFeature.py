@@ -11,9 +11,22 @@ def get_cropped_image(dfSingle, path):
 def get_full_mask(dfSingle, path):
     return cv2.imread(path+'mask/' + dfSingle['Mask'], 0)
 
+def get_full_mask_result(dfSingle, path):
+    return cv2.imread(path+'resultMask/' + dfSingle['Mask'], 0)
+
 def get_cropped_mask(dfSingle, path):
     image = get_full_mask(dfSingle, path)
     return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
+
+def get_full_masked_image(dfSingle, path):
+    image = get_full_image(dfSingle, path)
+    mask = get_full_mask(dfSingle, path)
+    return cv2.bitwise_and(image,image,mask = mask)
+
+def get_cropped_masked_image(dfSingle, path):
+    image = get_cropped_image(dfSingle, path)
+    mask = get_cropped_mask(dfSingle, path)
+    return cv2.bitwise_and(image,image,mask = mask)
 
 def get_mask_aspect(dfSingle, path): 
     crop = get_cropped_mask(dfSingle, path)  
@@ -45,4 +58,3 @@ def get_ground_truth(df, path):
         
     return df
 
-#        areaFinal = cv2.bitwise_and(areaImg,areaImg,mask = areaMask) # Imagen final con la señal solo                   
