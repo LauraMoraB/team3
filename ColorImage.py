@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 from ImageFeature import get_cropped_masked_image
 from matplotlib import pyplot as plt
 
