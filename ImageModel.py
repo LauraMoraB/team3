@@ -5,7 +5,7 @@ Created on Wed Oct  3 13:16:33 2018
 @author: Zaius
 """
 class ModelImage:
-    def __init__(self, imageGrid, typeOfSign, fillRatio, formFactor, name, maskGrid, finalGrid, completeImg):
+    def __init__(self, imageGrid, typeOfSign, fillRatio, formFactor, name, maskGrid, finalGrid, area, completeImg):
          self.imageGrid = imageGrid
          self.typeOfSign = typeOfSign
          self.fillRatio = fillRatio
@@ -13,5 +13,5 @@ class ModelImage:
          self.name = name
          self.maskGrid = maskGrid
          self.finalGrid = finalGrid
+         self.area = area
          self.completeImg = completeImg
-
