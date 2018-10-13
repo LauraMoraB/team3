@@ -19,7 +19,7 @@ pathToMasks = "datasets/split/train/mask/"
 validationPath = "datasets/split/validation/"
 
 #---> CONFIGURATION  <----#
-LOAD_DATA = True
+LOAD_DATA = False
 PLOT = False
 VALIDATE = False
 TEST = 0
@@ -44,3 +44,7 @@ if(PLOT == True):
 #---> VALIDATION DATA SEGMENTATION  <----#
 color_segmentation(dfValidation, validationPath)
 validation(dfValidation, validationPath)
+
+#---> FULL TRAIN DATA SEGMENTATION  <----#
+color_segmentation(df, trainPath)
+validation(df, trainPath)
