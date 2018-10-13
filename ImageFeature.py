@@ -1,57 +1,53 @@
-import glob
 import numpy as np
-import ImageModel as imMod
-import matplotlib.pyplot as plt
-from create_dataframe import create_df
-from collections import defaultdict
 import cv2
 
-def getPartialName(txtname):
-    pathList =txtname.split(".")
-    maskName = pathList[0] +"."+ pathList[1]
-    return maskName
+def get_full_image(dfSingle, path):
+    return cv2.imread(path + dfSingle['Image'],1)
 
-def getGridOfMask(df, imageName, i, addPath, addPathMask, addPathGt):
-    maskName=df["Mask"].iloc[i]
-    mask = cv2.imread(addPathMask+maskName,0)
-    area = mask[int(df["UpLeft(Y)"].iloc[i]):int(df["DownRight(Y)"].iloc[i]), int(df["UpLeft(X)"].iloc[i]):int(df["DownRight(X)"].iloc[i])]
-    
-    fillRatioOnes = np.count_nonzero(area)
-    sizeMatrix = np.shape(area)
-    
-    fillRatioZeros = sizeMatrix[0]*sizeMatrix[1]
-    fillRatio = fillRatioOnes/fillRatioZeros
-    
-    if(sizeMatrix[0]<sizeMatrix[1]):    
-        formFactor = abs(sizeMatrix[0]/sizeMatrix[1])
+def get_cropped_image(dfSingle, path):
+    image = get_full_image(dfSingle, path)
+    return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
+
+def get_full_mask(dfSingle, path):
+    return cv2.imread(path+'mask/' + dfSingle['Mask'], 0)
+
+def get_full_mask_result(dfSingle, path):
+    return cv2.imread(path+'resultMask/' + dfSingle['Mask'], 0)
+
+def get_cropped_mask(dfSingle, path):
+    image = get_full_mask(dfSingle, path)
+    return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
+
+def get_full_masked_image(dfSingle, path):
+    image = get_full_image(dfSingle, path)
+    mask = get_full_mask(dfSingle, path)
+    return cv2.bitwise_and(image,image,mask = mask)
+
+def get_cropped_masked_image(dfSingle, path):
+    image = get_cropped_image(dfSingle, path)
+    mask = get_cropped_mask(dfSingle, path)
+    return cv2.bitwise_and(image,image,mask = mask)
+
+def get_mask_aspect(dfSingle, path): 
+    crop = get_cropped_mask(dfSingle, path)  
+    (imgX, imgY) = np.shape(crop)
+    imgOnes = np.count_nonzero(crop)    
+    imgArea = imgX*imgY
+    imgFillRatio = imgOnes/imgArea
+    if(imgX < imgY):    
+        imgFormFactor = abs(imgX/imgY)
     else:
-        formFactor = abs(sizeMatrix[1]/sizeMatrix[0])
+        imgFormFactor = abs(imgY/imgX)
 
-    return fillRatio, formFactor, area
+    return imgFillRatio, imgFormFactor, imgArea
 
-def getGridOfImage(df, addPath, addPathMask, addPathGt):
-    image_dict = defaultdict(list)
+def get_ground_truth(df, path):
     fillRatioL = []
     formFactorL = []
     areaL = []
     
-    for i in range(len(df)): 
-        imageName=df["Image"].iloc[i]
-        imageTrain = cv2.imread(addPath+imageName,1)
-        areaImg = imageTrain[int(df["UpLeft(Y)"].iloc[i]):int(df["DownRight(Y)"].iloc[i]), int(df["UpLeft(X)"].iloc[i]):int(df["DownRight(X)"].iloc[i])]
-        
-        fillRatio, formFactor, areaMask = getGridOfMask(df, imageName, i, addPath, addPathMask, addPathGt)
-        
-        areaFinal = cv2.bitwise_and(areaImg,areaImg,mask = areaMask) # Imagen final con la señal solo
-        partialName = getPartialName(imageName)
-        
-        typeSignal = df["Type"].iloc[i]
-        (xImg, yImg, zImg) = np.shape(areaFinal)
-        area = xImg*yImg
-        
-        bean = imMod.ModelImage(areaImg, typeSignal, fillRatio, formFactor, partialName, areaMask, areaFinal, area, imageTrain)       
-        image_dict[typeSignal].append(bean)
-                
+    for i in range(len(df)):       
+        fillRatio, formFactor, area = get_mask_aspect(df.iloc[i], path)    
         areaL.append(area)
         fillRatioL.append(fillRatio)
         formFactorL.append(formFactor)
@@ -60,12 +56,5 @@ def getGridOfImage(df, addPath, addPathMask, addPathGt):
     df["FormFactor"]=formFactorL
     df["Area"]=areaL
         
-    return image_dict, df
+    return df
 
-def testMasks(img):
-    testImg = img.imageGrid
-    plt.imshow(cv2.cvtColor(testImg, cv2.COLOR_BGR2RGB))
-    plt.show()
-    finalImg = img.finalGrid
-    plt.imshow(cv2.cvtColor(finalImg, cv2.COLOR_BGR2RGB))
-    plt.show()
