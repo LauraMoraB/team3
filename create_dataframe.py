@@ -19,7 +19,7 @@ def load_annotations(annot_file):
         
     return annotations
 
-def create_df(path_ds_images, path_ds_masks, path_ds_gt):
+def create_df_train(path_ds_images, path_ds_masks, path_ds_gt):
     listImages =[]
     listMask=[]
     listGT=[]

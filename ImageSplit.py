@@ -1,61 +1,60 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Oct  4 19:52:08 2018
-@author: Aitor Sanchez
-"""
 from matplotlib import pyplot as plt
-from ImageFeature import getGridOfImage 
 import pandas as pd
 import numpy as np
 import cv2
-from ImageFeature import getPartialName
-from collections import defaultdict
 
 
-
-def compute_stats(image_dict, plot = False):
+def compute_stats(df):
     #Stadistical study for the different signal types in order to properly
     #split the training set into two sets,  ~70% and ~30% with the best 
     #main features represented in both of them
-    fillRatioStats = {}
-    formFactorStats = {}
-    areaStats = {}
-    for signalType in image_dict:
-        fillRatioList = []
-        formFactorList = []       
-        areaList = []       
-        for signalGrid in image_dict[signalType]:
-<<<<<<< HEAD
-            #no se que hace ????????????????????????????????????????????
-            #plt.imsave("./Resultados/"+signalType+"/"+signalGrid.name+'.jpg', signalGrid.finalGrid)
-            fillRatio_list.append(signalGrid.fillRatio)
-            formFactor_list.append(signalGrid.formFactor)
-        fillRatio_dict[signalType] = fillRatio_list
-        formFactor_dict[signalType] = formFactor_list
-#    plt.imsave("./Resultados/"+signalType+"/"+signalGrid.name+'.jpg', signalGrid.finalGrid)
+    cols = ['Type', 'FillRatioMean', 'FillRatioStd', 'FormFactorMean', 'FormFactorStd', 'AreaMean', 'AreaStd']
+    dfStats = pd.DataFrame(columns=cols)
 
-    return (fillRatio_dict, formFactor_dict)
-=======
-            fillRatioList.append(signalGrid.fillRatio)
-            formFactorList.append(signalGrid.formFactor)                    
-            areaList.append(signalGrid.area)                    
-        fillRatioStats[signalType] = compute_freq(signalType, fillRatioList, 'fillRatio', plot, 'green')
-        formFactorStats[signalType] = compute_freq(signalType, formFactorList, 'formFactor', plot, 'red')
-        areaStats[signalType] = compute_freq(signalType, areaList, 'area', plot, 'black')
+    types = df.Type.unique().tolist()
+    types.sort()
+    fillRatioMean = []
+    fillRatioStd = []
+    formFactorMean = []
+    formFactorStd = []
+    areaMean = []
+    areaStd = []
+    for typeSignal in types:
+        typeDf = df[df.Type == typeSignal]
+        fillRatioMean.append(np.mean(typeDf['FillRatio']))
+        fillRatioStd.append(np.std(typeDf['FillRatio']))
+        formFactorMean.append(np.mean(typeDf['FormFactor']))
+        formFactorStd.append(np.std(typeDf['FormFactor']))
+        areaMean.append(np.mean(typeDf['Area']))
+        areaStd.append(np.std(typeDf['Area']))
+        
+    dfStats['Type'] = types
+    dfStats['FillRatioMean'] = fillRatioMean
+    dfStats['FillRatioStd'] = fillRatioStd
+    dfStats['FormFactorMean'] = formFactorMean
+    dfStats['FormFactorStd'] = formFactorStd
+    dfStats['AreaMean'] = areaMean
+    dfStats['AreaStd'] = areaStd
+        
+    return dfStats
 
-    return (fillRatioStats, formFactorStats, areaStats)
 
-def compute_freq(signalType, imgInfo, name, plot, color):        
-
-    if(plot == True):
-        plt.hist(imgInfo, bins=30, color=color)
-        plt.ylabel('f')
-        plt.xlabel(name)
-        plt.title('signalType '+signalType)
-        plt.show()
+def plot_stats(df):        
+    types = df.Type.unique().tolist()
+    types.sort()
+    plotting = ['FillRatio', 'FormFactor', 'Area']
+    colors = ['k', 'r', 'g', 'b', 'm', 'c', 'y']
+    for typeSignal in types:
+        dfType = df[df.Type == typeSignal]
+        for chart in plotting:
+            data = dfType[chart].tolist()      
+            plt.hist(data, bins=30, color = colors[0])
+            plt.ylabel('f')
+            plt.xlabel(chart)
+            plt.title('signalType '+typeSignal)
+            plt.show()
+        colors.pop(0)
     
-    return (np.mean(imgInfo), np.std(imgInfo))
-
 def sort_by_mean(reference, data):
     dataError = []
     meanData = np.mean(data)
@@ -65,89 +64,51 @@ def sort_by_mean(reference, data):
     sortedReference = [x for _,x in sorted(zip(dataError, reference))]
 
     return sortedReference
->>>>>>> master
         
 
-def split_by_type(dataset, pathimages, pathmask):
-    col = ['UpLeft(Y)','UpLeft(X)','DownRight(Y)','DownRight(X)','Type', "Image", "Mask", "FillRatio", "FormFactor", "Area"]
+def split_by_type(df, pathimages, pathmask):
+    # Prepares train and valid dataframes to follow df structure
+    col = list(df)
     train = pd.DataFrame(columns=col)
     validation = pd.DataFrame(columns=col)
-    for typeSignal in dataset.Type.unique():
-        typeDf = dataset[dataset.Type == typeSignal]
+    # Divides df images for signal type
+    for typeSignal in df.Type.unique():
+        typeDf = df[df.Type == typeSignal]
+        # Sorts out subDf according to their signal area size
         reference = sort_by_mean(typeDf.index.values.tolist(), typeDf.Area.tolist())
+        # Divides 30 - 70
         k = 0
         for indexRef in reference:
             if(k == 2 or k == 5 or k == 8):
-                # validationnset
                 validation = validation.append(typeDf[typeDf.index == indexRef])
             else:
-                # setset
                 train = train.append(typeDf[typeDf.index == indexRef])
             if(k == 9):
                 k = 0
             else:
-                k += 1
-                
-    # save validation images
+                k += 1                
+    # Saves test and validation images in new subfolders
     for image in validation["Image"].tolist():  
         imageTrain = cv2.imread(pathimages+image,1)
-        cv2.imwrite("./datasets/validation/"+image, imageTrain)
+        cv2.imwrite("./datasets/split/validation/"+image, imageTrain)
         
     for mask in validation["Mask"].tolist():
         maskTrain = cv2.imread(pathmask+mask,1)
-        cv2.imwrite("./datasets/validation/mask/"+mask, maskTrain)
+        cv2.imwrite("./datasets/split/validation/mask/"+mask, maskTrain)
         
+    for image in train["Image"].tolist():  
+        imageTrain = cv2.imread(pathimages+image,1)
+        cv2.imwrite("./datasets/split/train/"+image, imageTrain)
+        
+    for mask in train["Mask"].tolist():
+        maskTrain = cv2.imread(pathmask+mask,1)
+        cv2.imwrite("./datasets/split/train/mask/"+mask, maskTrain)
+               
     return train, validation
 
-
-<<<<<<< HEAD
-#if __name__ == '__main__':
-#    imgType = 'A'        
-#    try:
-#        (fillRatio_dict, formFactor_dict) = computeStats(image_dict)   
-#    except NameError:
-#        image_dict = getGridOfImage()
-#        (fillRatio_dict, formFactor_dict) = computeStats(image_dict)
-#    
-#    plt.hist(fillRatio_dict[imgType])
-#    plt.ylabel('frequencia')
-#    plt.xlabel('fillRatio')
-#    plt.title('signalType '+imgType)
-#    plt.show()
-=======
-def divide_dictionary(image_dict, dataFrame1, dataFrame2):
-    dict1 = defaultdict(list)
-    dict2 = defaultdict(list)
-    
-    for typeSignal in image_dict:
-        type1 = dataFrame1[dataFrame1.Type == typeSignal]
-        typeName1 = type1.Image.values.tolist()
-        typeArea1 = type1.Area.values.tolist()
-        type2 = dataFrame2[dataFrame2.Type == typeSignal]
-        typeName2 = type2.Image.values.tolist()
-        typeArea2 = type2.Area.values.tolist()
-        for signal in image_dict[typeSignal]:
-            if signal.name+'.jpg' in typeName1 and signal.area in typeArea1:
-                dict1[typeSignal].append(signal)
-            elif signal.name+'.jpg' in typeName2 and signal.area in typeArea2:
-                dict2[typeSignal].append(signal)
-                
-    return (dict1, dict2)
-
-
-#if __name__ == '__main__':
-#    plot = False
-#    try:
-#        (train, validation) = split_by_type(df)
-#    except NameError:
-#        (image_dict, df) = getGridOfImage()
-#        (train, validation) = split_by_type(df)
-
-    
     
         
         
         
         
     
->>>>>>> master
