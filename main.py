@@ -1,7 +1,6 @@
 from ImageFeature import get_ground_truth
 from ImageSplit import split_by_type, compute_stats, plot_stats
 from createDataframe import create_df_train, create_df_test
-#from ColorImage import compute_color, compute_histogram_type 
 from ColorSegmentation import color_segmentation
 from validation import validation
 
@@ -11,9 +10,7 @@ testPath = 'datasets/test/'
 trainPath = 'datasets/train/'
 trainGtPath = 'datasets/train/gt/'
 trainMaskPath = 'datasets/train/mask/'
-
 resultsPath = 'm1-results/week1/validation/'
-
 pathToResults = "datasets/split/train/result/"
 pathToMasks = "datasets/split/train/mask/"
 validationPath = "datasets/split/validation/"
@@ -21,9 +18,6 @@ validationPath = "datasets/split/validation/"
 #---> CONFIGURATION  <----#
 LOAD_DATA = False
 PLOT = False
-VALIDATE = False
-TEST = 0
-MODEL = 2
 
 #---> DATA PARSING AND SPLIT  <----#
 if(LOAD_DATA == True):
