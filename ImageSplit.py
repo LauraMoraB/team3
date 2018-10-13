@@ -8,7 +8,7 @@ def compute_stats(df):
     #Stadistical study for the different signal types in order to properly
     #split the training set into two sets,  ~70% and ~30% with the best 
     #main features represented in both of them
-    cols = ['Type', 'FillRatioMean', 'FillRatioStd', 'FormFactorMean', 'FormFactorStd', 'AreaMean', 'AreaStd']
+    cols = ['Type', 'FillRatioMean', 'FillRatioStd', 'FormFactorMean', 'FormFactorStd', 'AreaMean', 'AreaStd', 'XMax', 'XMin', 'XMean', 'XStd', 'YMax', 'YMin', 'YMean', 'YStd']
     dfStats = pd.DataFrame(columns=cols)
 
     types = df.Type.unique().tolist()
@@ -18,7 +18,16 @@ def compute_stats(df):
     formFactorMean = []
     formFactorStd = []
     areaMean = []
-    areaStd = []
+    areaStd = []    
+    xMean = []
+    xStd = []      
+    xMax = []
+    xMin = []    
+    yMean = []
+    yStd = []
+    yMax = []
+    yMin = []        
+    
     for typeSignal in types:
         typeDf = df[df.Type == typeSignal]
         fillRatioMean.append(np.mean(typeDf['FillRatio']))
@@ -27,6 +36,14 @@ def compute_stats(df):
         formFactorStd.append(np.std(typeDf['FormFactor']))
         areaMean.append(np.mean(typeDf['Area']))
         areaStd.append(np.std(typeDf['Area']))
+        xMean.append(np.mean(typeDf['X']))
+        xStd.append(np.std(typeDf['X']))        
+        xMax.append(np.max(typeDf['X']))
+        xMin.append(np.min(typeDf['X'])) 
+        yMean.append(np.mean(typeDf['Y']))
+        yStd.append(np.std(typeDf['Y']))        
+        yMax.append(np.max(typeDf['Y']))
+        yMin.append(np.min(typeDf['Y'])) 
         
     dfStats['Type'] = types
     dfStats['FillRatioMean'] = fillRatioMean
@@ -35,6 +52,16 @@ def compute_stats(df):
     dfStats['FormFactorStd'] = formFactorStd
     dfStats['AreaMean'] = areaMean
     dfStats['AreaStd'] = areaStd
+    
+    dfStats['XMax'] = xMax
+    dfStats['XMin'] = xMin
+    dfStats['XMean'] = xMean
+    dfStats['XStd'] = xStd
+    
+    dfStats['YMax'] = yMax
+    dfStats['YMin'] = yMin
+    dfStats['YMean'] = yMean
+    dfStats['YStd'] = yStd
         
     return dfStats
 

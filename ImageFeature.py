@@ -32,29 +32,34 @@ def get_mask_aspect(dfSingle, path):
     crop = get_cropped_mask(dfSingle, path)  
     (imgX, imgY) = np.shape(crop)
     imgOnes = np.count_nonzero(crop)    
-    imgArea = imgX*imgY
-    imgFillRatio = imgOnes/imgArea
+    imgFillRatio = imgOnes/(imgX*imgY)
     if(imgX < imgY):    
         imgFormFactor = abs(imgX/imgY)
     else:
         imgFormFactor = abs(imgY/imgX)
 
-    return imgFillRatio, imgFormFactor, imgArea
+    return imgFillRatio, imgFormFactor, imgX, imgY
 
 def get_ground_truth(df, path):
     fillRatioL = []
     formFactorL = []
     areaL = []
+    xL = []
+    yL = []
     
     for i in range(len(df)):       
-        fillRatio, formFactor, area = get_mask_aspect(df.iloc[i], path)    
-        areaL.append(area)
+        fillRatio, formFactor, x, y = get_mask_aspect(df.iloc[i], path)    
+        xL.append(x)
+        yL.append(y)
+        areaL.append(x*y)
         fillRatioL.append(fillRatio)
         formFactorL.append(formFactor)
-       
+   
     df["FillRatio"]=fillRatioL
     df["FormFactor"]=formFactorL
     df["Area"]=areaL
+    df["X"]=xL
+    df["Y"]=yL
         
     return df
 
