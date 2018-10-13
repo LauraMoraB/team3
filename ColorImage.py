@@ -3,8 +3,6 @@ import numpy as np
 from ImageFeature import get_cropped_masked_image
 from matplotlib import pyplot as plt
 
-
-#
 def RGB2HSV(image):
     # converts RGB image array into H, S, V, unidimensional ordered list
     hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
@@ -36,6 +34,7 @@ def get_px_values(dfSingle, path):
     return (validHue, validSat)
 
 def get_color_histogram(df, path):
+    # creates color histograms in HSV for each signalType in the df
     colors = ['k', 'r', 'g', 'b', 'm', 'c', 'y']
     for typeSignal in sorted(df.Type.unique()):
         typeDf = df[df.Type == typeSignal]    
