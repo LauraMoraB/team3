@@ -21,7 +21,7 @@ addPath = 'datasets/train/'
 addPathGt = 'datasets/train/gt/'
 addPathMask = 'datasets/train/mask/'
 
-validate = 'false'
+validate = 'true'
 test = 0
 model = 2
 
