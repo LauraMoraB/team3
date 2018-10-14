@@ -1,4 +1,4 @@
 *ipnyb
 .ipnyb_checkpoints
 *.pyc
-*pycache__
+*__pycache__
