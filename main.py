@@ -1,83 +1,44 @@
-from ImageFeature import getGridOfImage
-from ImageSplit import split_by_type
-from ImageSplit import divide_dictionary 
-from ImageSplit import compute_stats
-from create_dataframe import create_df
-from create_dataframe import create_df_test
-from ColorImage import computeColor
-from ColorImage import compute_histogram_type  
-from ColorSegmentation import colorSegmentation
-from ColorSegmentation import colorSegmentation_test
-from collections import defaultdict
+from ImageFeature import get_ground_truth
+from ImageSplit import split_by_type, compute_stats, plot_stats
+from createDataframe import create_df_train, create_df_test
+from ColorSegmentation import color_segmentation
+from validation import validation
 
-import sys 
-import cv2
-from collections import defaultdict
-sys.path.insert(0, 'traffic_signs/')
+#---> KEY PATHS  <----#
 
-import traffic_sign_detection
+testPath = 'datasets/test/'
+trainPath = 'datasets/train/'
+trainGtPath = 'datasets/train/gt/'
+trainMaskPath = 'datasets/train/mask/'
+resultsPath = 'm1-results/week1/validation/'
+pathToResults = "datasets/split/train/result/"
+pathToMasks = "datasets/split/train/mask/"
+validationPath = "datasets/split/validation/"
 
-addPath = 'datasets/train/'
-addPathGt = 'datasets/train/gt/'
-addPathMask = 'datasets/train/mask/'
+#---> CONFIGURATION  <----#
+LOAD_DATA = False
+PLOT = False
 
-validate = 'true'
-test = 0
-model = 2
-
-# First, the whole DS is analized a organized in a data structure
-# to be used on the next steps
-# Then, DS is analized taking into account FR, FF and Area for each signal
-try:
-    (fillRatioStats, formFactorStats, areaStats) = compute_stats(image_dict, plot = False)   
-except NameError:
-    df = create_df(addPath, addPathMask, addPathGt)
-    # Dataframe and Dictionary creation
-    (image_dict, df) = getGridOfImage(df, addPath, addPathMask, addPathGt)
-
-# Test Dataset
-test_df = create_df_test('datasets/test/')
-# TRAIN AND VALIDATION
-# Second the DS is split into two (70%, 30%) taking into account Size area
-(train, validation) = split_by_type(df, addPath,addPathMask ) 
-
-# import into dictionary
-(validation_dict, train_dict) = divide_dictionary(image_dict, validation, train)
-            
-## After the split, the analysis is divided between Training and Validate
-if validate == "true":
-    # Apply filters
-    if model == 1: 
-        color_dict = computeColor(validation_dict, "HSV", "mix") 
-        dataset_output_masks = "m1-results/week1/validation/"    
-        for imageType in color_dict:
-            for image in color_dict[imageType]:
-                name = image[1]
-                cv2.imwrite(dataset_output_masks+name+".png", image[0])
-    else:
-        if test == 1:
-            colorSegmentation_test(test_df, 'datasets/test/')
-        else: 
-            colorSegmentation(validation_dict)
+#---> DATA PARSING AND SPLIT  <----#
+if(LOAD_DATA == True):
+# df is created by Parsing training image folders
+    df = create_df_train(trainPath, trainMaskPath, trainGtPath)
+    # df is updated computing provided groundtruth information
+    df = get_ground_truth(df, trainPath)
+    # df is created with test images
+    dfTest = create_df_test(testPath)
+    # stats are worked out over the df
+    dfStats = compute_stats(df)    
+    # ds is splited into two sets (70%, 30%) taking into account signal area size
+    (dfTrain, dfValidation) = split_by_type(df, trainPath, trainMaskPath) 
     
-   
-elif validate == "false":
-    # compute histograms for training data from each imageType
-    imageType=["A","B","C","D","E","F"]
-    for i in imageType:
-        hue, sat, val = compute_histogram_type(i, train_dict)
-        #Plot histogram
-#        plt.figure(figsize=(10,8))
-#        plt.subplot()           
-#        plt.subplots_adjust(hspace=.5)
-#        plt.title("Hue")
-#        plt.hist(hue, bins='auto')
-#        plt.subplot(312)                             
-#        plt.title("Saturation")
-#        plt.hist(sat, bins='auto')
-#        plt.subplot(313)
-#        plt.title("Luminosity Value")
-#        plt.hist(val, bins='auto')
-        
-else: 
-    print ("Wrong entry")
+if(PLOT == True):
+    plot_stats(df)
+
+#---> VALIDATION DATA SEGMENTATION  <----#
+color_segmentation(dfValidation, validationPath)
+validation(dfValidation, validationPath)
+
+#---> FULL TRAIN DATA SEGMENTATION  <----#
+color_segmentation(df, trainPath)
+validation(df, trainPath)
