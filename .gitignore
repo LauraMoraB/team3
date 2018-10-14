@@ -4,3 +4,4 @@
 *.png
 *.jpg
 *pycache__
+*.vscode
