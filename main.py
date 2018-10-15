@@ -3,6 +3,7 @@ from ImageSplit import split_by_type, compute_stats, plot_stats
 from createDataframe import create_df_train, create_df_test
 from ColorSegmentation import color_segmentation
 from validation import validation
+from SlidingWindow import window_main
 
 #---> KEY PATHS  <----#
 
@@ -14,9 +15,10 @@ resultsPath = 'm1-results/week1/validation/'
 pathToResults = "datasets/split/train/result/"
 pathToMasks = "datasets/split/train/mask/"
 validationPath = "datasets/split/validation/"
+trainSplitPath = "datasets/split/train/"
 
 #---> CONFIGURATION  <----#
-LOAD_DATA = False
+LOAD_DATA = True
 PLOT = False
 
 #---> DATA PARSING AND SPLIT  <----#
@@ -36,9 +38,16 @@ if(PLOT == True):
     plot_stats(df)
 
 #---> VALIDATION DATA SEGMENTATION  <----#
-color_segmentation(dfValidation, validationPath)
-validation(dfValidation, validationPath)
+#color_segmentation(dfValidation, validationPath)
+#validation(dfValidation, validationPath)
+#
 
-#---> FULL TRAIN DATA SEGMENTATION  <----#
-color_segmentation(df, trainPath)
-validation(df, trainPath)
+##---> FULL TRAIN DATA SEGMENTATION  <----#
+#color_segmentation(df, trainPath)
+#validation(df, trainPath)
+
+##### Window #####
+window_main(dfTrain, trainSplitPath)
+
+
+
