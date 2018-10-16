@@ -14,7 +14,7 @@ trainSplitPath = "datasets/split/train/"
 #--->  CONFIGURATION  <----#
 LOAD_DATA = True
 PLOT_STATS = False
-USE_TRAIN = True
+USE_TRAIN = False
 USE_VALIDATION = False
 
 #--->  COLOR THRESHOLDS  <----#
@@ -56,4 +56,4 @@ if(USE_VALIDATION == True):
 ##### Window #####
 #window_main(dfTrain, trainSplitPath)
 window_candidate = [['00.001147', 70, 183, 139, 251, 'E'],['00.001150', 70, 183, 139, 251, 'F']]
-validation_window(window_candidate, validationSplitGtPath )
+validation_window(window_candidate, validationSplitPath )

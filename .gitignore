@@ -6,3 +6,5 @@ ResultMask/
 *.png
 *.jpg
 *pycache__
+*.iml
+*.xml

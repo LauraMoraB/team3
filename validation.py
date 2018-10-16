@@ -195,7 +195,7 @@ def validation_window(bboxes, pathToGT):
         # In the first place of the list, the image name has to be stored so we can get the name
         gtFile = "gt."+windows[0]+".txt"
 
-        annotations = load_annotations(pathToGT+gtFile)
+        annotations = load_annotations(pathToGT+'gt/'+gtFile)
 
         # remove image name to evaluate position
         windows.pop(0)

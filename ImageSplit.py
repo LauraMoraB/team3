@@ -2,8 +2,8 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 import cv2
-from createDataframe import load_annotations
 from ImageFeature import save_gt
+import os
 
 def compute_stats(df):
     #Stadistical study for the different signal types in order to properly
@@ -136,7 +136,10 @@ def split_by_type(df, pathimages):
             if(k == 9):
                 k = 0
             else:
-                k += 1                
+                k += 1           
+    
+    create_splitFolders('train')
+    create_splitFolders('validation')
     # Saves test and validation images in new subfolders
     for image in validation["Image"].tolist():  
         imageTrain = cv2.imread(pathimages+image,1)
@@ -163,13 +166,18 @@ def split_by_type(df, pathimages):
         split = image.split(".")
         gtfile = "gt."+split[0]+"."+split[1]+".txt"  
         save_gt("./datasets/split/validation/gt/","./datasets/train/gt/",  gtfile)
-        
-        
+             
                
     return train, validation
 
-    
-        
+def create_splitFolders(split_name):   
+    path = "datasets/"
+    pathStructure = [['split/'],[split_name+'/'],['mask/','gt/','resultMask/']]
+    for paths in pathStructure:
+        for subPath in paths:
+            if not os.path.exists(path+str(subPath)):
+                os.makedirs(path+subPath)
+        path = path+subPath  
         
         
         
