@@ -8,17 +8,23 @@ def compute_stats(df):
     #Stadistical study for the different signal types in order to properly
     #split the training set into two sets,  ~70% and ~30% with the best 
     #main features represented in both of them
-    cols = ['Type', 'FillRatioMean', 'FillRatioStd', 'FormFactorMean', 'FormFactorStd', 'AreaMean', 'AreaStd', 'XMax', 'XMin', 'XMean', 'XStd', 'YMax', 'YMin', 'YMean', 'YStd']
+    cols = ['Type', 'FillRatioMean', 'FillRatioStd', 'FillRatioMax', 'FillRatioMin', 'FormFactorMean', 'FormFactorStd', 'FormFactorMax', 'FormFactorMin', 'AreaMean', 'AreaStd', 'AreaMax', 'AreaMin', 'XMax', 'XMin', 'XMean', 'XStd', 'YMax', 'YMin', 'YMean', 'YStd']
     dfStats = pd.DataFrame(columns=cols)
 
     types = df.Type.unique().tolist()
     types.sort()
     fillRatioMean = []
-    fillRatioStd = []
+    fillRatioStd = []    
+    fillRatioMax = []
+    fillRatioMin = []
     formFactorMean = []
-    formFactorStd = []
+    formFactorStd = []    
+    formFactorMax = []
+    formFactorMin = []
     areaMean = []
     areaStd = []    
+    areaMax = []
+    areaMin = []      
     xMean = []
     xStd = []      
     xMax = []
@@ -32,10 +38,16 @@ def compute_stats(df):
         typeDf = df[df.Type == typeSignal]
         fillRatioMean.append(np.mean(typeDf['FillRatio']))
         fillRatioStd.append(np.std(typeDf['FillRatio']))
+        fillRatioMax.append(np.max(typeDf['FillRatio']))
+        fillRatioMin.append(np.min(typeDf['FillRatio']))
         formFactorMean.append(np.mean(typeDf['FormFactor']))
         formFactorStd.append(np.std(typeDf['FormFactor']))
+        formFactorMax.append(np.max(typeDf['FormFactor']))
+        formFactorMin.append(np.min(typeDf['FormFactor']))        
         areaMean.append(np.mean(typeDf['Area']))
         areaStd.append(np.std(typeDf['Area']))
+        areaMax.append(np.max(typeDf['Area']))
+        areaMin.append(np.min(typeDf['Area']))
         xMean.append(np.mean(typeDf['X']))
         xStd.append(np.std(typeDf['X']))        
         xMax.append(np.max(typeDf['X']))
@@ -46,22 +58,32 @@ def compute_stats(df):
         yMin.append(np.min(typeDf['Y'])) 
         
     dfStats['Type'] = types
+    
     dfStats['FillRatioMean'] = fillRatioMean
     dfStats['FillRatioStd'] = fillRatioStd
+    dfStats['FillRatioMax'] = fillRatioMax
+    dfStats['FillRatioMin'] = fillRatioMin
+    
     dfStats['FormFactorMean'] = formFactorMean
     dfStats['FormFactorStd'] = formFactorStd
+    dfStats['FormFactorMax'] = formFactorMax
+    dfStats['FormFactorMin'] = formFactorMin
+    
     dfStats['AreaMean'] = areaMean
     dfStats['AreaStd'] = areaStd
+    dfStats['AreaMax'] = areaMax
+    dfStats['AreaMin'] = areaMin
     
-    dfStats['XMax'] = xMax
-    dfStats['XMin'] = xMin
     dfStats['XMean'] = xMean
     dfStats['XStd'] = xStd
-    
+    dfStats['XMax'] = xMax
+    dfStats['XMin'] = xMin
+
+    dfStats['YMean'] = yMean
+    dfStats['YStd'] = yStd    
     dfStats['YMax'] = yMax
     dfStats['YMin'] = yMin
-    dfStats['YMean'] = yMean
-    dfStats['YStd'] = yStd
+
         
     return dfStats
 
@@ -93,7 +115,7 @@ def sort_by_mean(reference, data):
     return sortedReference
         
 
-def split_by_type(df, pathimages, pathmask):
+def split_by_type(df, pathimages):
     # Prepares train and valid dataframes to follow df structure
     col = list(df)
     train = pd.DataFrame(columns=col)
@@ -120,7 +142,7 @@ def split_by_type(df, pathimages, pathmask):
         cv2.imwrite("./datasets/split/validation/"+image, imageTrain)
         
     for mask in validation["Mask"].tolist():
-        maskTrain = cv2.imread(pathmask+mask,1)
+        maskTrain = cv2.imread(pathimages+"/mask/"+mask,1)
         cv2.imwrite("./datasets/split/validation/mask/"+mask, maskTrain)
         
     for image in train["Image"].tolist():  
@@ -128,7 +150,7 @@ def split_by_type(df, pathimages, pathmask):
         cv2.imwrite("./datasets/split/train/"+image, imageTrain)
         
     for mask in train["Mask"].tolist():
-        maskTrain = cv2.imread(pathmask+mask,1)
+        maskTrain = cv2.imread(pathimages+"/mask/"+mask,1)
         cv2.imwrite("./datasets/split/train/mask/"+mask, maskTrain)
                
     return train, validation

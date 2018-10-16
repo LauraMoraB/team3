@@ -64,7 +64,7 @@ def performance_evaluation_pixel(pixelTP, pixelFP, pixelFN, pixelTN):
     return [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity, pixel_F1]
 
       
-def validation(df, path):    
+def pixel_validation(df, path):    
 
     TruePos = 0
     FalsePos = 0

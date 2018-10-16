@@ -19,7 +19,7 @@ def load_annotations(annot_file):
         
     return annotations
 
-def create_df_train(path_ds_images, path_ds_masks, path_ds_gt):
+def create_df_train(path_ds_images):
     listImages =[]
     listMask=[]
     listGT=[]
@@ -29,11 +29,11 @@ def create_df_train(path_ds_images, path_ds_masks, path_ds_gt):
         if filename.endswith(".jpg"):
             listImages.append(filename)
 
-    for mask in os.listdir(path_ds_masks):
+    for mask in os.listdir(path_ds_images+"/mask/"):
         listMask.append(mask)
 
-    for annot in os.listdir(path_ds_gt):
-        listGT.append(load_annotations(path_ds_gt+"/"+annot))
+    for annot in os.listdir(path_ds_images+"/gt/"):
+        listGT.append(load_annotations(path_ds_images+"/gt/"+annot))
         
         
     col = ['UpLeft(Y)','UpLeft(X)','DownRight(Y)','DownRight(X)','Type', "Image", "Mask"]

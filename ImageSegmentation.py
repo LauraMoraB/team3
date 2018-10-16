@@ -54,9 +54,10 @@ def color_segmentation(df, path):
         # Prepares mask files
         sizeImg  = np.shape(fullImage)     
         fullMask = np.zeros((sizeImg[0], sizeImg[1]))
-        # Color space change
 
+        # Color space change, it operates on HSV
         fullImage = cv2.cvtColor(fullImage, cv2.COLOR_BGR2HSV)
+        # For plotting purposes
         rgbimg = cv2.cvtColor(fullImage, cv2.COLOR_HSV2RGB)
         
         bitwiseRes = apply_color_mask(fullImage)
@@ -76,8 +77,9 @@ def color_segmentation(df, path):
 #        plt.show()
         plt.imshow(rgbimg)
         plt.show()
-#        cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
-#        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', rgbimg)
+        cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
+        resultImg = cv2.cvtColor(rgbimg, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', resultImg)
     return listOfBB
 
 
