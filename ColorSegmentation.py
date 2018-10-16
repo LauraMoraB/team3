@@ -88,9 +88,8 @@ def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listO
         aspect = h/w
     if (280 > w > 30) and (280  >h > 30) and aspect>0.75:
         
-        imageSegmented = image[y:y+h,x:x+w]
+#        bitwiseResSegmented = get_region_of_interest(x, y ,w, h, currentMask)
         bitwiseResSegmented = currentMask[y:y+h,x:x+w]
-#        bitwiseRes = apply_mask_color_Inner(imageSegmented)
     
         greyRes  = cv2.cvtColor(bitwiseResSegmented, cv2.COLOR_BGR2GRAY)
         fillRatioOnes = np.count_nonzero(greyRes)
@@ -104,12 +103,30 @@ def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listO
             fullMask[y:y+h,x:x+w] = thresh
             get_templete_matching(x, y ,w, h, thresh, image)
 
-#            cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),10)
-#
-#            image[y:y+h,x:x+w, 0]  =  thresh1
-#            image[y:y+h,x:x+w, 1]  =  thresh1
-#            image[y:y+h,x:x+w, 2]  =  thresh1
+            cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),10)
+
                 
+def get_region_of_interest(x, y ,w, h, currentMask):
+    
+    totalY, totalX = np.shape(currentMask[:,:,0])
+    aditionalWidth = int(0.1 * w)
+    aditionalHeight = int(0.1 * h)
+    
+    y1 = y
+    x1 = x
+    y2 = y + h
+    x2 = x + w
+    
+    if (x1 - aditionalWidth) > 0:
+        x1 = x1 - aditionalWidth
+    if (x2 + aditionalWidth) < totalX:
+        x2 = x2 + aditionalWidth
+    if (y1 - aditionalHeight) > 0:
+        y1 = y1 + aditionalHeight
+    if (y2 + aditionalHeight) < totalY:
+        y2 = y2 + aditionalHeight
+        
+    return currentMask[y1:y2,x1:x2]
             
 def get_templete_matching(x, y ,w, h, maskSegmented, image):
     for i in range(1,5):
@@ -119,16 +136,19 @@ def get_templete_matching(x, y ,w, h, maskSegmented, image):
         res = cv2.matchTemplate(maskSegmented, maskTemplate, cv2.TM_CCOEFF_NORMED) 
           
         # Specify a threshold 
-        threshold = 0.9
+        threshold = 0.8
           
         # Store the coordinates of matched area in a numpy array 
         loc = np.where( res >= threshold)  
           
         # Draw a rectangle around the matched region. 
         for pt in zip(*loc[::-1]): 
-            cv2.rectangle(image, (pt[0]+x, pt[1]+y), (pt[0] + x + w, pt[1] + y + h), (0,255,0), 5) 
-          
-#        # Show the final image with the matched area. 
-#        cv2.imshow('Detected'+str(i),maskSegmented)
-#        cv2.show()
-    
+#            cv2.rectangle(image, (pt[0]+x, pt[1]+y), (pt[0] + x + w, pt[1] + y + h), (0,255,0), 5)
+            if(i==1):
+                cv2.putText(image, 'CIRCULO', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (255,0,0), 3)
+            elif(i==2):
+                cv2.putText(image, 'RECTANGLE', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (0,255,0), 3)
+            elif(i==3):
+                cv2.putText(image, 'TRIANGLE', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (0,0,255), 3)
+            else:
+                cv2.putText(image, 'WARNING', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (255,255,255), 3)
