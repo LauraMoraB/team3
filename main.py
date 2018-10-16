@@ -2,7 +2,7 @@ from ImageFeature import get_ground_truth
 from ImageSplit import split_by_type, compute_stats, plot_stats
 from createDataframe import create_df_train, create_df_test
 from ImageSegmentation import color_segmentation
-from Validation import pixel_validation
+from validation import pixel_validation
 import numpy as np
 
 #--->  KEY PATHS  <----#
