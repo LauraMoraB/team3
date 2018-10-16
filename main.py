@@ -13,12 +13,14 @@ trainMaskPath = 'datasets/train/mask/'
 resultsPath = 'm1-results/week1/validation/'
 pathToResults = "datasets/split/train/result/"
 pathToMasks = "datasets/split/train/mask/"
-validationPath = "datasets/split/validation/"
+validationSplitPath = "datasets/split/validation/"
+trainSplitPath = "datasets/split/train/"
 
 #---> CONFIGURATION  <----#
 LOAD_DATA = True
 PLOT = False
 FULL_TRAIN = False
+FULL_VALIDATION = True
 
 #---> DATA PARSING AND SPLIT  <----#
 if(LOAD_DATA == True):
@@ -35,12 +37,13 @@ if(LOAD_DATA == True):
     
 if(PLOT == True):
     plot_stats(df)
-
-#---> VALIDATION DATA SEGMENTATION  <----#
-color_segmentation(dfValidation, validationPath)
-validation(dfValidation, validationPath)
+    
+if(FULL_VALIDATION == True):
+    #---> VALIDATION DATA SEGMENTATION  <----#
+    color_segmentation(dfValidation, validationSplitPath)
+    validation(dfValidation, validationSplitPath)
 
 if(FULL_TRAIN == True):
-    #---> FULL TRAIN DATA SEGMENTATION  <----#
-    color_segmentation(df, trainPath)
-    validation(df, trainPath)
+    #---> TRAIN DATA SEGMENTATION  <----#
+    color_segmentation(dfTrain, trainSplitPath)
+    validation(dfTrain, trainSplitPath)
