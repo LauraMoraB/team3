@@ -79,7 +79,7 @@ def color_segmentation(df, path):
         # Color space change
 
         fullImage = cv2.cvtColor(fullImage, cv2.COLOR_BGR2HSV)
-        copyOfFullImage = fullImage
+        rgbimg = cv2.cvtColor(fullImage, cv2.COLOR_HSV2RGB)
         
         bitwiseRes = apply_color_mask(fullImage)
         
@@ -92,15 +92,15 @@ def color_segmentation(df, path):
             for cnt in contours:
                 x,y,w,h = cv2.boundingRect(cnt)
                 cv2.drawContours(bitwiseRes, [cnt], 0,255,-1)
-                get_inside_grid_segmentation(x, y, w, h, copyOfFullImage, fullMask, bitwiseRes)
+                get_inside_grid_segmentation(x, y, w, h, rgbimg, fullMask, bitwiseRes)
                         
-#        rgbimg = cv2.cvtColor(copyOfFullImage, cv2.COLOR_HSV2RGB)
-        plt.imshow(fullMask)
-        plt.show()
 #        plt.imshow(fullMask)
 #        plt.show()
+#        plt.imshow(rgbimg)
+#        plt.show()
         cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
-        
+        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', rgbimg)
+
         
 
 
@@ -134,7 +134,7 @@ def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask):
             fullMask[y:y+h,x:x+w] = thresh
 #            ret1, thresh1 = cv2.threshold(greyRes, 0, 255, cv2.THRESH_BINARY)
             
-            cv2.rectangle(image,(x,y),(x+w,y+h),(0,0,0),4)
+            cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),10)
 #
 #            image[y:y+h,x:x+w, 0]  =  thresh1
 #            image[y:y+h,x:x+w, 1]  =  thresh1
