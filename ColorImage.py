@@ -2,7 +2,7 @@ import cv2
 from ImageFeature import get_cropped_masked_image
 from matplotlib import pyplot as plt
 
-def RGB2HSV(image):
+def RGB2HSV(image): #########################################################################Explicacion 
     # converts RGB image array into H, S, V, unidimensional ordered list
     hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
     hue, sat, val = hsv[:,:,0], hsv[:,:,1], hsv[:,:,2]
@@ -32,7 +32,7 @@ def get_px_values(dfSingle, path):
         pxCount += 1
     return (validHue, validSat)
 
-def get_color_histogram(df, path):
+def get_color_histogram(df, path): #########################################################################Explicacion 
     # creates color histograms in HSV for each signalType in the df
     colors = ['k', 'r', 'g', 'b', 'm', 'c', 'y']
     for typeSignal in sorted(df.Type.unique()):

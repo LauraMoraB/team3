@@ -3,6 +3,7 @@ from ImageSplit import split_by_type, compute_stats, plot_stats
 from createDataframe import create_df_train, create_df_test
 from ColorSegmentation import color_segmentation
 from validation import validation
+from Preprocesing import preproces_image
 
 #---> KEY PATHS  <----#
 
@@ -11,14 +12,15 @@ trainPath = 'datasets/train/'
 trainGtPath = 'datasets/train/gt/'
 trainMaskPath = 'datasets/train/mask/'
 resultsPath = 'm1-results/week1/validation/'
-pathToResults = "datasets/split/train/result/"
+pathToResults = "datasets/split/train/resultMask/"
 pathToMasks = "datasets/split/train/mask/"
 validationPath = "datasets/split/validation/"
+
 
 #---> CONFIGURATION  <----#
 LOAD_DATA = False
 PLOT = False
-
+VALIDATION =True
 #---> DATA PARSING AND SPLIT  <----#
 if(LOAD_DATA == True):
 # df is created by Parsing training image folders
@@ -34,11 +36,11 @@ if(LOAD_DATA == True):
     
 if(PLOT == True):
     plot_stats(df)
-
-#---> VALIDATION DATA SEGMENTATION  <----#
-color_segmentation(dfValidation, validationPath)
-validation(dfValidation, validationPath)
-
-#---> FULL TRAIN DATA SEGMENTATION  <----#
-color_segmentation(df, trainPath)
-validation(df, trainPath)
+if(VALIDATION == True):
+    #---> VALIDATION DATA SEGMENTATION  <----#
+    preproces_image(dfValidation, validationPath)
+    validation(dfValidation, validationPath)
+elif(VALIDATION == False):    
+    #---> FULL TRAIN DATA SEGMENTATION  <----#
+    color_segmentation(df, trainPath)
+    validation(df, trainPath)
