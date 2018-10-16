@@ -42,28 +42,6 @@ def apply_color_mask(fullImage):
     return cv2.bitwise_and(fullImage, fullImage, mask = mask)
 
 
-def apply_mask_color_Inner(imageSegmented):
-    hsv_rang_Seg= (
-         np.array([0,150,50]), np.array([20, 255, 255]) #RED
-         ,np.array([160,150,50]), np.array([180, 255, 255]) #DARK RED
-         ,np.array([100,150,50]), np.array([140, 255, 255]) #BLUE
-         ,np.array([0,0,0]), np.array([180, 255, 30]) #BLACK
-         ,np.array([0,0,200]), np.array([180, 255, 255]) #WHITE
-    )
-    ize_hsv_rang_seg = np.size(hsv_rang_Seg ,0)
-    for i in range(0, ize_hsv_rang_seg-1,2):
-        lower = hsv_rang_Seg[i]
-        upper = hsv_rang_Seg[i+1] 
-        mask = cv2.inRange(imageSegmented, lower, upper)
-        if i==0:
-            maskConcatenated = mask
-        else:
-            maskConcatenated = cv2.add(maskConcatenated, mask)
-    
-    return cv2.bitwise_and(imageSegmented, imageSegmented, mask = maskConcatenated)    
-    
-
-
 
 def color_segmentation(df, path):
 
@@ -96,20 +74,12 @@ def color_segmentation(df, path):
                         
 #        plt.imshow(fullMask)
 #        plt.show()
-#        plt.imshow(rgbimg)
-#        plt.show()
-        cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
-        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', rgbimg)
+        plt.imshow(rgbimg)
+        plt.show()
+#        cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
+#        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', rgbimg)
     return listOfBB
 
-        
-
-
-            
-def get_templete_matching(imageSegmented):
-    plt.imshow(imageSegmented)
-    plt.show
-    
 
 def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listOfBB, imageName):
     if w<h:
@@ -129,16 +99,36 @@ def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listO
         fillRatio = fillRatioOnes/fillRatioZeros
         if fillRatio > 0.45:
             listOfBB.append((imageName,x,y,w,h))
-#            get_templete_matching(copyImageSeg)
 
             ret, thresh = cv2.threshold(greyRes, 0, 1, cv2.THRESH_BINARY)
             fullMask[y:y+h,x:x+w] = thresh
-#            ret1, thresh1 = cv2.threshold(greyRes, 0, 255, cv2.THRESH_BINARY)
-            
-            cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),10)
+            get_templete_matching(x, y ,w, h, thresh, image)
+
+#            cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),10)
 #
 #            image[y:y+h,x:x+w, 0]  =  thresh1
 #            image[y:y+h,x:x+w, 1]  =  thresh1
 #            image[y:y+h,x:x+w, 2]  =  thresh1
-#            get_templete_matching(copyImageSeg)
                 
+            
+def get_templete_matching(x, y ,w, h, maskSegmented, image):
+    for i in range(1,5):
+        maskTemplate = cv2.imread("template/mask.temp"+str(i)+".png",0)
+        maskTemplate = cv2.resize(maskTemplate,(w-1,h-1))
+        # Perform match operations. 
+        res = cv2.matchTemplate(maskSegmented, maskTemplate, cv2.TM_CCOEFF_NORMED) 
+          
+        # Specify a threshold 
+        threshold = 0.9
+          
+        # Store the coordinates of matched area in a numpy array 
+        loc = np.where( res >= threshold)  
+          
+        # Draw a rectangle around the matched region. 
+        for pt in zip(*loc[::-1]): 
+            cv2.rectangle(image, (pt[0]+x, pt[1]+y), (pt[0] + x + w, pt[1] + y + h), (0,255,0), 5) 
+          
+#        # Show the final image with the matched area. 
+#        cv2.imshow('Detected'+str(i),maskSegmented)
+#        cv2.show()
+    

@@ -20,7 +20,7 @@ trainSplitPath = "datasets/split/train/"
 LOAD_DATA = True
 PLOT = False
 FULL_TRAIN = False
-FULL_VALIDATION = True
+FULL_VALIDATION = False
 
 #---> DATA PARSING AND SPLIT  <----#
 if(LOAD_DATA == True):
