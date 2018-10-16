@@ -40,7 +40,7 @@ if(PLOT == True):
     
 if(FULL_VALIDATION == True):
     #---> VALIDATION DATA SEGMENTATION  <----#
-    color_segmentation(dfValidation, validationSplitPath)
+    listOfBB = color_segmentation(dfValidation, validationSplitPath)
     validation(dfValidation, validationSplitPath)
 
 if(FULL_TRAIN == True):

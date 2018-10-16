@@ -67,7 +67,7 @@ def apply_mask_color_Inner(imageSegmented):
 
 def color_segmentation(df, path):
 
-
+    listOfBB = []
     for i in range(len(df)):       
         # Gets images one by one
         dfSingle = df.iloc[i]
@@ -92,7 +92,7 @@ def color_segmentation(df, path):
             for cnt in contours:
                 x,y,w,h = cv2.boundingRect(cnt)
                 cv2.drawContours(bitwiseRes, [cnt], 0,255,-1)
-                get_inside_grid_segmentation(x, y, w, h, rgbimg, fullMask, bitwiseRes)
+                get_inside_grid_segmentation(x, y, w, h, rgbimg, fullMask, bitwiseRes, listOfBB, imageName[:-3])
                         
 #        plt.imshow(fullMask)
 #        plt.show()
@@ -100,6 +100,7 @@ def color_segmentation(df, path):
 #        plt.show()
         cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
         cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', rgbimg)
+    return listOfBB
 
         
 
@@ -110,7 +111,7 @@ def get_templete_matching(imageSegmented):
     plt.show
     
 
-def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask):
+def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listOfBB, imageName):
     if w<h:
         aspect = w/h
     else:
@@ -127,7 +128,7 @@ def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask):
         fillRatioZeros = sizeMatrix[0]*sizeMatrix[1]
         fillRatio = fillRatioOnes/fillRatioZeros
         if fillRatio > 0.45:
-            
+            listOfBB.append((imageName,x,y,w,h))
 #            get_templete_matching(copyImageSeg)
 
             ret, thresh = cv2.threshold(greyRes, 0, 1, cv2.THRESH_BINARY)
