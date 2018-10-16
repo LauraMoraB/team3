@@ -11,8 +11,8 @@ def get_cropped_image(dfSingle, path):
 def get_full_mask(dfSingle, path):
     return cv2.imread(path+'mask/' + dfSingle['Mask'], 0)
 
-def get_full_mask_result(dfSingle, path):
-    return cv2.imread(path+'resultMask/' + dfSingle['Mask'], 0)
+def get_full_mask_result(dfSingle, path, maskType):
+    return cv2.imread(path+'resultMask/'+maskType+'/' + dfSingle['Mask'], 0)
 
 def get_cropped_mask(dfSingle, path):
     image = get_full_mask(dfSingle, path)

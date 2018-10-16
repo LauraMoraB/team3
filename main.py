@@ -3,20 +3,28 @@ from ImageSplit import split_by_type, compute_stats, plot_stats
 from createDataframe import create_df_train, create_df_test
 from ImageSegmentation import color_segmentation
 from Validation import pixel_validation
+import numpy as np
 
-#---> KEY PATHS  <----#
+#--->  KEY PATHS  <----#
 testPath = 'datasets/test/'
 fullTrainPath = 'datasets/train/'
 validationSplitPath = "datasets/split/validation/"
 trainSplitPath = "datasets/split/train/"
 
-#---> CONFIGURATION  <----#
-LOAD_DATA = False
+#--->  CONFIGURATION  <----#
+LOAD_DATA = True
 PLOT_STATS = False
 USE_TRAIN = True
 USE_VALIDATION = False
 
-#---> DATA PARSING AND SPLIT  <----#
+#--->  COLOR THRESHOLDS  <----#
+hsv_rang = (
+     np.array([0,150,50]), np.array([20, 255, 255]) #RED
+     ,np.array([160,150,50]), np.array([180, 255, 255]) #DARK RED
+     ,np.array([100,150,50]), np.array([140, 255, 255]) #BLUE
+)
+
+#--->  DATA PARSING AND SPLIT  <----#
 if(LOAD_DATA == True):
 # df is created by Parsing training image folders
     df = create_df_train(fullTrainPath)
@@ -33,11 +41,15 @@ if(PLOT_STATS == True):
     plot_stats(df)
     
 if(USE_TRAIN == True):
-    #---> TRAIN DATA SEGMENTATION  <----#
-    listOfBB = color_segmentation(dfTrain, trainSplitPath)
-    pixel_validation(dfTrain, trainSplitPath)
+    #--->  TRAIN DATA SEGMENTATION  <----#
+    listOfBB = color_segmentation(dfTrain, trainSplitPath, hsv_rang)
+    pixel_validation(dfTrain, trainSplitPath, 'colorMask')
+    pixel_validation(dfTrain, trainSplitPath, 'morphologyMask')
+    pixel_validation(dfTrain, trainSplitPath, 'finalMask')
     
 if(USE_VALIDATION == True):
-    #---> VALIDATION DATA SEGMENTATION  <----#
-    listOfBB = color_segmentation(dfValidation, validationSplitPath)
-    pixel_validation(dfValidation, validationSplitPath)
+    #--->  VALIDATION DATA SEGMENTATION  <----#
+    listOfBB = color_segmentation(dfValidation, validationSplitPath, hsv_rang)
+    pixel_validation(dfTrain, trainSplitPath, 'colorMask')
+    pixel_validation(dfTrain, trainSplitPath, 'morphologyMask')
+    pixel_validation(dfTrain, trainSplitPath, 'finalMask')

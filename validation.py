@@ -64,7 +64,7 @@ def performance_evaluation_pixel(pixelTP, pixelFP, pixelFN, pixelTN):
     return [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity, pixel_F1]
 
       
-def pixel_validation(df, path):    
+def pixel_validation(df, pathGT, maskType):    
 
     TruePos = 0
     FalsePos = 0
@@ -73,8 +73,8 @@ def pixel_validation(df, path):
     for i in range(len(df)):       
         dfSingle = df.iloc[i]
 
-        maskResult = get_full_mask_result(dfSingle, path)
-        maskValidator = get_full_mask(dfSingle, path)
+        maskResult = get_full_mask_result(dfSingle, pathGT, maskType)
+        maskValidator = get_full_mask(dfSingle, pathGT)
         
         [pixelTP, pixelFP, pixelFN, pixelTN] = performance_accumulation_pixel(maskResult, maskValidator)
         TruePos += pixelTP
@@ -83,7 +83,7 @@ def pixel_validation(df, path):
         TrueNeg += pixelTN
         
     [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity, pixel_F1] = performance_evaluation_pixel(TruePos, FalsePos, FalseNeg, TrueNeg)
-    
+    print('RESULTS -> using ',maskType)
     print('Precission: ', pixel_precision)
     print('Accuracy: ', pixel_accuracy)
     print('Specificity: ', pixel_specificity)

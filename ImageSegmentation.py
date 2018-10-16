@@ -1,13 +1,7 @@
 from ImageFeature import get_full_image
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
-
-hsv_rang = (
-     np.array([0,150,50]), np.array([20, 255, 255]) #RED
-     ,np.array([160,150,50]), np.array([180, 255, 255]) #DARK RED
-     ,np.array([100,150,50]), np.array([140, 255, 255]) #BLUE
-)
+from matplotlib import pyplot as plt
 
 def apply_morphology_operations(mask):
 
@@ -24,7 +18,7 @@ def apply_morphology_operations(mask):
     return mask
     
 
-def apply_color_mask(fullImage):
+def apply_color_mask(fullImage, hsv_rang):
     
     size_hsv_rang = np.size(hsv_rang,0)
     for i in range(0, size_hsv_rang-1, 2):
@@ -37,31 +31,32 @@ def apply_color_mask(fullImage):
         else:
             maskConcatenated = cv2.add(maskConcatenated, mask)
             
-    mask = apply_morphology_operations(maskConcatenated)
-
-    return cv2.bitwise_and(fullImage, fullImage, mask = mask)
-
+    return maskConcatenated
+    
 
 
-def color_segmentation(df, path):
+
+def color_segmentation(df, path, hsv_rang):
 
     listOfBB = []
     for i in range(len(df)):       
         # Gets images one by one
         dfSingle = df.iloc[i]
-        fullImage = get_full_image(dfSingle, path)    
+        imgBGR = get_full_image(dfSingle, path)    
         imageName = dfSingle['Image']   
-        # Prepares mask files
-        sizeImg  = np.shape(fullImage)     
-        fullMask = np.zeros((sizeImg[0], sizeImg[1]))
 
-        # Color space change, it operates on HSV
-        fullImage = cv2.cvtColor(fullImage, cv2.COLOR_BGR2HSV)
-        # For plotting purposes
-        rgbimg = cv2.cvtColor(fullImage, cv2.COLOR_HSV2RGB)
-        
-        bitwiseRes = apply_color_mask(fullImage)
-        
+        # Prepares mask files
+        sizeImg  = np.shape(imgBGR)     
+        fullMask = np.zeros((sizeImg[0], sizeImg[1]))
+        # Color space change, it operates on HSV, RGB 
+        imgHSV = cv2.cvtColor(imgBGR, cv2.COLOR_BGR2HSV)
+        imgRGB = cv2.cvtColor(imgHSV, cv2.COLOR_HSV2RGB)
+
+        # Get mask, color + morphology         
+        color_mask = apply_color_mask(imgHSV, hsv_rang)
+        morphology_mask = apply_morphology_operations(color_mask)         
+        bitwiseRes = cv2.bitwise_and(imgHSV, imgHSV, mask = morphology_mask)        
+ 
         blur = cv2.blur(bitwiseRes, (5, 5), 0)            
         imgray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
         
@@ -71,15 +66,14 @@ def color_segmentation(df, path):
             for cnt in contours:
                 x,y,w,h = cv2.boundingRect(cnt)
                 cv2.drawContours(bitwiseRes, [cnt], 0,255,-1)
-                get_inside_grid_segmentation(x, y, w, h, rgbimg, fullMask, bitwiseRes, listOfBB, imageName[:-3])
+                get_inside_grid_segmentation(x, y, w, h, imgRGB, fullMask, bitwiseRes, listOfBB, imageName[:-3])
                         
-#        plt.imshow(fullMask)
-#        plt.show()
-        plt.imshow(rgbimg)
-        plt.show()
-        cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
-        resultImg = cv2.cvtColor(rgbimg, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', resultImg)
+        cv2.imwrite(path+'resultMask/colorMask/mask.'+imageName[:-3]+'png', color_mask)
+        cv2.imwrite(path+'resultMask/morphologyMask/mask.'+imageName[:-3]+'png', morphology_mask)
+        cv2.imwrite(path+'resultMask/finalMask/mask.'+imageName[:-3]+'png', fullMask)
+        imgBGR = cv2.cvtColor(imgRGB, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', imgBGR)
+    
     return listOfBB
 
 
