@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from createDataframe import load_annotations
 
 def get_full_image(dfSingle, path):
     return cv2.imread(path + dfSingle['Image'],1)
@@ -28,6 +29,17 @@ def get_cropped_masked_image(dfSingle, path):
     mask = get_cropped_mask(dfSingle, path)
     return cv2.bitwise_and(image,image,mask = mask)
 
+def save_gt(pathToSave, pathToget, gtfile):
+    annotations = load_annotations(pathToget+gtfile)
+    
+    with open(pathToSave+gtfile, "w") as f:
+        for i,element in enumerate(annotations[0]):   
+            if i != 4:
+                f.write(format(element, '.8f'))
+                f.write(" ")
+            else:
+                f.write(element)
+    
 def get_mask_aspect(dfSingle, path): 
     crop = get_cropped_mask(dfSingle, path)  
     (imgX, imgY) = np.shape(crop)
@@ -57,4 +69,3 @@ def get_ground_truth(df, path):
     df["Area"]=areaL
         
     return df
-

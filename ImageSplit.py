@@ -2,7 +2,8 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
 import cv2
-
+from createDataframe import load_annotations
+from ImageFeature import save_gt
 
 def compute_stats(df):
     #Stadistical study for the different signal types in order to properly
@@ -103,6 +104,18 @@ def split_by_type(df, pathimages, pathmask):
     for mask in train["Mask"].tolist():
         maskTrain = cv2.imread(pathmask+mask,1)
         cv2.imwrite("./datasets/split/train/mask/"+mask, maskTrain)
+    
+    for image in train["Image"].tolist():
+        split = image.split(".")
+        gtfile = "gt."+split[0]+"."+split[1]+".txt"
+        save_gt("./datasets/split/train/gt/","./datasets/train/gt/",  gtfile)
+            
+    for image in validation["Image"].tolist():
+        split = image.split(".")
+        gtfile = "gt."+split[0]+"."+split[1]+".txt"  
+        save_gt("./datasets/split/validation/gt/","./datasets/train/gt/",  gtfile)
+        
+        
                
     return train, validation
 
