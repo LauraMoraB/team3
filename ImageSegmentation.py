@@ -2,6 +2,7 @@ from ImageFeature import get_full_image
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
+import os
 
 def apply_morphology_operations(mask):
 
@@ -67,7 +68,9 @@ def color_segmentation(df, path, hsv_rang):
                 x,y,w,h = cv2.boundingRect(cnt)
                 cv2.drawContours(bitwiseRes, [cnt], 0,255,-1)
                 get_inside_grid_segmentation(x, y, w, h, imgRGB, fullMask, bitwiseRes, listOfBB, imageName[:-3])
-                        
+        
+        create_maskFolders('train')
+        create_maskFolders('validation') 
         cv2.imwrite(path+'resultMask/colorMask/mask.'+imageName[:-3]+'png', color_mask)
         cv2.imwrite(path+'resultMask/morphologyMask/mask.'+imageName[:-3]+'png', morphology_mask)
         cv2.imwrite(path+'resultMask/finalMask/mask.'+imageName[:-3]+'png', fullMask)
@@ -148,3 +151,15 @@ def get_templete_matching(x, y ,w, h, maskSegmented, image):
                 cv2.putText(image, 'TRIANGLE', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (0,0,255), 3)
             else:
                 cv2.putText(image, 'WARNING', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (255,255,255), 3)
+
+
+def create_maskFolders(split_name):   
+    path = "datasets/"
+    pathStructure = [['split/'],[split_name+'/'],['resultMask/'],['colorMask/','morphologyMask/','finalMask/']]
+    for paths in pathStructure:
+        for subPath in paths:
+            if not os.path.exists(path+str(subPath)):
+                os.makedirs(path+subPath)
+        path = path+subPath  
+        
+        

@@ -12,9 +12,11 @@ validationSplitPath = "datasets/split/validation/"
 trainSplitPath = "datasets/split/train/"
 
 #--->  CONFIGURATION  <----#
-LOAD_DATA = True
+
+
+LOAD_DATA = False
 PLOT_STATS = False
-USE_TRAIN = False
+USE_TRAIN = True
 USE_VALIDATION = False
 
 #--->  COLOR THRESHOLDS  <----#
