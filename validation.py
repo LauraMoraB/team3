@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Zaius
-"""
-import cv2
 import numpy as np
 from ImageFeature import get_full_mask, get_full_mask_result
 from createDataframe import load_annotations

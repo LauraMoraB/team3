@@ -14,4 +14,3 @@ for i in range(1,5):
     ret, thresh = cv2.threshold(greyRes, 0, 1, cv2.THRESH_BINARY)
     cv2.imwrite('template/mask.temp'+str(i)+'.png', thresh)
 
-
