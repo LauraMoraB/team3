@@ -1,4 +1,11 @@
+Resultados/
+ResultMask/
 *ipnyb
 .ipnyb_checkpoints
 *.pyc
+*.png
+*.jpg
 *pycache__
+*.iml
+*.xml
+*.txt
