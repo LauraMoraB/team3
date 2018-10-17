@@ -27,7 +27,8 @@ def preproces_image(df, path):
         #d=9 sigmaColor =75 sigmaSpace =75
         #blur = cv2.bilateralFilter(bgr_ecualizado,5,100,100)
         fullImage =cv2.GaussianBlur(bgr_ecualizado,(21,21),0)        
-       
+        fullImage = cv2.bilateralFilter(bgr_ecualizado,5,100,100)
+
         #need \datasets\split\validation\fullImage_blur
         cv2.imwrite(path+'fullImage_blur/'+imageName[:-3]+'png', fullImage)
         # Prepares mask files

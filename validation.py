@@ -22,8 +22,8 @@ def performance_accumulation_pixel(pixel_candidates, pixel_annotation):
     False Negative (pixelFN) and True Negative (pixelTN) pixels in the image pixel_candidates
     """
     
-    pixel_candidates = np.uint64(pixel_candidates>0)
-    pixel_annotation = np.uint64(pixel_annotation>0)
+    pixel_candidates = np.uint64(pixel_candidates > 0)
+    pixel_annotation = np.uint64(pixel_annotation > 0)
     
     pixelTP = np.sum(pixel_candidates & pixel_annotation)
     pixelFP = np.sum(pixel_candidates & (pixel_annotation==0))
@@ -65,17 +65,14 @@ def performance_evaluation_pixel(pixelTP, pixelFP, pixelFN, pixelTN):
 
       
 def validation(df, path):    
-
     TruePos = 0
     FalsePos = 0
     FalseNeg = 0
     TrueNeg = 0
     for i in range(len(df)):       
         dfSingle = df.iloc[i]
-
-        maskResult = get_full_mask_result(dfSingle, path)
+        maskResult = get_full_mask_result(dfSingle, path) 
         maskValidator = get_full_mask(dfSingle, path)
-        
         [pixelTP, pixelFP, pixelFN, pixelTN] = performance_accumulation_pixel(maskResult, maskValidator)
         TruePos += pixelTP
         FalsePos += pixelFP
@@ -84,11 +81,18 @@ def validation(df, path):
         
     [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity, pixel_F1] = performance_evaluation_pixel(TruePos, FalsePos, FalseNeg, TrueNeg)
     
+    print('TruePos: ', TruePos)
+    print('FalsePos: ', FalsePos)
+    print('FalseNeg: ', FalseNeg)
+    print('TrueNeg: ', TrueNeg)
+    
     print('Precission: ', pixel_precision)
     print('Accuracy: ', pixel_accuracy)
     print('Specificity: ', pixel_specificity)
     print('Recall: ', pixel_sensitivity)
     print('F1: ', pixel_F1)
+    need=TruePos/1062927
+    print('need: ', need)
 
     return [TruePos, FalsePos, FalseNeg, TrueNeg]
 
