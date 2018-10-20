@@ -13,12 +13,10 @@ validationSplitPath = "datasets/split/validation/"
 trainSplitPath = "datasets/split/train/"
 
 #--->  CONFIGURATION  <----#
-
-
-LOAD_DATA = True
+LOAD_DATA = False
 PLOT_STATS = False
 USE_TRAIN = False
-USE_VALIDATION = False
+USE_VALIDATION = True
 
 #--->  COLOR THRESHOLDS  <----#
 hsv_rang = (
@@ -26,6 +24,9 @@ hsv_rang = (
      ,np.array([160,150,50]), np.array([180, 255, 255]) #DARK RED
      ,np.array([100,150,50]), np.array([140, 255, 255]) #BLUE
 )
+# ---> METHOD TO SAVE GT <--- #
+typeW = "SLW"
+method = 1
 
 #--->  DATA PARSING AND SPLIT  <----#
 if(LOAD_DATA == True):
@@ -55,17 +56,18 @@ if(USE_VALIDATION == True):
     #--->  VALIDATION DATA SEGMENTATION  <----#
     #listOfBB = color_segmentation(dfValidation, validationSplitPath, hsv_rang)
     
-    #window_canditate =  window_main(dfValidation, validationSplitPath+"resultMask/morphologyMask/", dfStats)
+    window_canditate =  window_main(dfValidation, validationSplitPath+"resultMask/morphologyMask/", dfStats)
     
 #    pixel_validation(dfTrain, trainSplitPath, 'colorMask')
 #    pixel_validation(dfTrain, trainSplitPath, 'morphologyMask')
 #    pixel_validation(dfTrain, trainSplitPath, 'finalMask')
 #    
-    #validation_window(window_canditate, validationSplitPath )
+    validation_window(window_canditate, validationSplitPath )
+    
     
     for element in window_canditate:
         name, positions = element
-        save_text_file(validationSplitPath+"gtResult/", positions, name)
+        save_text_file(validationSplitPath+"gtResult/", positions, name, method, typeW)
     
     
 ##### Window #####

@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from createDataframe import load_annotations
+import os
 
 def get_full_image(dfSingle, path):
     return cv2.imread(path + dfSingle['Image'],1)
@@ -12,7 +13,7 @@ def get_cropped_image(dfSingle, path):
 def get_full_mask(dfSingle, path):
     return cv2.imread(path+'mask/' + dfSingle['Mask'], 0)
 
-def get_full_mask_window_result(dfSingle, path, results):
+def get_full_mask_window_result(dfSingle, path):
     return cv2.imread(path+dfSingle['Mask'], 0)
 
 def get_full_mask_result(dfSingle, path, maskType):
@@ -43,20 +44,24 @@ def save_gt(pathToSave, pathToget, gtfile):
             else:
                 f.write(element)
                 
-def save_text_file(pathToSave, elements, name):
+def save_text_file(pathToSave, elements, name, method, typeW):
     name = "gt."+name+".txt"
-
-    with open(pathToSave+name, "w") as f:
+    path = pathToSave+typeW+"/"
+    
+    if not os.path.exists(path):
+        os.makedirs(path)
+    with open(path+name, "a") as f:
         if elements:
             for i,element in enumerate(elements[0]):
                 if i != 4:
                     f.write(format(element, '.8f'))
                     f.write(" ")
                 else:
-                    f.write(element)
+                    f.write(element+"\n")
+            f.write("\n")
         else:
             f.write("")
-    
+
 def get_mask_aspect(dfSingle, path): 
     crop = get_cropped_mask(dfSingle, path)  
     (imgX, imgY) = np.shape(crop)

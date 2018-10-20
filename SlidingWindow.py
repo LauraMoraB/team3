@@ -28,7 +28,7 @@ def get_window_size(df):
     """
     # Get window size from Aspect Ratio in the traffic signs
     
-    meanAspect = df["FormFactor"].mean()
+    meanAspect = df["FormFactorMean"].mean()
     maxArea = df["AreaMax"].mean()
     minArea = df["AreaMin"].mean()
     winH_max = int(np.sqrt(maxArea/meanAspect))
@@ -122,6 +122,7 @@ def compute_windows(df, pathToImage, line, dfStats):
     # load the image and define the window width and height
     imageRead = df.iloc[line]
     image = get_full_mask_window_result(imageRead, pathToImage)
+    
     (h, w)=image.shape[:2]
     #(winW, winH) = get_window_size(df)
     
@@ -152,7 +153,7 @@ def compute_windows(df, pathToImage, line, dfStats):
 def window_main(df, path, dfStats):
     finalBBoxes =[]
     
-    for i in range(df.shape[0]):
+    for i in range(0,1): #(df.shape[0]):
          
         name, listb = compute_windows(df, path, i, dfStats)
             
