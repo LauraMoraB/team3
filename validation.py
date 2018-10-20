@@ -181,24 +181,24 @@ def pixel_validation(df, pathGT, maskType):
     return [TruePos, FalsePos, FalseNeg, TrueNeg]
 
 
-def validation_window(bboxes, pathToGT):
-    # in this case, the list of possible bboxes is returned as a list
+def validation_window(df, path, method):
+    """
+    Compute performance of the model
+    """
+    bboxes = read_gt(df, path, method)
+
     TruePos = 0
     FalsePos = 0
     FalseNeg = 0
-    w = []
+
+
     for i in range(len(bboxes)):
         name, lista = bboxes[i]
-        for x in lista:
-            # First window of the possible detections
-            windows = x
-            # In the first place of the list, the image name has to be stored so we can get the name
+        for windows in lista:
             gtFile = "gt."+name+".txt"
-            
-            annotations = load_annotations(pathToGT+'gt/'+gtFile)
+            annotations = load_annotations(path+'gt/'+gtFile)
             
             windows = [windows]
-            # remove image name to evaluate position
             [pixelTP, pixelFN, pixelFP] = performance_accumulation_window(windows, annotations)
     
             TruePos += pixelTP
@@ -217,3 +217,27 @@ def validation_window(bboxes, pathToGT):
     print('F1: ', F1)
 
     return [TruePos, FalsePos, FalseNeg]
+
+
+def read_gt(df, path, method):
+    """
+    pasa un path y lee los gt para convertirlos en el input que necesitamos
+    list
+        - str: nombre fichero
+        - list: lista de posicions tly,tlx,bry,brx
+    """
+    bboxesF=[]
+    
+    for i in range(0, len(df)):
+        file = df["Image"].iloc[i]
+        split = file.split(".")
+        name=split[0]+"."+split[1]
+        file = "gt."+split[0]+"."+split[1]+".txt"
+        
+        bboxes= load_annotations(path+"gtResult/"+method+"/"+file)
+        
+        bboxesF.append((name,bboxes))
+    
+    return bboxesF
+    
+    

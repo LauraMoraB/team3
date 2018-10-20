@@ -1,4 +1,5 @@
 import cv2
+import os
 import numpy as np
 from resizeImage import image_resize
 from OverlapSolution import non_max_suppression_slow
@@ -151,6 +152,7 @@ def compute_windows(df, pathToImage, line, dfStats):
     return name,listBbox
 
 def window_main(df, path, dfStats):
+    
     finalBBoxes =[]
     
     for i in range(0,1): #(df.shape[0]):
@@ -170,8 +172,14 @@ def window_main(df, path, dfStats):
             endY = listb[j][2]
             endX = listb[j][3]
             cv2.rectangle(im, (startX, startY), (endX, endY), (0, 255, 255), 5)
-             
-        cv2.imwrite(path+'resultWindow/'+df["Mask"].iloc[i], im)
+        
+        pathSave="datasets/split/validation/resultWindow/SLW_Method1/" 
+        
+        #Save Images
+        if not os.path.exists(pathSave):
+            os.makedirs(pathSave)
+            
+        cv2.imwrite(pathSave+df["Mask"].iloc[i], im)
             
     return finalBBoxes
          

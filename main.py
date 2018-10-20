@@ -16,7 +16,7 @@ trainSplitPath = "datasets/split/train/"
 LOAD_DATA = False
 PLOT_STATS = False
 USE_TRAIN = False
-USE_VALIDATION = True
+USE_VALIDATION = False
 
 #--->  COLOR THRESHOLDS  <----#
 hsv_rang = (
@@ -56,23 +56,17 @@ if(USE_VALIDATION == True):
     #--->  VALIDATION DATA SEGMENTATION  <----#
     #listOfBB = color_segmentation(dfValidation, validationSplitPath, hsv_rang)
     
-    window_canditate =  window_main(dfValidation, validationSplitPath+"resultMask/morphologyMask/", dfStats)
+    #window_canditate =  window_main(dfValidation, validationSplitPath+"resultMask/morphologyMask/", dfStats)
     
 #    pixel_validation(dfTrain, trainSplitPath, 'colorMask')
 #    pixel_validation(dfTrain, trainSplitPath, 'morphologyMask')
 #    pixel_validation(dfTrain, trainSplitPath, 'finalMask')
-#    
-    validation_window(window_canditate, validationSplitPath )
-    
+ 
     
     for element in window_canditate:
         name, positions = element
         save_text_file(validationSplitPath+"gtResult/", positions, name, method, typeW)
     
     
-##### Window #####
-#window_canditate =  window_main(dfTrain, trainSplitPath)
-#validation_window(window_canditate, trainSplitPath )
-#for element in window_canditate:
-#    name, positions = element
-#    save_text_file(trainSplitPath+"gtResult/", positions, name)
+validation_window(dfValidation, validationSplitPath, typeW )
+    
