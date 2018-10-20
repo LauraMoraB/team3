@@ -9,11 +9,12 @@ def get_cropped_image(dfSingle, path):
     image = get_full_image(dfSingle, path)
     return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
 
-def get_full_mask(dfSingle, path, results):
-    if results == 1:
-        return cv2.imread(path+dfSingle['Mask'], 0)
-    else:
-        return cv2.imread(path+'mask/' + dfSingle['Mask'], 0)
+def get_full_mask(dfSingle, path):
+    return cv2.imread(path+'mask/' + dfSingle['Mask'], 0)
+
+def get_full_mask_window_result(dfSingle, path, results):
+    return cv2.imread(path+dfSingle['Mask'], 0)
+
 def get_full_mask_result(dfSingle, path, maskType):
     return cv2.imread(path+'resultMask/'+maskType+'/' + dfSingle['Mask'], 0)
 

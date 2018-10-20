@@ -15,10 +15,10 @@ trainSplitPath = "datasets/split/train/"
 #--->  CONFIGURATION  <----#
 
 
-LOAD_DATA = False
+LOAD_DATA = True
 PLOT_STATS = False
 USE_TRAIN = False
-USE_VALIDATION = True
+USE_VALIDATION = False
 
 #--->  COLOR THRESHOLDS  <----#
 hsv_rang = (
@@ -55,7 +55,7 @@ if(USE_VALIDATION == True):
     #--->  VALIDATION DATA SEGMENTATION  <----#
     #listOfBB = color_segmentation(dfValidation, validationSplitPath, hsv_rang)
     
-    #window_canditate =  window_main(dfValidation, validationSplitPath+"resultMask/morphologyMask/")
+    #window_canditate =  window_main(dfValidation, validationSplitPath+"resultMask/morphologyMask/", dfStats)
     
 #    pixel_validation(dfTrain, trainSplitPath, 'colorMask')
 #    pixel_validation(dfTrain, trainSplitPath, 'morphologyMask')

@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from resizeImage import image_resize
 from OverlapSolution import non_max_suppression_slow
-from ImageFeature import get_full_mask
+from ImageFeature import get_full_mask, get_full_mask_window_result
 
 ## Method for sliding window
 def sliding_window(image, stepSize, windowSize):
@@ -27,13 +27,17 @@ def get_window_size(df):
      Adaptar mida live
     """
     # Get window size from Aspect Ratio in the traffic signs
-    meanArea = df["Area"].mean()
+    
     meanAspect = df["FormFactor"].mean()
+    maxArea = df["AreaMax"].mean()
+    minArea = df["AreaMin"].mean()
+    winH_max = int(np.sqrt(maxArea/meanAspect))
+    winW_max = int(winH_max*meanAspect)
     
-    winH = int(np.sqrt(meanArea/meanAspect))
-    winW = int(winH*meanAspect)
+    winH_min = int(np.sqrt(minArea/meanAspect))
+    winW_min = int(winH_min*meanAspect)
     
-    return (winW, winH)
+    return winW_min, winH_min, winW_max, winH_max
 
 # Compute Fill Ratio
 def compute_fill_ratio(x,y, winW, winH, image):
@@ -94,14 +98,8 @@ def window_detection(image, stepSize, windowSize):
 
 def overlapping_removal(boundingBoxes, overlapThreshold, image):
     
-    removal = 1
-    
-    if removal == 1:
-        # Remove Overlapping
-        pick = non_max_suppression_slow(boundingBoxes, overlapThreshold)
-    else:
-        pick = join_bbox(boundingBoxes, overlapThreshold)
-        
+    # Remove Overlapping
+    pick = non_max_suppression_slow(boundingBoxes, overlapThreshold)
         
 #    # JUST TO VISUALIZE
 #        
@@ -115,44 +113,32 @@ def overlapping_removal(boundingBoxes, overlapThreshold, image):
     return pick
 
 
-def compute_windows(df, pathToImage, line, res=0): 
+def compute_windows(df, pathToImage, line, dfStats): 
     # Get image name
     name = df["Image"].iloc[line]
     split = name.split(".")
     name = split[0]+"."+split[1]
     
-    
     # load the image and define the window width and height
     imageRead = df.iloc[line]
-   
-    image = get_full_mask(imageRead, pathToImage, 1)
-   
-    
+    image = get_full_mask_window_result(imageRead, pathToImage)
     (h, w)=image.shape[:2]
-    (winW, winH) = get_window_size(df)
+    #(winW, winH) = get_window_size(df)
     
-    if res == 1:
-        # Image reduced for computation purposes
-        image = image_resize(image, height = int(h/2))
-        (h, w)=image.shape[:2]
-        # As the image is resize form computing purposes, the window will be to
-        (winW, winH)=(int(winW/2), int(winH/2))
-        
     overlapThreshold=0.3
-    stepSize= int(winW*overlapThreshold) # how much overlapp between windows
-
-
+    (winW1, winH1,winW2, winH2) = get_window_size(dfStats)
+    
     severalSizes= []
-    for i in range(20,140,20):
-        winW=winH=i
-        
-        stepSize= int(winW*overlapThreshold) # how much overlapp between windows
-        allBBoxes, allBBoxes_list = window_detection(image, stepSize, windowSize=(winW, winH))
-       
-        if allBBoxes_list:
-            severalSizes.append(allBBoxes_list[0])
-#        else:
-#            print("buida")
+    for i in range(winW1,winW2,20):
+        for j in range(winH1,winH2,20):
+            winW=i
+            winH=j
+    
+            stepSize= int(winW*overlapThreshold) # how much overlapp between windows
+            allBBoxes, allBBoxes_list = window_detection(image, stepSize, windowSize=(winW, winH))
+           
+            if allBBoxes_list:
+                severalSizes.append(allBBoxes_list[0])
    
     finalBBoxes = overlapping_removal(np.array(severalSizes), overlapThreshold, image)
     
@@ -163,17 +149,17 @@ def compute_windows(df, pathToImage, line, res=0):
 
     return name,listBbox
 
-def window_main(df, path):
+def window_main(df, path, dfStats):
     finalBBoxes =[]
     
     for i in range(df.shape[0]):
          
-        name, listb = compute_windows(df, path, i, 0)
+        name, listb = compute_windows(df, path, i, dfStats)
             
         finalBBoxes.append((name,listb))  
         
         imageRead = df.iloc[i]
-        image = get_full_mask(imageRead, path,1) 
+        image = get_full_mask_window_result(imageRead, path) 
         
         im =cv2.cvtColor(image.astype('uint8') * 255, cv2.COLOR_GRAY2BGR)
             
