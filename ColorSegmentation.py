@@ -45,7 +45,6 @@ def apply_color_mask(fullImage):
 
 def color_segmentation(df, path):
 
-    listOfBB = []
     for i in range(len(df)):       
         # Gets images one by one
         dfSingle = df.iloc[i]
@@ -66,27 +65,33 @@ def color_segmentation(df, path):
         
         ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
         heir, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        txtFile = open("bbresults/gt."+imageName[:-3]+"txt", "w")
+
         if contours:
             for cnt in contours:
                 x,y,w,h = cv2.boundingRect(cnt)
                 cv2.drawContours(bitwiseRes, [cnt], 0,255,-1)
-                get_inside_grid_segmentation(x, y, w, h, rgbimg, fullMask, bitwiseRes, listOfBB, imageName[:-3])
-                        
-#        plt.imshow(fullMask)
-#        plt.show()
+                get_inside_grid_segmentation(x, y, w, h, rgbimg, fullMask, bitwiseRes, txtFile)
+                
+    
+
+        txtFile.close()
+        plt.imshow(fullMask)
+        plt.show()
+        plt.imshow(bitwiseRes)
+        plt.show()
         plt.imshow(rgbimg)
         plt.show()
-#        cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
+        cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
 #        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', rgbimg)
-    return listOfBB
 
 
-def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listOfBB, imageName):
+def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, txtFile):
     if w<h:
         aspect = w/h
     else:
         aspect = h/w
-    if (280 > w > 30) and (280  >h > 30) and aspect>0.75:
+    if (280 > w > 30) and (280  >h > 30) and aspect>0.65:
         
 #        bitwiseResSegmented = get_region_of_interest(x, y ,w, h, currentMask)
         bitwiseResSegmented = currentMask[y:y+h,x:x+w]
@@ -96,12 +101,13 @@ def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listO
         sizeMatrix = np.shape(greyRes)
         fillRatioZeros = sizeMatrix[0]*sizeMatrix[1]
         fillRatio = fillRatioOnes/fillRatioZeros
-        if fillRatio > 0.45:
-            listOfBB.append((imageName,x,y,w,h))
+        if fillRatio > 0.35:
 
             ret, thresh = cv2.threshold(greyRes, 0, 1, cv2.THRESH_BINARY)
             fullMask[y:y+h,x:x+w] = thresh
-            get_templete_matching(x, y ,w, h, thresh, image)
+            tipo = get_templete_matching(x, y ,w, h, thresh, image)
+            
+            txtFile.write(str(float(y))+" "+ str(float(x))+ " " + str(float(h+y)) + " " + str(float(w+x)) + " " + tipo + "\n")
 
             cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),10)
 
@@ -129,26 +135,43 @@ def get_region_of_interest(x, y ,w, h, currentMask):
     return currentMask[y1:y2,x1:x2]
             
 def get_templete_matching(x, y ,w, h, maskSegmented, image):
-    for i in range(1,5):
+    maximumFinal= 0;
+    tipo = "NULL"
+    
+    for i in range(1,9):
         maskTemplate = cv2.imread("template/mask.temp"+str(i)+".png",0)
         maskTemplate = cv2.resize(maskTemplate,(w-1,h-1))
         # Perform match operations. 
         res = cv2.matchTemplate(maskSegmented, maskTemplate, cv2.TM_CCOEFF_NORMED) 
           
         # Specify a threshold 
-        threshold = 0.8
-          
-        # Store the coordinates of matched area in a numpy array 
-        loc = np.where( res >= threshold)  
-          
-        # Draw a rectangle around the matched region. 
-        for pt in zip(*loc[::-1]): 
-#            cv2.rectangle(image, (pt[0]+x, pt[1]+y), (pt[0] + x + w, pt[1] + y + h), (0,255,0), 5)
-            if(i==1):
-                cv2.putText(image, 'CIRCULO', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (255,0,0), 3)
-            elif(i==2):
-                cv2.putText(image, 'RECTANGLE', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (0,255,0), 3)
-            elif(i==3):
-                cv2.putText(image, 'TRIANGLE', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (0,0,255), 3)
-            else:
-                cv2.putText(image, 'WARNING', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (255,255,255), 3)
+        if (i == 2):
+            threshold = 0.45
+        else:
+            threshold = 0.6
+        
+        maximumLocal = np.max(res)
+        if (maximumLocal>=threshold and maximumLocal> maximumFinal):
+            maximumFinal = maximumLocal
+            # Store the coordinates of matched area in a numpy array 
+            loc = np.where( res >= threshold)  
+            
+            # Draw a rectangle around the matched region. 
+            for pt in zip(*loc[::-1]): 
+    #            cv2.rectangle(image, (pt[0]+x, pt[1]+y), (pt[0] + x + w, pt[1] + y + h), (0,255,0), 5)
+                if(i==1 or i ==5 ):
+                    cv2.putText(image, 'CIRCULO', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (255,0,0), 3)
+                    tipo = "CDE"
+                elif(i==2 or i ==6):
+                    cv2.putText(image, 'RECTANGLE', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (0,255,0), 3)
+                    tipo = "F"
+                elif(i==3 or i ==7):
+                    cv2.putText(image, 'TRIANGLE', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (0,0,255), 3)
+                    tipo = "B"
+                else:
+                    cv2.putText(image, 'WARNING', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (255,255,255), 3)
+                    tipo = "A"
+    return tipo
+
+
+

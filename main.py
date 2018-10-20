@@ -17,10 +17,10 @@ validationSplitPath = "datasets/split/validation/"
 trainSplitPath = "datasets/split/train/"
 
 #---> CONFIGURATION  <----#
-LOAD_DATA = True
+LOAD_DATA = False
 PLOT = False
 FULL_TRAIN = False
-FULL_VALIDATION = False
+FULL_VALIDATION = True
 
 #---> DATA PARSING AND SPLIT  <----#
 if(LOAD_DATA == True):
