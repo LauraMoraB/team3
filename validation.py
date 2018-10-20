@@ -95,12 +95,10 @@ def performance_accumulation_window(detections, annotations):
 
     detections_used  = np.zeros(len(detections))
     annotations_used = np.zeros(len(annotations))
-
+    
     TP = 0
-    print (detections)
     for ii in range (len(annotations)):
         #for jj in range (len(detections)):
-
         if (detections_used[ii] == 0) & (bbox_iou(annotations[ii], detections) > 0.5):
             TP = TP+1
             detections_used[ii]  = 1
@@ -190,23 +188,25 @@ def validation_window(bboxes, pathToGT):
     FalseNeg = 0
 
     for i in range(len(bboxes)):
-        # First window of the possible detections
-        windows = bboxes[i]
-        # In the first place of the list, the image name has to be stored so we can get the name
-        gtFile = "gt."+windows[0]+".txt"
-
-        annotations = load_annotations(pathToGT+'gt/'+gtFile)
-
-        # remove image name to evaluate position
-        windows.pop(0)
-        [pixelTP, pixelFP, pixelFN] = performance_accumulation_window(windows, annotations)
-
-        TruePos += pixelTP
-        FalsePos += pixelFP
-        FalseNeg += pixelFN
+        name, lista = bboxes[i]
+        for x in lista:
+            # First window of the possible detections
+            windows = x
+            # In the first place of the list, the image name has to be stored so we can get the name
+            gtFile = "gt."+name+".txt"
+    
+            annotations = load_annotations(pathToGT+'gt/'+gtFile)
+    
+            # remove image name to evaluate position
+            [pixelTP, pixelFP, pixelFN] = performance_accumulation_window(windows, annotations)
+    
+            TruePos += pixelTP
+            FalsePos += pixelFP
+            FalseNeg += pixelFN
 
     [precision, sensitivity, accuracy] = performance_evaluation_window(TruePos, FalsePos, FalseNeg)
-
+    
+    print("\n------ FINAL RESULT Window Validation -------")
     print('Window Precision: ', precision)
     print('Accuracy: ', accuracy)
     print('Window Sensitivity: ', sensitivity)

@@ -56,38 +56,39 @@ def color_segmentation(df, path, hsv_rang):
         # Get mask, color + morphology         
         color_mask = apply_color_mask(imgHSV, hsv_rang)
         morphology_mask = apply_morphology_operations(color_mask)         
-        bitwiseRes = cv2.bitwise_and(imgHSV, imgHSV, mask = morphology_mask)        
- 
-        blur = cv2.blur(bitwiseRes, (5, 5), 0)            
-        imgray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
+#        bitwiseRes = cv2.bitwise_and(imgHSV, imgHSV, mask = morphology_mask)        
+# 
+#        blur = cv2.blur(bitwiseRes, (5, 5), 0)            
+#        imgray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
         
-        ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
-        heir, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        if contours:
-            for cnt in contours:
-                x,y,w,h = cv2.boundingRect(cnt)
-                cv2.drawContours(bitwiseRes, [cnt], 0,255,-1)
-                get_inside_grid_segmentation(x, y, w, h, imgRGB, fullMask, bitwiseRes, listOfBB, imageName[:-3])
-        
+#        ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
+#        heir, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+#        if contours:
+#            for cnt in contours:
+#                x,y,w,h = cv2.boundingRect(cnt)
+#                cv2.drawContours(bitwiseRes, [cnt], 0,255,-1)
+#                get_inside_grid_segmentation(x, y, w, h, imgRGB, fullMask, bitwiseRes, listOfBB, imageName[:-4])
+#        
         create_maskFolders('train')
         create_maskFolders('validation') 
         cv2.imwrite(path+'resultMask/colorMask/mask.'+imageName[:-3]+'png', color_mask)
         cv2.imwrite(path+'resultMask/morphologyMask/mask.'+imageName[:-3]+'png', morphology_mask)
-        cv2.imwrite(path+'resultMask/finalMask/mask.'+imageName[:-3]+'png', fullMask)
-        imgBGR = cv2.cvtColor(imgRGB, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', imgBGR)
+#        cv2.imwrite(path+'resultMask/finalMask/mask.'+imageName[:-3]+'png', fullMask)
+#        imgBGR = cv2.cvtColor(imgRGB, cv2.COLOR_RGB2BGR)
+#        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', imgBGR)
     
     return listOfBB
 
 
 def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listOfBB, imageName):
+    window = []
     if w<h:
         aspect = w/h
     else:
         aspect = h/w
+        
     if (280 > w > 30) and (280  >h > 30) and aspect>0.75:
         
-#        bitwiseResSegmented = get_region_of_interest(x, y ,w, h, currentMask)
         bitwiseResSegmented = currentMask[y:y+h,x:x+w]
     
         greyRes  = cv2.cvtColor(bitwiseResSegmented, cv2.COLOR_BGR2GRAY)
@@ -95,11 +96,18 @@ def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listO
         sizeMatrix = np.shape(greyRes)
         fillRatioZeros = sizeMatrix[0]*sizeMatrix[1]
         fillRatio = fillRatioOnes/fillRatioZeros
+        
         if fillRatio > 0.45:
-            listOfBB.append((imageName,x,y,w,h))
+            
+            window.append([y,x,h+y,w+x])
+            #listOfBB.append((imageName,x,y,w,h))
+            
+            listOfBB.append((imageName,window))
 
             ret, thresh = cv2.threshold(greyRes, 0, 1, cv2.THRESH_BINARY)
+            
             fullMask[y:y+h,x:x+w] = thresh
+            
             get_templete_matching(x, y ,w, h, thresh, image)
 
             cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),10)
