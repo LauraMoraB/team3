@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-from ImageFeature import get_full_mask, get_full_mask_result, get_full_image
-from matplotlib import pyplot as plt
+from ImageFeature import get_full_mask, get_full_mask_result, get_full_image, save_text_file
+import os
 
 def fast_sw(df, path, dfStats):
 #    start_time = time.clock()
@@ -14,10 +14,6 @@ def fast_sw(df, path, dfStats):
     for i in range(len(df)):
         dfSingle = df.iloc[i]
         mask = get_full_mask(dfSingle, path)
-        # ploting for testing
-        maskbw =cv2.cvtColor(mask.astype('uint8') * 255, cv2.COLOR_GRAY2BGR)        
-        plt.imshow(maskbw)
-        plt.show()
         # First BB candidate --> full image      
         (imgRows, imgCols) = np.shape(mask)
         BB = np.array([[0,0],[imgRows,imgCols]])
@@ -28,16 +24,20 @@ def fast_sw(df, path, dfStats):
         # rejoinv posible new intersections
         finalBB = join_bbs(joinBB.copy())
         # safe and boxes polotting!       
-        to_list(finalBB)
-        dsListBB.append((dfSingle['Image'][0:-4],to_list(finalBB)))  
-        
-        
+        to_list(joinBB)
+        dsListBB.append((dfSingle['Image'][0:-4],to_list(joinBB)))  
+
+        # save visual result
+        maskbw =cv2.cvtColor(mask.astype('uint8') * 255, cv2.COLOR_GRAY2BGR)        
         for j in range(len(finalBB)):
             BB = finalBB[j].tolist()
             cv2.rectangle( maskbw, (BB[0][1],BB[0][0]), (BB[1][1],BB[1][0]), (0, 255, 255), 5)
-        plt.imshow(maskbw)
-        plt.show()
-           
+        subPath = "resultWindows/fast/"
+        totalPath = path + subPath
+        if not os.path.exists(totalPath):
+            os.makedirs(totalPath)
+        cv2.imwrite(totalPath+dfSingle['Image'], maskbw)
+         
     return dsListBB
 
 def to_list(list_in):
@@ -45,7 +45,6 @@ def to_list(list_in):
     for bb in list_in:
         bb_list.append([bb[0][0],bb[0][1], bb[1][0],bb[1][1]])
     return bb_list
-        
         
 def evaluate_image_wrap(img, fillRatioMin, rowsMin, colsMin, BB):   
     listBB, currentBB, status = evaluate_image(img.copy(), fillRatioMin, rowsMin, colsMin, BB.copy(), BB.copy(), listBB=[])
@@ -66,12 +65,12 @@ def evaluate_image(img, fillRatioMin, rowsMin, colsMin, currentBB, oldBB, listBB
         return listBB, oldBB, False   
     else:
         # FillRatio too small, need to zoom in and evaluate again!
-        halfRows = int(imgRows*.44)
-        halfCols = int(imgCols*.44)
+        halfRows = int(imgRows*.45)
+        halfCols = int(imgCols*.45)
         # top-left quadrant
         oldBB = currentBB.copy()
         currentBB += np.array([[0, 0],[-halfRows, -halfCols]])       
-        subImg = img[:-(halfRows+1) , :(-halfCols+1)]
+        subImg = img[:-(halfRows+1) , :-(halfCols+1)]
         listBB, currentBB, status = evaluate_image(subImg, fillRatioMin, rowsMin, colsMin, currentBB, oldBB, listBB)
         # top-right quadrant
         if(status):

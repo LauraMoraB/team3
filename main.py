@@ -5,6 +5,7 @@ from ImageSegmentation import color_segmentation
 from validation import pixel_validation, validation_window
 import numpy as np
 from SlidingWindow import window_main
+from FastSlidingWindow import fast_sw
 
 #--->  KEY PATHS  <----#
 testPath = 'datasets/test/'
@@ -13,7 +14,7 @@ validationSplitPath = "datasets/split/validation/"
 trainSplitPath = "datasets/split/train/"
 
 #--->  CONFIGURATION  <----#
-LOAD_DATA = False
+LOAD_DATA = True
 PLOT_STATS = False
 USE_TRAIN = False
 USE_VALIDATION = True
@@ -29,7 +30,7 @@ typeW = "SLW"
 method = 1
 
 #--->  DATA PARSING AND SPLIT  <----#
-if(LOAD_DATA == True):
+if(LOAD_DATA == False):
 # df is created by Parsing training image folders
     df = create_df_train(fullTrainPath)
     # df is updated computing provided groundtruth informa2tion
@@ -57,6 +58,7 @@ if(USE_VALIDATION == True):
     #listOfBB = color_segmentation(dfValidation, validationSplitPath, hsv_rang)
     
     window_canditate =  window_main(dfValidation, validationSplitPath+"resultMask/morphologyMask/", dfStats)
+    window_canditate =  fast_sw(dfValidation, validationSplitPath, dfStats)
     
 #    pixel_validation(dfTrain, trainSplitPath, 'colorMask')
 #    pixel_validation(dfTrain, trainSplitPath, 'morphologyMask')
@@ -69,6 +71,10 @@ if(USE_VALIDATION == True):
         name, positions = element
         save_text_file(validationSplitPath+"gtResult/", positions, name, method, typeW)
     
+
+# SLIDING WINDOWS SPEED COMPARISON
+    
+
     
 ##### Window #####
 #window_canditate =  window_main(dfTrain, trainSplitPath)
