@@ -1,26 +1,22 @@
 import cv2
 import numpy as np
-from ImageFeature import get_full_mask, get_full_mask_result
+from ImageFeature import get_full_mask, get_full_mask_result, get_full_image
 from matplotlib import pyplot as plt
-import time
 
 def fast_sw(df, path, dfStats):
-
-    start_time = time.clock()
-
+#    start_time = time.clock()
     # Create constraints from DS study
     ROWS_MIN = min(dfStats['YMin'].tolist())
     COLS_MIN = min(dfStats['XMin'].tolist())
     FILL_RATIO_MIN = min(dfStats['FillRatioMin'].tolist())
     # dictionary to store BBlist per image
-    windows_dic={}
+    dsListBB=[]
     for i in range(len(df)):
         dfSingle = df.iloc[i]
         mask = get_full_mask(dfSingle, path)
-        
         # ploting for testing
-        print(dfSingle['Image'])
-        plt.imshow(mask)
+        maskbw =cv2.cvtColor(mask.astype('uint8') * 255, cv2.COLOR_GRAY2BGR)        
+        plt.imshow(maskbw)
         plt.show()
         # First BB candidate --> full image      
         (imgRows, imgCols) = np.shape(mask)
@@ -32,19 +28,25 @@ def fast_sw(df, path, dfStats):
         # rejoinv posible new intersections
         finalBB = join_bbs(joinBB.copy())
         # safe and boxes polotting!       
-        windows_dic[dfSingle['Image']]=finalBB        
-        im =cv2.cvtColor(mask.astype('uint8') * 255, cv2.COLOR_GRAY2BGR)
+        to_list(finalBB)
+        dsListBB.append((dfSingle['Image'][0:-4],to_list(finalBB)))  
+        
+        
         for j in range(len(finalBB)):
             BB = finalBB[j].tolist()
-            cv2.rectangle( im, (BB[0][1],BB[0][0]), (BB[1][1],BB[1][0]), (0, 255, 255), 5)
-        plt.imshow(im)
+            cv2.rectangle( maskbw, (BB[0][1],BB[0][0]), (BB[1][1],BB[1][0]), (0, 255, 255), 5)
+        plt.imshow(maskbw)
         plt.show()
-            
-    print(time.clock() - start_time, "seconds")
+           
+    return dsListBB
 
-    return windows_dic
-
-
+def to_list(list_in):
+    bb_list = []
+    for bb in list_in:
+        bb_list.append([bb[0][0],bb[0][1], bb[1][0],bb[1][1]])
+    return bb_list
+        
+        
 def evaluate_image_wrap(img, fillRatioMin, rowsMin, colsMin, BB):   
     listBB, currentBB, status = evaluate_image(img.copy(), fillRatioMin, rowsMin, colsMin, BB.copy(), BB.copy(), listBB=[])
     return listBB
@@ -123,8 +125,14 @@ def max_bb(bb1, bb2):
     (rmax, cmax) = (max(bb1[1][0], bb2[1][0]), max(bb1[1][1], bb2[1][1]))
     return np.array([[rmin,cmin],[rmax,cmax]])
         
-        
-        
+#def show_bb(dfSingle, path, bb = []):
+#    img = get_full_image(dfSingle, path)
+#    if (len(bb)):
+#        img = img[bb[0][0]:bb[1][0],bb[0][1]:bb[1][1]]
+#    imgrgb =cv2.cvtColor(img,cv2.COLOR_BGR2RGB)        
+#    plt.imshow(imgrgb)
+#    plt.show()       
+#        
         
         
         
