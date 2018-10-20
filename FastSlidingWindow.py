@@ -24,19 +24,19 @@ def fast_sw(df, path, dfStats):
         # rejoinv posible new intersections
         finalBB = join_bbs(joinBB.copy())
         # safe and boxes polotting!       
-        to_list(joinBB)
-        dsListBB.append((dfSingle['Image'][0:-4],to_list(joinBB)))  
+        to_list(finalBB)
+        dsListBB.append((dfSingle['Image'][0:-4],to_list(finalBB)))  
 
-        # save visual result
-        maskbw =cv2.cvtColor(mask.astype('uint8') * 255, cv2.COLOR_GRAY2BGR)        
-        for j in range(len(finalBB)):
-            BB = finalBB[j].tolist()
-            cv2.rectangle( maskbw, (BB[0][1],BB[0][0]), (BB[1][1],BB[1][0]), (0, 255, 255), 5)
-        subPath = "resultWindows/fast/"
-        totalPath = path + subPath
-        if not os.path.exists(totalPath):
-            os.makedirs(totalPath)
-        cv2.imwrite(totalPath+dfSingle['Image'], maskbw)
+#        # save visual result for testing purposes
+#        maskbw =cv2.cvtColor(mask.astype('uint8') * 255, cv2.COLOR_GRAY2BGR)        
+#        for j in range(len(finalBB)):
+#            BB = finalBB[j].tolist()
+#            cv2.rectangle( maskbw, (BB[0][1],BB[0][0]), (BB[1][1],BB[1][0]), (0, 255, 255), 5)
+#        subPath = "resultWindows/fast/"
+#        totalPath = path + subPath
+#        if not os.path.exists(totalPath):
+#            os.makedirs(totalPath)
+#        cv2.imwrite(totalPath+dfSingle['Image'], maskbw)
          
     return dsListBB
 
