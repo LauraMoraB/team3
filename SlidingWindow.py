@@ -18,13 +18,14 @@ def sliding_window(image, stepSize, windowSize):
         if y+windowSize[1] >= image.shape[0]:
                 break
 
-# Method for setting window size
-                
-# to improve
-#   - min 
-#    - max
-# Adaptar mida live
 def get_window_size(df):
+    """
+     Method for setting window size
+     to improve
+       - min 
+        - max
+     Adaptar mida live
+    """
     # Get window size from Aspect Ratio in the traffic signs
     meanArea = df["Area"].mean()
     meanAspect = df["FormFactor"].mean()
@@ -32,8 +33,6 @@ def get_window_size(df):
     winH = int(np.sqrt(meanArea/meanAspect))
     winW = int(winH*meanAspect)
     
-    # Set numbers directly
-    #(winW, winH) = (100, 100)
     return (winW, winH)
 
 # Compute Fill Ratio
@@ -47,15 +46,15 @@ def compute_fill_ratio(x,y, winW, winH, image):
     return fillRatio
 
 def window_detection(image, stepSize, windowSize):
+    
     # init variables
     winW= windowSize[0]
     winH = windowSize[1]
-    #fillRatio = []
+    
     candidateWindow= []
     bigger =0
 
     # loop over the sliding window each image
-    
     for (x, y, window) in sliding_window(image, stepSize, windowSize=(winW, winH)):
         
         # if the window does not meet our desired window size, ignore it
@@ -64,9 +63,6 @@ def window_detection(image, stepSize, windowSize):
         
         filling = compute_fill_ratio(x, y, winW, winH, image)
         
-        # Value is now set to 0, but it should be related with: 
-        # - the window size
-        # - Fill Ratios calculated in task 1
         if filling > 0.4:  
             stepSize=2
             
@@ -86,58 +82,54 @@ def window_detection(image, stepSize, windowSize):
                     startY = y+y_in
                     endX = startX+winW
                     endY=startY+winH
-                    possibleWindow = [startX, startY, endX, endY]
+                    possibleWindow = [startY, startX, endY, endX]
                 
             candidateWindow.append(possibleWindow)
+            
             bigger=0
-
     # Convert to numpy array for the overlap removal method
     boundingBoxes = np.array(candidateWindow)
-    return boundingBoxes
+    
+    return boundingBoxes, candidateWindow
 
 def overlapping_removal(boundingBoxes, overlapThreshold, image):
-    removal =1
-    ## Removing Overlapping 
-    #print ("[x] %d initial bounding boxes" % (len(boundingBoxes)))
-    orig = image.copy()
-    result = image.copy()
-
-    # JUST TO VISUALIZE
-    # loop over the bounding boxes for each image and draw them
-    for (startX, startY, endX, endY) in boundingBoxes:
-        cv2.rectangle(orig, (startX, startY), (endX, endY), (255, 255, 255), 2)
-
-    #plt.imshow(orig)
-    #plt.show()
-
+    
+    removal = 1
+    
     if removal == 1:
         # Remove Overlapping
         pick = non_max_suppression_slow(boundingBoxes, overlapThreshold)
-        #print ("[x] after applying non-maximum, %d bounding boxes" % (len(pick)) )
     else:
         pick = join_bbox(boundingBoxes, overlapThreshold)
         
         
-    # JUST TO VISUALIZE
-    for (startX, startY, endX, endY) in pick:
-        cv2.rectangle(result, (startX, startY), (endX, endY), (255, 255, 255), 2)
-        
+#    # JUST TO VISUALIZE
+#        
+#    orig = image.copy()
+#    result = image.copy()
+#    for (startX, startY, endX, endY) in pick:
+#        cv2.rectangle(result, (startX, startY), (endX, endY), (255, 255, 255), 2)
     #plt.imshow(result)
     #plt.show()
 
     return pick
 
 
-def compute_windows(dfTrain, pathToImage, line, res=0):    
-    # load the image and define the window width and height
-    imageRead = dfTrain.iloc[line]
-    #image = cv2.imread('datasets/split/train/mask/mask.00.005892.png',0)
-    image = get_full_mask(imageRead, pathToImage)
+def compute_windows(df, pathToImage, line, res=0): 
+    # Get image name
+    name = df["Image"].iloc[line]
+    split = name.split(".")
+    name = split[0]+"."+split[1]
     
-    #image = cv2.imread(pathToImage+imageRead,0)
+    
+    # load the image and define the window width and height
+    imageRead = df.iloc[line]
+   
+    image = get_full_mask(imageRead, pathToImage, 1)
+   
     
     (h, w)=image.shape[:2]
-    (winW, winH) = get_window_size(dfTrain)
+    (winW, winH) = get_window_size(df)
     
     if res == 1:
         # Image reduced for computation purposes
@@ -146,36 +138,53 @@ def compute_windows(dfTrain, pathToImage, line, res=0):
         # As the image is resize form computing purposes, the window will be to
         (winW, winH)=(int(winW/2), int(winH/2))
         
-    
-    #plt.imshow(image, cmap='gray')
-    #plt.show()
-    
-    
     overlapThreshold=0.3
     stepSize= int(winW*overlapThreshold) # how much overlapp between windows
 
-    allBBoxes = window_detection(image, stepSize, windowSize=(winW, winH))
 
-    finalBBoxes = overlapping_removal(allBBoxes, overlapThreshold,image)
+    severalSizes= []
+    for i in range(20,140,20):
+        winW=winH=i
+        
+        stepSize= int(winW*overlapThreshold) # how much overlapp between windows
+        allBBoxes, allBBoxes_list = window_detection(image, stepSize, windowSize=(winW, winH))
+       
+        if allBBoxes_list:
+            severalSizes.append(allBBoxes_list[0])
+#        else:
+#            print("buida")
+   
+    finalBBoxes = overlapping_removal(np.array(severalSizes), overlapThreshold, image)
     
-    return allBBoxes,finalBBoxes
+    if type(finalBBoxes) == np.ndarray:
+        listBbox = finalBBoxes.tolist()
+    else:
+        listBbox = finalBBoxes
 
+    return name,listBbox
 
-def window_main(df, trainSplitPath):
-    for i in range(0,1):#(dfTrain.shape[0]):
+def window_main(df, path):
+    finalBBoxes =[]
+    
+    for i in range(df.shape[0]):
+         
+        name, listb = compute_windows(df, path, i, 0)
+            
+        finalBBoxes.append((name,listb))  
         
-        imageRead = dfTrain.iloc[i]
-        image = get_full_mask(imageRead, trainSplitPath)  
-        
-        beforeSel, selection = compute_windows(dfTrain, trainSplitPath, i,0)
+        imageRead = df.iloc[i]
+        image = get_full_mask(imageRead, path,1) 
         
         im =cv2.cvtColor(image.astype('uint8') * 255, cv2.COLOR_GRAY2BGR)
-        
-        for j in range(len(selection)):
-            startX = selection[j][0]
-            startY = selection[j][1]
-            endX = selection[j][2]
-            endY = selection[j][3]
+            
+        for j in range(len(listb)):
+            startY = listb[j][0]
+            startX = listb[j][1]
+            endY = listb[j][2]
+            endX = listb[j][3]
             cv2.rectangle(im, (startX, startY), (endX, endY), (0, 255, 255), 5)
+             
+        cv2.imwrite(path+'resultWindow/'+df["Mask"].iloc[i], im)
+            
+    return finalBBoxes
          
-        #cv2.imwrite(trainSplitPath+'resultWindow/'+dfTrain["Mask"].iloc[i], im)

@@ -9,9 +9,11 @@ def get_cropped_image(dfSingle, path):
     image = get_full_image(dfSingle, path)
     return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
 
-def get_full_mask(dfSingle, path):
-    return cv2.imread(path+'mask/' + dfSingle['Mask'], 0)
-
+def get_full_mask(dfSingle, path, results):
+    if results == 1:
+        return cv2.imread(path+dfSingle['Mask'], 0)
+    else:
+        return cv2.imread(path+'mask/' + dfSingle['Mask'], 0)
 def get_full_mask_result(dfSingle, path, maskType):
     return cv2.imread(path+'resultMask/'+maskType+'/' + dfSingle['Mask'], 0)
 
@@ -39,6 +41,20 @@ def save_gt(pathToSave, pathToget, gtfile):
                 f.write(" ")
             else:
                 f.write(element)
+                
+def save_text_file(pathToSave, elements, name):
+    name = "gt."+name+".txt"
+
+    with open(pathToSave+name, "w") as f:
+        if elements:
+            for i,element in enumerate(elements[0]):
+                if i != 4:
+                    f.write(format(element, '.8f'))
+                    f.write(" ")
+                else:
+                    f.write(element)
+        else:
+            f.write("")
     
 def get_mask_aspect(dfSingle, path): 
     crop = get_cropped_mask(dfSingle, path)  

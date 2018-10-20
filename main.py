@@ -1,9 +1,10 @@
-from ImageFeature import get_ground_truth
+from ImageFeature import get_ground_truth, save_text_file
 from ImageSplit import split_by_type, compute_stats, plot_stats
 from createDataframe import create_df_train, create_df_test
 from ImageSegmentation import color_segmentation
 from validation import pixel_validation, validation_window
 import numpy as np
+from SlidingWindow import window_main
 
 #--->  KEY PATHS  <----#
 testPath = 'datasets/test/'
@@ -16,8 +17,8 @@ trainSplitPath = "datasets/split/train/"
 
 LOAD_DATA = False
 PLOT_STATS = False
-USE_TRAIN = True
-USE_VALIDATION = False
+USE_TRAIN = False
+USE_VALIDATION = True
 
 #--->  COLOR THRESHOLDS  <----#
 hsv_rang = (
@@ -30,7 +31,7 @@ hsv_rang = (
 if(LOAD_DATA == True):
 # df is created by Parsing training image folders
     df = create_df_train(fullTrainPath)
-    # df is updated computing provided groundtruth information
+    # df is updated computing provided groundtruth informa2tion
     df = get_ground_truth(df, fullTrainPath)
     # df is created with test images
     dfTest = create_df_test(testPath)
@@ -48,14 +49,28 @@ if(USE_TRAIN == True):
     pixel_validation(dfTrain, trainSplitPath, 'colorMask')
     pixel_validation(dfTrain, trainSplitPath, 'morphologyMask')
     pixel_validation(dfTrain, trainSplitPath, 'finalMask')
-
+    validation_window(listOfBB, trainSplitPath)
+    
 if(USE_VALIDATION == True):
     #--->  VALIDATION DATA SEGMENTATION  <----#
-    listOfBB = color_segmentation(dfValidation, validationSplitPath, hsv_rang)
-    pixel_validation(dfTrain, trainSplitPath, 'colorMask')
-    pixel_validation(dfTrain, trainSplitPath, 'morphologyMask')
-    pixel_validation(dfTrain, trainSplitPath, 'finalMask')
+    #listOfBB = color_segmentation(dfValidation, validationSplitPath, hsv_rang)
+    
+    #window_canditate =  window_main(dfValidation, validationSplitPath+"resultMask/morphologyMask/")
+    
+#    pixel_validation(dfTrain, trainSplitPath, 'colorMask')
+#    pixel_validation(dfTrain, trainSplitPath, 'morphologyMask')
+#    pixel_validation(dfTrain, trainSplitPath, 'finalMask')
+#    
+    #validation_window(window_canditate, validationSplitPath )
+    
+    for element in window_canditate:
+        name, positions = element
+        save_text_file(validationSplitPath+"gtResult/", positions, name)
+    
+    
 ##### Window #####
-#window_main(dfTrain, trainSplitPath)
-window_candidate = [['00.001147', 70, 183, 139, 251, 'E'],['00.001150', 70, 183, 139, 251, 'F']]
-validation_window(window_candidate, validationSplitPath )
+#window_canditate =  window_main(dfTrain, trainSplitPath)
+#validation_window(window_canditate, trainSplitPath )
+#for element in window_canditate:
+#    name, positions = element
+#    save_text_file(trainSplitPath+"gtResult/", positions, name)
