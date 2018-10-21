@@ -55,7 +55,7 @@ def color_segmentation(df, path):
         # Color space change
 
         fullImage = cv2.cvtColor(fullImage, cv2.COLOR_BGR2HSV)
-        rgbimg = cv2.cvtColor(fullImage, cv2.COLOR_HSV2RGB)
+#        rgbimg = cv2.cvtColor(fullImage, cv2.COLOR_HSV2RGB)
         
         maskColor = apply_color_mask(fullImage)
         maskMorph = apply_morphology_operations(maskColor)
@@ -66,16 +66,19 @@ def color_segmentation(df, path):
         
         ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
         heir, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        txtFile = open("bbresults/gt."+imageName[:-3]+"txt", "w")
+#        txtFile = open("bbresults/gt."+imageName[:-3]+"txt", "w")
 
         if contours:
             for cnt in contours:
                 x,y,w,h = cv2.boundingRect(cnt)
-                cv2.drawContours(bitwiseRes, [cnt], 0,255,-1)
-                get_inside_grid_segmentation(x, y, w, h, rgbimg, fullMask, bitwiseRes, txtFile)
-                
-    
-        txtFile.close()
+                bitwiseRes = cv2.drawContours(bitwiseRes, [cnt], 0,255,-1)
+#                get_inside_grid_segmentation(x, y, w, h, rgbimg, fullMask, bitwiseRes, txtFile)
+        
+        greyRes  = cv2.cvtColor(bitwiseRes, cv2.COLOR_BGR2GRAY)
+        
+        ret, thresh = cv2.threshold(greyRes, 0, 1, cv2.THRESH_BINARY)
+
+#        txtFile.close()
         
 #        plt.imshow(fullImage)
 #        plt.show()
@@ -83,13 +86,13 @@ def color_segmentation(df, path):
 #        plt.show()
 #        plt.imshow(maskMorph)
 #        plt.show()
-#        plt.imshow(bitwiseRes)
-#        plt.show()
+        plt.imshow(greyRes)
+        plt.show()
 #        plt.imshow(fullMask)
 #        plt.show()
 #        plt.imshow(rgbimg)
 #        plt.show()
-        cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
+        cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', thresh)
 #        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', rgbimg)
 
 

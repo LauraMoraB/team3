@@ -148,7 +148,7 @@ def get_templete_matching(x, y ,w, h, maskSegmented, image):
     tipo = "NULL"
     
     for i in range(1,7):
-        maskTemplate = cv2.imread("template/avgGrey/temp"+str(i)+".png",0)
+        maskTemplate = cv2.imread("template/avgGrey/mask.temp"+str(i)+".png",0)
         maskTemplate = cv2.resize(maskTemplate,(w-1,h-1))
         # Perform match operations. 
         res = cv2.matchTemplate(maskSegmented, maskTemplate, cv2.TM_CCOEFF_NORMED) 

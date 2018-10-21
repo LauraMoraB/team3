@@ -54,4 +54,5 @@ if(FULL_TRAIN == True):
     
 if(TEST == True):
 #    color_segmentation_binary(dfTest, testPath)
-    color_segmentation_grey(dfTest, testPath)
+#    color_segmentation_grey(dfTest, testPath)
+    color_segmentation(dfTest, testPath)
