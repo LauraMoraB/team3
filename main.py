@@ -8,6 +8,11 @@ from SlidingWindow import window_main
 from FastSlidingWindow import fast_sw
 import datetime
 from argparse import ArgumentParser
+from ColorSegmentation import color_segmentation
+from ColorSegmentationBinary import color_segmentation_binary
+from ColorSegmentationGrey import color_segmentation_grey
+
+from validation import validation
 
 global CONSOLE_ARGUMENTS
 
@@ -129,8 +134,10 @@ if(USE_TEST == True):
     pathToMask = testPath+"resultMask/"
     
     if task == "CCL":    
-        listOfBB = color_segmentation(dfTest, testPath, hsv_rang)
-    
+        #listOfBB = color_segmentation(dfTest, testPath, hsv_rang)
+        color_segmentation_binary(dfTest, testPath)
+        color_segmentation_grey(dfTest, testPath)
+
     elif task == "SLW":
         
         init = datetime.datetime.now()
