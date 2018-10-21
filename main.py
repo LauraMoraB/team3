@@ -18,8 +18,19 @@ trainSplitPath = "datasets/split/train/"
 LOAD_DATA = False
 PLOT_STATS = False
 USE_TRAIN = False
-USE_VALIDATION = True
+USE_VALIDATION = False
 USE_TEST = False
+
+# el typeW indicates where images and text files are going to be stored
+typeW = "CCL_3"
+
+# The method to be executed
+task = "SLW"
+
+if task == "SLW":
+    # set to 2 or 3
+    method = 3
+
 
 #--->  COLOR THRESHOLDS  <----#
 hsv_rang = (
@@ -28,14 +39,6 @@ hsv_rang = (
      ,np.array([100,150,50]), np.array([140, 255, 255]) #BLUE
 )
 
-# el typeW indicates where images and text files are going to be stored
-typeW = "SLW_GT_SQUARE_TEST"
-
-task = "SLW"
-
-if task == "SLW":
-    # set to 2 or 3
-    method = 1
 
 ###--->  DATA PARSING AND SPLIT  <----#
 if(LOAD_DATA == True):
@@ -87,6 +90,8 @@ if(USE_VALIDATION == True):
 if(USE_TEST == True):
     
     path_complete=testPath+"gtResult/"
+    # aixo ha de canviar xk pilli les imatges de test 
+    pathToMask = testPath+"resultMask/"
     
     if task == "CCL":    
         listOfBB = color_segmentation(dfTest, testPath, hsv_rang)
@@ -95,7 +100,7 @@ if(USE_TEST == True):
         
         init = datetime.datetime.now()
         
-        window_canditate =  window_main(dfTest, path_complete, dfStats, typeW, method)
+        window_canditate =  window_main(dfTest, pathToMask, dfStats, typeW, method)
         
         end = datetime.datetime.now()
         print ("Total Time: ", end-init)
@@ -104,9 +109,7 @@ if(USE_TEST == True):
         for element in window_canditate:
             name, positions = element
             save_text_file(path_complete, positions, name, method, typeW)
-        
-        validation_window(dfTest, path_complete, typeW )
-      
+              
     
     elif task == "SLW_FAST":
         
@@ -121,11 +124,7 @@ if(USE_TEST == True):
             name, positions = element
             save_text_file(testPath, positions, name, method, typeW)
             
-        validation_window(dfTest, path_complete, typeW )
         
     else:
         print ("Entered method is invalid")
-    
-    
-
     
