@@ -7,6 +7,32 @@ import numpy as np
 from SlidingWindow import window_main
 from FastSlidingWindow import fast_sw
 import datetime
+from argparse import ArgumentParser
+
+global CONSOLE_ARGUMENTS
+
+def parse_arguments():
+    """
+	Parse line arguments
+	"""
+    parser = ArgumentParser()
+    general_args = parser.add_argument_group("General arguments")
+
+    general_args.add_argument("-ld", "--load_data", action='store_true', help="Load data")
+    general_args.add_argument("-ps", "--plot_slots", action='store_true', help="Ploting slots")
+
+    general_args.add_argument('-t', '--task', choices=('SLW2', 'SLW3', 'SLW_FAST', 'CCL'))
+
+    # create our group of mutually exclusive arguments
+    mutually_exclusive = parser.add_mutually_exclusive_group()
+    mutually_exclusive.add_argument("--test", action='store_true', help="test excludes train, validate")
+    mutually_exclusive.add_argument("--train", action='store_true', help="train excludes test, validate")
+    mutually_exclusive.add_argument("--validate", action='store_true', help="validate excludes test, train")
+
+    return parser.parse_args()
+
+
+CONSOLE_ARGUMENTS = parse_arguments()
 
 #--->  KEY PATHS  <----#
 testPath = 'datasets/test/'
@@ -15,6 +41,15 @@ validationSplitPath = "datasets/split/validation/"
 trainSplitPath = "datasets/split/train/"
 
 #--->  CONFIGURATION  <----#
+
+print(CONSOLE_ARGUMENTS.load_data)
+print(CONSOLE_ARGUMENTS.task)
+print(CONSOLE_ARGUMENTS.plot_slots)
+print(CONSOLE_ARGUMENTS.train)
+print(CONSOLE_ARGUMENTS.validate)
+print(CONSOLE_ARGUMENTS.test)
+
+
 LOAD_DATA = False
 PLOT_STATS = False
 USE_TRAIN = False
