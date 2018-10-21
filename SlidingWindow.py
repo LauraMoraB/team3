@@ -38,6 +38,9 @@ def get_window_size(df):
     winH_min = int(np.sqrt(minArea/meanAspect))
     winW_min = int(winH_min*meanAspect)
     
+    winW_min=winH_min=20
+    winW_max=winH_max=160
+    
     return winW_min, winH_min, winW_max, winH_max
 
 # Compute Fill Ratio
@@ -131,8 +134,9 @@ def compute_windows(df, pathToImage, line, dfStats):
     (winW1, winH1,winW2, winH2) = get_window_size(dfStats)
     
     severalSizes= []
-    for i in range(winW1,winW2,20):
-        for j in range(winH1,winH2,20):
+    step=20
+    for i in range(winW1,winW2,step):
+        for j in range(winH1,winH2,step):
             winW=i
             winH=j
     
@@ -151,11 +155,11 @@ def compute_windows(df, pathToImage, line, dfStats):
 
     return name,listBbox
 
-def window_main(df, path, dfStats):
+def window_main(df, path, dfStats, typeW):
     
     finalBBoxes =[]
     
-    for i in range(0,1): #(df.shape[0]):
+    for i in range(df.shape[0]):
          
         name, listb = compute_windows(df, path, i, dfStats)
             
@@ -173,7 +177,8 @@ def window_main(df, path, dfStats):
             endX = listb[j][3]
             cv2.rectangle(im, (startX, startY), (endX, endY), (0, 255, 255), 5)
         
-        pathSave="datasets/split/validation/resultWindow/SLW_Method1/" 
+        pathSave="datasets/split/validation/resultWindow/"+typeW+"/" 
+        #pathSave="datasets/split/validation/resultWindow/SLW_Method1/" 
         
         #Save Images
         if not os.path.exists(pathSave):
