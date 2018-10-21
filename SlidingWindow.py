@@ -29,19 +29,21 @@ def get_window_size(df):
     """
     # Get window size from Aspect Ratio in the traffic signs
     
-    meanAspect = df["FormFactorMean"].mean()
-    maxArea = df["AreaMax"].mean()
-    minArea = df["AreaMin"].mean()
-    winH_max = int(np.sqrt(maxArea/meanAspect))
-    winW_max = int(winH_max*meanAspect)
+#    meanAspect = df["FormFactorMean"].mean()
+#    maxArea = df["AreaMax"].mean()
+#    minArea = df["AreaMin"].mean()
+#    
+##    winH_max = int(np.sqrt(maxArea/meanAspect))
+#    winW_max = int(winH_max*meanAspect)
+#    
+#    winH_min = int(np.sqrt(minArea/meanAspect))
+#    winW_min = int(winH_min*meanAspect)
     
-    winH_min = int(np.sqrt(minArea/meanAspect))
-    winW_min = int(winH_min*meanAspect)
+    winW_min=40
+    winW_max=160
     
-    winW_min=winH_min=40
-    winW_max=winH_max=160
-    
-    return winW_min, winH_min, winW_max, winH_max
+    return winW_min, winW_max
+    #return winW_min, winH_min, winW_max, winH_max
 
 # Compute Fill Ratio
 def compute_fill_ratio(x,y, winW, winH, image):
@@ -117,7 +119,7 @@ def overlapping_removal(boundingBoxes, overlapThreshold, image):
     return pick
 
 
-def compute_windows(df, pathToImage, line, dfStats): 
+def compute_windows(df, pathToImage, line, dfStats, method): 
     # Get image name
     name = df["Image"].iloc[line]
     split = name.split(".")
@@ -127,16 +129,22 @@ def compute_windows(df, pathToImage, line, dfStats):
     imageRead = df.iloc[line]
     image = get_full_mask_window_result(imageRead, pathToImage)
         
-    (h, w)=image.shape[:2]        
-    overlapThreshold=0.3
-    (winW1, winH1,winW2, winH2) = get_window_size(dfStats)
+    (h, w)=image.shape[:2]    
     
+    overlapThreshold=0.3
+    winW1, winW2 = get_window_size(dfStats)
+    
+    if method == 3:
+        aspect = dfStats["FormFactorMean"].mean()
+    else: 
+        aspect = 1
+
     severalSizes= []
+    
     step=20
-    for i in range(winW1,winH2,step):
-        #for j in range(winH1,winH2,step):
+    for i in range(winW1,winW2,step):
         winW=i
-        winH=i
+        winH=int(i*aspect)
 
         stepSize= int(winW*0.66) # how much overlapp between windows
         allBBoxes, allBBoxes_list = window_detection(image, stepSize, windowSize=(winW, winH))
@@ -153,13 +161,13 @@ def compute_windows(df, pathToImage, line, dfStats):
 
     return name,listBbox
 
-def window_main(df, path, dfStats, typeW):
+def window_main(df, path, dfStats, typeW, method):
     
     finalBBoxes =[]
     
     for i in range(df.shape[0]):
          
-        name, listb = compute_windows(df, path, i, dfStats)
+        name, listb = compute_windows(df, path, i, dfStats, method)
             
         finalBBoxes.append((name,listb))  
         

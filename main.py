@@ -17,7 +17,7 @@ trainSplitPath = "datasets/split/train/"
 LOAD_DATA = False
 PLOT_STATS = False
 USE_TRAIN = False
-USE_VALIDATION = False
+USE_VALIDATION = True
 USE_TEST = False
 
 #--->  COLOR THRESHOLDS  <----#
@@ -28,8 +28,8 @@ hsv_rang = (
 )
 # ---> METHOD TO SAVE GT <--- #
 # el typeW indica la carpeta on guardaran els fitxers txt i les imatges
-typeW = "SLW_GT_SQUARE_RES"
-method = 1
+typeW = "SLW_GT_RECT_IMPROV"
+method = 3
 
 ###--->  DATA PARSING AND SPLIT  <----#
 if(LOAD_DATA == True):
@@ -60,11 +60,11 @@ if(USE_VALIDATION == True):
     #listOfBB = color_segmentation(dfValidation, validationSplitPath, hsv_rang)
     
     # amb el path, perteixes de gt o de la nostra segmentacio
-    #results = "resultMask/morphologyMask/"
-    results = "mask/"
+    results = "resultMask/finalMask/"
+    #results = "mask/"
     import datetime
     print ("Start: ", datetime.datetime.now())
-    window_canditate =  window_main(dfValidation, validationSplitPath+results, dfStats, typeW)
+    window_canditate =  window_main(dfValidation, validationSplitPath+results, dfStats, typeW, method)
     print ("End: ", datetime.datetime.now())
    # window_canditate =  fast_sw(dfValidation, validationSplitPath, dfStats)
     
@@ -72,10 +72,12 @@ if(USE_VALIDATION == True):
 #    pixel_validation(dfTrain, trainSplitPath, 'morphologyMask')
 #    pixel_validation(dfTrain, trainSplitPath, 'finalMask')
  
-#    
+    
     for element in window_canditate:
         name, positions = element
         save_text_file(validationSplitPath+"gtResult/", positions, name, method, typeW)
+    
+    validation_window(dfValidation, validationSplitPath, typeW )
  
 #if(USE_TEST == True):
     
@@ -83,5 +85,5 @@ if(USE_VALIDATION == True):
 
 # SLIDING WINDOWS SPEED COMPARISON
     
-validation_window(dfValidation, validationSplitPath, typeW )
+#
     
