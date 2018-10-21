@@ -17,7 +17,7 @@ trainSplitPath = "datasets/split/train/"
 LOAD_DATA = False
 PLOT_STATS = False
 USE_TRAIN = False
-USE_VALIDATION = True
+USE_VALIDATION = False
 USE_TEST = False
 
 #--->  COLOR THRESHOLDS  <----#
@@ -28,24 +28,24 @@ hsv_rang = (
 )
 # ---> METHOD TO SAVE GT <--- #
 # el typeW indica la carpeta on guardaran els fitxers txt i les imatges
-typeW = "SLW_GT_SQUARE"
+typeW = "SLW_GT_SQUARE_RES"
 method = 1
 
 ###--->  DATA PARSING AND SPLIT  <----#
-#if(LOAD_DATA == False):
-## df is created by Parsing training image folders
-#    df = create_df_train(fullTrainPath)
-#    # df is updated computing provided groundtruth informa2tion
-#    df = get_ground_truth(df, fullTrainPath)
-#    # df is created with test images
-#    dfTest = create_df_test(testPath)
-#    # stats are worked out over the df
-#    dfStats = compute_stats(df)
-#    # ds is splited into two sets (70%, 30%) taking into account signal area size
-#    (dfTrain, dfValidation) = split_by_type(df, fullTrainPath)
-#
-#if(PLOT_STATS == True):
-#    plot_stats(df)
+if(LOAD_DATA == True):
+# df is created by Parsing training image folders
+    df = create_df_train(fullTrainPath)
+    # df is updated computing provided groundtruth informa2tion
+    df = get_ground_truth(df, fullTrainPath)
+    # df is created with test images
+    dfTest = create_df_test(testPath)
+    # stats are worked out over the df
+    dfStats = compute_stats(df)
+    # ds is splited into two sets (70%, 30%) taking into account signal area size
+    (dfTrain, dfValidation) = split_by_type(df, fullTrainPath)
+
+if(PLOT_STATS == True):
+    plot_stats(df)
 #
 #if(USE_TRAIN == True):
 #    #--->  TRAIN DATA SEGMENTATION  <----#
@@ -62,7 +62,10 @@ if(USE_VALIDATION == True):
     # amb el path, perteixes de gt o de la nostra segmentacio
     #results = "resultMask/morphologyMask/"
     results = "mask/"
+    import datetime
+    print ("Start: ", datetime.datetime.now())
     window_canditate =  window_main(dfValidation, validationSplitPath+results, dfStats, typeW)
+    print ("End: ", datetime.datetime.now())
    # window_canditate =  fast_sw(dfValidation, validationSplitPath, dfStats)
     
 #    pixel_validation(dfTrain, trainSplitPath, 'colorMask')

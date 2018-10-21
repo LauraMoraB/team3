@@ -38,7 +38,7 @@ def get_window_size(df):
     winH_min = int(np.sqrt(minArea/meanAspect))
     winW_min = int(winH_min*meanAspect)
     
-    winW_min=winH_min=20
+    winW_min=winH_min=40
     winW_max=winH_max=160
     
     return winW_min, winH_min, winW_max, winH_max
@@ -126,25 +126,23 @@ def compute_windows(df, pathToImage, line, dfStats):
     # load the image and define the window width and height
     imageRead = df.iloc[line]
     image = get_full_mask_window_result(imageRead, pathToImage)
-    
-    (h, w)=image.shape[:2]
-    #(winW, winH) = get_window_size(df)
-    
+        
+    (h, w)=image.shape[:2]        
     overlapThreshold=0.3
     (winW1, winH1,winW2, winH2) = get_window_size(dfStats)
     
     severalSizes= []
     step=20
-    for i in range(winW1,winW2,step):
-        for j in range(winH1,winH2,step):
-            winW=i
-            winH=j
-    
-            stepSize= int(winW*overlapThreshold) # how much overlapp between windows
-            allBBoxes, allBBoxes_list = window_detection(image, stepSize, windowSize=(winW, winH))
-           
-            if allBBoxes_list:
-                severalSizes.append(allBBoxes_list[0])
+    for i in range(winW1,winH2,step):
+        #for j in range(winH1,winH2,step):
+        winW=i
+        winH=i
+
+        stepSize= int(winW*0.66) # how much overlapp between windows
+        allBBoxes, allBBoxes_list = window_detection(image, stepSize, windowSize=(winW, winH))
+       
+        if allBBoxes_list:
+            severalSizes.append(allBBoxes_list[0])
    
     finalBBoxes = overlapping_removal(np.array(severalSizes), overlapThreshold, image)
     
@@ -165,26 +163,26 @@ def window_main(df, path, dfStats, typeW):
             
         finalBBoxes.append((name,listb))  
         
-        imageRead = df.iloc[i]
-        image = get_full_mask_window_result(imageRead, path) 
-        
-        im =cv2.cvtColor(image.astype('uint8') * 255, cv2.COLOR_GRAY2BGR)
-            
-        for j in range(len(listb)):
-            startY = listb[j][0]
-            startX = listb[j][1]
-            endY = listb[j][2]
-            endX = listb[j][3]
-            cv2.rectangle(im, (startX, startY), (endX, endY), (0, 255, 255), 5)
-        
-        pathSave="datasets/split/validation/resultWindow/"+typeW+"/" 
+#        imageRead = df.iloc[i]
+#        image = get_full_mask_window_result(imageRead, path) 
+#        
+#        im =cv2.cvtColor(image.astype('uint8') * 255, cv2.COLOR_GRAY2BGR)
+#            
+#        for j in range(len(listb)):
+#            startY = listb[j][0]
+#            startX = listb[j][1]
+#            endY = listb[j][2]
+#            endX = listb[j][3]
+#            cv2.rectangle(im, (startX, startY), (endX, endY), (0, 255, 255), 5)
+#        
+        #pathSave="datasets/split/validation/resultWindow/"+typeW+"/" 
         #pathSave="datasets/split/validation/resultWindow/SLW_Method1/" 
         
         #Save Images
-        if not os.path.exists(pathSave):
-            os.makedirs(pathSave)
-            
-        cv2.imwrite(pathSave+df["Mask"].iloc[i], im)
-            
+#        if not os.path.exists(pathSave):
+#            os.makedirs(pathSave)
+#            
+#        cv2.imwrite(pathSave+df["Mask"].iloc[i], im)
+#            
     return finalBBoxes
          
