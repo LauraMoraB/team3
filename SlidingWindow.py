@@ -43,7 +43,7 @@ def get_window_size(df):
     winW_max=160
     
     return winW_min, winW_max
-    #return winW_min, winH_min, winW_max, winH_max
+
 
 # Compute Fill Ratio
 def compute_fill_ratio(x,y, winW, winH, image):
@@ -97,6 +97,7 @@ def window_detection(image, stepSize, windowSize):
             candidateWindow.append(possibleWindow)
             
             bigger=0
+            
     # Convert to numpy array for the overlap removal method
     boundingBoxes = np.array(candidateWindow)
     
@@ -128,7 +129,7 @@ def compute_windows(df, pathToImage, line, dfStats, method):
     # load the image and define the window width and height
     imageRead = df.iloc[line]
     image = get_full_mask_window_result(imageRead, pathToImage)
-        
+    
     (h, w)=image.shape[:2]    
     
     overlapThreshold=0.3
