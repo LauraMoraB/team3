@@ -16,6 +16,7 @@ def apply_morphology_operations(mask):
     
     mask = cv2.dilate(mask,kernelDialte, iterations = 1)
     mask = cv2.erode(mask ,kernelErode, iterations = 1)
+    
     return mask
     
 
@@ -100,7 +101,6 @@ def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listO
         if fillRatio > 0.45:
             
             window.append([y,x,h+y,w+x])
-            #listOfBB.append((imageName,x,y,w,h))
             
             listOfBB.append((imageName,window))
 
