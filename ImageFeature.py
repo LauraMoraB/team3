@@ -14,7 +14,9 @@ def get_full_mask(dfSingle, path):
     return cv2.imread(path+'mask/' + dfSingle['Mask'], 0)
 
 def get_full_mask_window_result(dfSingle, path):
-    return cv2.imread(path+dfSingle['Mask'], 0)
+    split = dfSingle["Image"].split(".")
+    name_mask = "mask."+split[0]+"."+split[1]+".png"
+    return cv2.imread(path+name_mask, 0)
 
 def get_full_mask_result(dfSingle, path, maskType):
     return cv2.imread(path+'resultMask/'+maskType+'/' + dfSingle['Mask'], 0)
@@ -67,6 +69,7 @@ def get_mask_aspect(dfSingle, path):
     (imgX, imgY) = np.shape(crop)
     imgOnes = np.count_nonzero(crop)    
     imgFillRatio = imgOnes/(imgX*imgY)
+    
     if(imgX < imgY):    
         imgFormFactor = abs(imgX/imgY)
     else:
