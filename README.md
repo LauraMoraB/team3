@@ -59,4 +59,4 @@ Parameters:
 - t: method to be executed
 - train/test/validate: data which is going to be analysed. Only one at a time can be used
 
-The paths to find the data has to be changed in the code.
+The paths to find the data have to be changed in the code.
