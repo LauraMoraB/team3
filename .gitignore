@@ -1,3 +1,8 @@
 Resultados/
 ResultMask/
+*ipnyb
+.ipnyb_checkpoints
 *.pyc
+*.png
+*.jpg
+*pycache__
