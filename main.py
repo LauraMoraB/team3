@@ -1,18 +1,17 @@
 from ImageFeature import get_ground_truth, save_text_file
 from ImageSplit import split_by_type, compute_stats, plot_stats
 from createDataframe import create_df_train, create_df_test
-from ImageSegmentation import color_segmentation
 from validation import pixel_validation, validation_window
 import numpy as np
 from SlidingWindow import window_main
 from FastSlidingWindow import fast_sw
 import datetime
 from argparse import ArgumentParser
-from ColorSegmentation import color_segmentation
+#from ColorSegmentation import color_segmentation
 from ColorSegmentationBinary import color_segmentation_binary
 from ColorSegmentationGrey import color_segmentation_grey
 
-from validation import validation
+#from validation import validation
 
 global CONSOLE_ARGUMENTS
 
@@ -47,29 +46,22 @@ trainSplitPath = "datasets/split/train/"
 
 #--->  CONFIGURATION  <----#
 
-print(CONSOLE_ARGUMENTS.load_data)
-print(CONSOLE_ARGUMENTS.task)
-print(CONSOLE_ARGUMENTS.plot_slots)
-print(CONSOLE_ARGUMENTS.train)
-print(CONSOLE_ARGUMENTS.validate)
-print(CONSOLE_ARGUMENTS.test)
-
-
-LOAD_DATA = False
-PLOT_STATS = False
-USE_TRAIN = False
-USE_VALIDATION = False
-USE_TEST = False
+LOAD_DATA = CONSOLE_ARGUMENTS.load_data
+PLOT_STATS = CONSOLE_ARGUMENTS.plot_slots
+USE_TRAIN = CONSOLE_ARGUMENTS.train
+USE_VALIDATION = CONSOLE_ARGUMENTS.validate
+USE_TEST = CONSOLE_ARGUMENTS.test
 
 # el typeW indicates where images and text files are going to be stored
 typeW = "CCL_3"
 
 # The method to be executed
-task = "SLW"
+task = CONSOLE_ARGUMENTS.task
 
-if task == "SLW":
-    # set to 2 or 3
+if task == "SLW3":
     method = 3
+elif task == "SLW2":
+    method=2
 
 
 #--->  COLOR THRESHOLDS  <----#
@@ -98,7 +90,7 @@ if(PLOT_STATS == True):
 #
 if(USE_TRAIN == True):
     #--->  TRAIN DATA SEGMENTATION  <----#
-    listOfBB = color_segmentation(dfTrain, trainSplitPath, hsv_rang)
+    color_segmentation_binary(dfTest, testPath)
     pixel_validation(dfTrain, trainSplitPath, 'colorMask')
     pixel_validation(dfTrain, trainSplitPath, 'morphologyMask')
     pixel_validation(dfTrain, trainSplitPath, 'finalMask')
@@ -134,11 +126,10 @@ if(USE_TEST == True):
     pathToMask = testPath+"resultMask/"
     
     if task == "CCL":    
-        #listOfBB = color_segmentation(dfTest, testPath, hsv_rang)
         color_segmentation_binary(dfTest, testPath)
         color_segmentation_grey(dfTest, testPath)
 
-    elif task == "SLW":
+    elif task == "SLW2" or task == "SLW3":
         
         init = datetime.datetime.now()
         
