@@ -1,7 +1,6 @@
 from ImageFeature import get_ground_truth, save_text_file
 from ImageSplit import split_by_type, compute_stats, plot_stats
 from createDataframe import create_df_train, create_df_test
-from ImageSegmentation import color_segmentation
 from validation import pixel_validation, validation_window
 import numpy as np
 from SlidingWindow import window_main
