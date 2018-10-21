@@ -2,6 +2,9 @@ from ImageFeature import get_ground_truth
 from ImageSplit import split_by_type, compute_stats, plot_stats
 from createDataframe import create_df_train, create_df_test
 from ColorSegmentation import color_segmentation
+from ColorSegmentationBinary import color_segmentation_binary
+from ColorSegmentationGrey import color_segmentation_grey
+
 from validation import validation
 
 #---> KEY PATHS  <----#
@@ -20,7 +23,8 @@ trainSplitPath = "datasets/split/train/"
 LOAD_DATA = False
 PLOT = False
 FULL_TRAIN = False
-FULL_VALIDATION = True
+FULL_VALIDATION = False
+TEST = True
 
 #---> DATA PARSING AND SPLIT  <----#
 if(LOAD_DATA == True):
@@ -47,3 +51,7 @@ if(FULL_TRAIN == True):
     #---> TRAIN DATA SEGMENTATION  <----#
     color_segmentation(dfTrain, trainSplitPath)
     validation(dfTrain, trainSplitPath)
+    
+if(TEST == True):
+#    color_segmentation_binary(dfTest, testPath)
+    color_segmentation_grey(dfTest, testPath)

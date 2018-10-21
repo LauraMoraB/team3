@@ -42,7 +42,7 @@ def apply_color_mask(fullImage):
 
 
 
-def color_segmentation(df, path):
+def color_segmentation_grey(df, path):
 
     for i in range(len(df)):       
         # Gets images one by one
@@ -66,7 +66,7 @@ def color_segmentation(df, path):
         
         ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
         heir, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        txtFile = open("bbresults/gt."+imageName[:-3]+"txt", "w")
+        txtFile = open("bbresults/grey/gt."+imageName[:-3]+"txt", "w")
 
         if contours:
             for cnt in contours:
@@ -87,9 +87,9 @@ def color_segmentation(df, path):
 #        plt.show()
 #        plt.imshow(fullMask)
 #        plt.show()
-#        plt.imshow(rgbimg)
-#        plt.show()
-        cv2.imwrite(path+'resultMask/mask.'+imageName[:-3]+'png', fullMask)
+        plt.imshow(rgbimg)
+        plt.show()
+        cv2.imwrite(path+'resultMask/grey/mask.'+imageName[:-3]+'png', fullMask)
 #        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', rgbimg)
 
 
@@ -118,7 +118,7 @@ def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, txtFi
             
             txtFile.write(str(float(y))+" "+ str(float(x))+ " " + str(float(h+y)) + " " + str(float(w+x)) + " " + tipo + "\n")
 
-#            cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),10)
+            cv2.rectangle(image,(x,y),(x+w,y+h),(0,255,0),10)
 
                 
 def get_region_of_interest(x, y ,w, h, currentMask):
@@ -166,18 +166,6 @@ def get_templete_matching(x, y ,w, h, maskSegmented, image):
             # Draw a rectangle around the matched region. 
             for pt in zip(*loc[::-1]): 
     #            cv2.rectangle(image, (pt[0]+x, pt[1]+y), (pt[0] + x + w, pt[1] + y + h), (0,255,0), 5)
-#                if(i==1 or i ==5 ):
-#                    cv2.putText(image, 'CIRCULO', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (255,0,0), 3)
-#                    tipo = "CDE"
-#                elif(i==2 or i ==6):
-#                    cv2.putText(image, 'RECTANGLE', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (0,255,0), 3)
-#                    tipo = "F"
-#                elif(i==3 or i ==7):
-#                    cv2.putText(image, 'TRIANGLE', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (0,0,255), 3)
-#                    tipo = "B"
-#                else:
-#                    cv2.putText(image, 'WARNING', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (255,255,255), 3)
-#                    tipo = "A"
                 if(i==1):
                     cv2.putText(image, 'A', (pt[0]+x, pt[1]+y),cv2.FONT_HERSHEY_SIMPLEX, 3, (0,255,0), 3)
                     tipo = "A"
