@@ -1,7 +1,15 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Oct 23 19:32:22 2018
+import cv2
+import numpy as np
 
-@author: laura
-"""
+# Paths
+pathDS = "dataset/"
 
+# Read Images
+df = create_df(pathDS)
+
+# Compute Histogram
+
+
+## ....
+
+# Save Results..
