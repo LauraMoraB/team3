@@ -1,12 +1,13 @@
 import numpy as np
 import pandas as pd
-from utils import create_df, submission_list, save_pkl
+from utils import create_df, submission_list, save_pkl, mapk
 
 # Paths
 pathDS = "dataset/"
 pathQueries = "queries/"
 pathResults = "results/"
-
+# Number of results per query
+k = 10
 # Read Images
 df = create_df(pathDS)
 
@@ -23,4 +24,9 @@ dfResult = pd.DataFrame({
     })
 
 result_list = submission_list(dfResult)
+
+query_list = result_list
+evaluation = mapk(query_list, result_list, k)
+
+
 save_pkl(result_list, pathResults)
