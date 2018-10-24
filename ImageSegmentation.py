@@ -19,33 +19,62 @@ def apply_morphology_operations(mask):
     return mask
     
 
-def apply_color_mask(fullImage, hsv_rang):
+def apply_color_mask(fullImage):
+
+    rojo_bajos1 = np.array([0,150,80], dtype=np.uint8) #RED
+    rojo_altos1 = np.array([10, 255, 255], dtype=np.uint8) #RED
     
-    size_hsv_rang = np.size(hsv_rang,0)
-    for i in range(0, size_hsv_rang-1, 2):
-        lower = hsv_rang[i]
-        upper = hsv_rang[i+1] 
-        
-        mask = cv2.inRange(fullImage, lower, upper)
-        if i==0:
-            maskConcatenated = mask
-        else:
-            maskConcatenated = cv2.add(maskConcatenated, mask)
+    rojo_bajos2 = np.array([170,150,80],dtype=np.uint8) #RED
+    rojo_altos2 = np.array([179, 255, 255], dtype=np.uint8) #RED
+    
+    blue_bajos1 = np.array([90,150,60], dtype=np.uint8) #BLUE
+    blue_altos1 = np.array([130, 255, 255], dtype=np.uint8) #BLUE
+    
+    
+    mascara_rojo1 = cv2.inRange(fullImage, rojo_bajos1, rojo_altos1)
+    mascara_rojo2 = cv2.inRange(fullImage, rojo_bajos2, rojo_altos2)
+    mascara_blue1 = cv2.inRange(fullImage, blue_bajos1, blue_altos1)
+
+    maskConcatenated = cv2.add(mascara_rojo1, mascara_rojo2)
+     
+    maskConcatenated = cv2.add(maskConcatenated, mascara_blue1)
             
     return maskConcatenated
     
 
+def preproces_image(fullImage):
+    hsv = cv2.cvtColor(fullImage, cv2.COLOR_BGR2HSV )
+    hsv_planes = cv2.split(hsv)
+    #clipLimit limite de contraste - tileGridSize ventana 
+    clahe = cv2.createCLAHE(clipLimit=3.0,tileGridSize=(8,8))
+    # V equalyse luminance
+    hsv_planes[2] = clahe.apply(hsv_planes[2])        
+    hsv = cv2.merge(hsv_planes)
+    
+    bgr_ecualizado = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR ) 
+        
+    return bgr_ecualizado
 
 
-def color_segmentation(df, path, hsv_rang):
+def color_segmentation(df, path):
 
-    listOfBB = []
-    for i in range(len(df)):       
+   listOfBB = []
+   for i in range(len(df)):       
         # Gets images one by one
         dfSingle = df.iloc[i]
         imgBGR = get_full_image(dfSingle, path)    
-        imageName = dfSingle['Image']   
-
+        imageName = dfSingle['Image']  
+         # Prepares mask files
+        bgr_ecualizado= preproces_image(imgBGR)
+        #lowpass filter
+#        blur =cv2.bilateralFilter(bgr_ecualizado,5,100,100) 
+        gaussian_3 = cv2.GaussianBlur(bgr_ecualizado, (9,9), 10.0)
+        unsharp_image = cv2.addWeighted(bgr_ecualizado, 1.5, gaussian_3, -0.5, 0, bgr_ecualizado)
+        imgBGR=unsharp_image
+#        imgBGR=bgr_ecualizado
+#        imgBGR=blur
+        cv2.imwrite(path+'Result_fullImage/'+imageName[:-3]+'png', imgBGR)
+ 
         # Prepares mask files
         sizeImg  = np.shape(imgBGR)     
         fullMask = np.zeros((sizeImg[0], sizeImg[1]))
@@ -54,15 +83,11 @@ def color_segmentation(df, path, hsv_rang):
         imgRGB = cv2.cvtColor(imgHSV, cv2.COLOR_HSV2RGB)
 
         # Get mask, color + morphology         
-        color_mask = apply_color_mask(imgHSV, hsv_rang)
+        color_mask = apply_color_mask(imgHSV)
         morphology_mask = apply_morphology_operations(color_mask)         
         bitwiseRes = cv2.bitwise_and(imgHSV, imgHSV, mask = morphology_mask)        
  
-        blur = cv2.blur(bitwiseRes, (5, 5), 0)            
-        imgray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
-        
-        ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
-        heir, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        heir, contours, _ = cv2.findContours(morphology_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         if contours:
             for cnt in contours:
                 x,y,w,h = cv2.boundingRect(cnt)
@@ -77,7 +102,7 @@ def color_segmentation(df, path, hsv_rang):
         imgBGR = cv2.cvtColor(imgRGB, cv2.COLOR_RGB2BGR)
         cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', imgBGR)
     
-    return listOfBB
+   return listOfBB
 
 
 def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listOfBB, imageName):
@@ -85,7 +110,7 @@ def get_inside_grid_segmentation(x, y ,w, h, image, fullMask, currentMask, listO
         aspect = w/h
     else:
         aspect = h/w
-    if (280 > w > 30) and (280  >h > 30) and aspect>0.75:
+    if (280 > w > 30) and (280  >h > 30) and aspect>0.5:
         
 #        bitwiseResSegmented = get_region_of_interest(x, y ,w, h, currentMask)
         bitwiseResSegmented = currentMask[y:y+h,x:x+w]

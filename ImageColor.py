@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 from scipy.stats import norm
 from matplotlib import pyplot as plt
-from ImageFeature import getGridOfImage 
+#from ImageFeature import getGridOfImage 
 
 
 def pixelescolorDetection(imagen, colorType,signalType, name):
@@ -124,23 +124,23 @@ def computeColor(image_dict, spaceType, colorType):
 
 
 
-if __name__ == '__main__':
-    imgType = 'D' 
-    spaceType = 'HSV'  
-#    spaceTypeRGB = 'RGB' 
-    colorType = 'blue'         
-    try:
-        (color_dict) = computeColor(image_dict, spaceType, colorType) 
-        #(color_dict) = computeColor(image_dict, spaceTypeRGB, colorType) 
-    except NameError:
-        image_dict = getGridOfImage()
-        (color_dict) = computeColor(image_dict, spaceType, colorType) 
-    
-
-
-    plt.imshow(color_dict[imgType][2])
-    plt.title('signalType '+imgType)
-    plt.show()
+#if __name__ == '__main__':
+#    imgType = 'D' 
+#    spaceType = 'HSV'  
+##    spaceTypeRGB = 'RGB' 
+#    colorType = 'blue'         
+#    try:
+#        (color_dict) = computeColor(image_dict, spaceType, colorType) 
+#        #(color_dict) = computeColor(image_dict, spaceTypeRGB, colorType) 
+#    except NameError:
+#        image_dict = getGridOfImage()
+#        (color_dict) = computeColor(image_dict, spaceType, colorType) 
+#    
+#
+#
+#    plt.imshow(color_dict[imgType][2])
+#    plt.title('signalType '+imgType)
+#    plt.show()
 
 #    plt.imshow(color_dict[imgType][1])
 #    plt.title('signalType '+imgType+' spaceType'+spaceTypeRGB)

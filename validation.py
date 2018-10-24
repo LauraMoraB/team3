@@ -179,6 +179,11 @@ def pixel_validation(df, pathGT, maskType):
     print('Specificity: ', pixel_specificity)
     print('Recall: ', pixel_sensitivity)
     print('F1: ', pixel_F1)
+    print('TruePos: ', TruePos)
+    need= TruePos/1062927
+    print('need: ', need)
+
+
 
     return [TruePos, FalsePos, FalseNeg, TrueNeg]
 
