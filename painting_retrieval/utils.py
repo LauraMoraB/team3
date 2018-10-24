@@ -1,6 +1,7 @@
 import pandas as pd
 import pickle
 import os
+import cv2
 
 def create_df(path_images):
     listImages =[]
@@ -17,9 +18,24 @@ def create_df(path_images):
 
 ## Save PKL
 # Revisar inputs
-def save_pkl(list_of_list,path):
-    with open(path+'.pkl', 'wb') as f:
+def save_pkl(list_of_list, path):
+    with open(path+'results.pkl', 'wb') as f:
         pickle.dump(list_of_list, f)
 
 def get_image(df, path):
     return cv2.imread(path + df['Image'], 1)
+
+def submission_list(df):
+    project_result = []
+    for query in df.Query.unique():
+        dfQuery = df[df.Query == query]
+        query_result = []
+        for i in range(len(dfQuery)):
+            dfImg = dfQuery[dfQuery.Order == i]
+            query_result.append(dfImg['Image'].values[0])
+        project_result.append(query_result.copy())
+    return project_result
+
+
+         
+
