@@ -1,6 +1,8 @@
 import pandas as pd
 import pickle
 import os
+import numpy as np
+import cv2
 
 def create_df(path_images):
     listImages =[]
@@ -13,6 +15,15 @@ def create_df(path_images):
     df["Image"] = listImages
 
     return df
+
+
+def get_full_image(dfSingle, path):
+    return cv2.imread(path + dfSingle['Image'],1)
+
+def get_cropped_image(dfSingle, path):
+    image = get_full_image(dfSingle, path)
+    return image[int(dfSingle["UpLeft(Y)"]):int(dfSingle["DownRight(Y)"]), int(dfSingle["UpLeft(X)"]):int(dfSingle["DownRight(X)"])]
+
 
 
 ## Save PKL
