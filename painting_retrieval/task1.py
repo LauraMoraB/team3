@@ -22,42 +22,54 @@ def equalize_1_channel(grayIm):
 # image white balance
 
 # compute histogram
-def compute_histogram(im, channel):
+def compute_histogram(im, channel, mask=None,bins=256):
     """
-    channel: must be 0,1 or 2
+    channel: must be 0, 1 or 2
     """
-    hist = cv2.calcHist([im], [channel], None, [256], [0,256])
+    hist = cv2.calcHist([im], [channel], mask, [bins], [0,bins])
     return hist
 
-def histogram_region(im, channel, mask):
+def histogram_region(im, channel, level):
     """
-    compute histogram of one of the regions in the image
-    """
-    hist = cv2.calcHist([im], [channel], mask, [256], [0,256])
-    return hist
-
-# pyramid images compression
-# Gaussian pyramid
-def gaussian_pyramid(im, levels):
-    G = im.copy()
-    pyramid = [G]
-    for i in range(levels):
-        G = cv2.pyrDown(G)
-        pyramid.append(G)
-        
-    return pyramid
-
-# divide image in 4 zones
-def divide_image(im, division):
-    portions=[]
-    w, h = im.shape()
-    w_small=w/division
-    h_small=h/division
+    im: image
+    level: level of segmentation
+    channel: 0,1,2
     
-    for position in range(0, w, w_small) :
-        portions.append(position)
-        
-        
-    return portions
+    return: list of histograms from the different image regions 
+    hist_channel = [ [hist_region1], [hist_region2],.., [hist_regionN] ]
+    
+    """
+    div = 2**level
+       
+    w, h = im.shape[0] , im.shape[1]
+    
+    w_step = int(w/div)
+    h_step = int(h/div)
+    
+    return [compute_histogram(im[y:y+h_step,x:x+w_step], channel) \
+    for x in range(0,w,w_step) \
+        if x+w_step <= w \
+    for y in range(0,h,h_step) \
+        if y+h_step<= h]
+
+
+
+def divide_image(im, div):
+    """
+    im: image
+    div: number of regions per absis
+    
+    return: list of [y1, x1, y2, x2] from the different image regions 
+    """
+    w, h = im.shape[0] , im.shape[1]
+    
+    w_step = int(w/div)
+    h_step = int(h/div)
+
+    return [[y,x,y+h_step,x+w_step] \
+    for x in range(0,w,w_step) \
+        if x+w_step <= w \
+    for y in range(0,h,h_step) \
+        if y+h_step<= h]
 
     

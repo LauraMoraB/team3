@@ -26,8 +26,8 @@ def save_pkl(list_of_list,path):
     with open(path+'.pkl', 'wb') as f:
         pickle.dump(list_of_list, f)
 
-def get_image(df, path):
-    return cv2.imread(path + df['Image'], 1)
+def get_image(im, path):
+    return cv2.imread(path+im, 1)
 
 def plot_gray(im):
     plt.imshow(im, cmap='gray')
