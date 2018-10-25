@@ -1,7 +1,6 @@
 import cv2
-import numpy as np
 from matplotlib import pyplot as plt
-from utils import create_df, submission_list, save_pkl, mapk, get_image, get_image, plot_rgb
+from utils import create_df, submission_list, save_pkl, mapk, get_image, plot_rgb
 from method1 import store_histogram_total
 from task5 import haar_wavelet, haar_sticking
 import pandas as pd
