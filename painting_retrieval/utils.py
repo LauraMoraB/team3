@@ -18,7 +18,6 @@ def create_df(path_images):
 
 
 ## Save PKL
-# Revisar inputs
 def save_pkl(list_of_list, path):
     with open(path+'results.pkl', 'wb') as f:
         pickle.dump(list_of_list, f)
@@ -37,6 +36,7 @@ def submission_list(df):
         project_result.append(query_result.copy())
     return project_result
 
+## Average precision at K calculation
 def apk(actual, predicted, k=10):
     """
     Computes the average precision at k.
@@ -75,6 +75,7 @@ def apk(actual, predicted, k=10):
 
     return score / min(len(actual), k)
 
+## Mean average precision at K calculation
 def mapk(actual, predicted, k=10):
     """
     Computes the mean average precision at k.
