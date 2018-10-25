@@ -9,6 +9,7 @@ import pandas as pd
 pathDS = "dataset/"
 pathQueries = "queries/"
 pathResults = "results/"
+
 # Number of results per query
 k = 10
 # Read Images
@@ -17,17 +18,17 @@ df = create_df(pathDS)
 hists= store_histogram_total(df, channel_name=['R','G','B'], level=1)
 
 
-# Texture Descriptors - Haar Wavelets technique
-imgTest = get_image(df.iloc[5], pathDS)
-plt.imshow(imgTest)
-plt.show()
-grayImg = cv2.cvtColor(imgTest, cv2.COLOR_BGR2GRAY)
-
-level = 0
-coeff = haar_wavelet(grayImg, level)
-imgHaar = haar_sticking(coeff, level)
-plt.imshow(imgHaar, cmap='gray')
-plt.show()
+## Texture Descriptors - Haar Wavelets technique
+#imgTest = get_image(df.iloc[5], pathDS)
+#plt.imshow(imgTest)
+#plt.show()
+#grayImg = cv2.cvtColor(imgTest, cv2.COLOR_BGR2GRAY)
+#
+#level = 0
+#coeff = haar_wavelet(grayImg, level)
+#imgHaar = haar_sticking(coeff, level)
+#plt.imshow(imgHaar, cmap='gray')
+#plt.show()
 
 
 # Save Results..

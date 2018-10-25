@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 import pywt
 from skimage.feature import greycomatrix, greycoprops
