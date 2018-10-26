@@ -1,6 +1,7 @@
 import pandas as pd
 import pickle
 import os
+import cv2
 
 def create_df(path_images):
     listImages =[]
