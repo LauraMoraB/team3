@@ -158,6 +158,11 @@ def compute_histograms(df, path, spaceType):
         plt.xlabel('channel0')  
         plt.title('channel0'+dfSingle)
         fig.savefig('Histograma/'+imageName)
+        
+        
+
+        
+        
 #        imhistograma=cv2.imread('channel0.png',1) 
 #        cv2.imwrite('Cambios/imhistograma'+imageName[:-3]+'png', imhistograma)
 
@@ -258,8 +263,28 @@ def color_characterization(df, path, spaceType_prep, spaceType_hist):
         plt.ylabel('f')  
         plt.xlabel('channel0')  
         plt.title('channel0'+dfSingle)
-        fig.savefig('Cambios/Histograma_'+spaceType_hist+imageName)
+        fig.savefig('Cambios/Histograma_channel0_'+spaceType_hist+imageName)
         plt.close(fig)
+       
+        fig2=plt.figure()
+        ax=fig2.add_subplot(111)
+        ax.plot([1,2,3])
+        plt.hist(channel1Single, bins = 25, color= None)
+        plt.ylabel('f')  
+        plt.xlabel('channel1')  
+        plt.title('channel1'+dfSingle)
+        fig2.savefig('Cambios/Histograma_channel1_'+spaceType_hist+imageName)
+        plt.close(fig2)
+
+        fig3=plt.figure()
+        ax=fig3.add_subplot(111)
+        ax.plot([1,2,3])
+        plt.hist(channel1Single, bins = 25, color= None)
+        plt.ylabel('f')  
+        plt.xlabel('channel2')  
+        plt.title('channel2'+dfSingle)
+        fig2.savefig('Cambios/Histograma_channel2_'+spaceType_hist+imageName)
+        plt.close(fig3)
         
         
 def equalize_3_channels(colorIm):
