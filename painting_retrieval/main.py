@@ -4,6 +4,7 @@ import numpy as np
 from utils import create_df, get_full_image, plot_rgb
 from task1 import color_characterization, compute_histograms, divide_image
 from method1 import store_histogram_total
+from global_color_histograms import global_color_hist,save_global_color_hist
 # Paths
 pathDS = "dataset/museum_set_random/"
 pathDSquery = "query_devel/query_devel_random/"
@@ -21,10 +22,21 @@ df = create_df(pathDS)
 # Compute HistogramGaby
 dfq = create_df(pathDSquery)
 #color_characterization(df, pathDS, 'HSV')
-color_characterization(df, pathDS, 'HSV', "HLS")
+#color_characterization(df, pathDS, 'HSV', "HLS")
 
 #compute_histograms(df, pathDS,'HSV')
+#def prueba(df, pathDS):
 
+#preproces_image(fullImage)
+#global_color(fullImage, spaceType)
+for i in range(len(df)):       
+    # Gets images one by one
+    dfSingle = df.iloc[i]
+    imgBGR = get_full_image(dfSingle, pathDS)    
+    imageName = dfSingle['Image']  
+    spaceType_hist= "HSV"
+    channel0Single, channel1Single, channel2Single = global_color_hist(imgBGR, spaceType_hist)
+    save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSingle,spaceType_hist, imageName)
 
 ## ....
 ## divide Image in 4 regions LAURA
