@@ -4,10 +4,15 @@ Created on Tue Oct 23 19:34:18 2018
 
 @author: Gaby
 """
-from utils import get_full_image
+from utils import get_full_image, get_image
 from matplotlib import pyplot as plt
+import pandas as pd
 import numpy as np
 import cv2
+import matplotlib
+matplotlib.use('Agg')
+
+
 
 def compute_normColor(im, channel):
     # convert input image to the normRGB color space
@@ -44,9 +49,9 @@ def preproces_image(fullImage,spaceType):
         hsv_planes[2] = clahe.apply(hsv_planes[2])        
         hsv = cv2.merge(hsv_planes)
         
-        bgr_ecualizado = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR ) 
+        ch_image = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR ) 
         
-    return bgr_ecualizado
+    return ch_image
     
 def image2list(image):
     # convert image array into unidimensional(pixel) ordered list
@@ -65,7 +70,49 @@ def channel2list(image): #######################################################
 def get_px_values(dfSingle, path, spaceType):
     # return hue and sat values for valid px  
     imagen = get_full_image(dfSingle, path)
+    
+    chimage= changeSpaceColor(imagen, spaceType)
+    channel0L, channel1L, channel2L=channel2list(chimage)
+ 
+    imageL = image2list(imagen)
 
+    validch0 = []
+    validch1 = []
+    validch2 = []
+    pxCount = 0
+    for px in imageL:
+        # (px)
+        if any(px):
+            validch0.append(channel0L[pxCount])
+            validch1.append(channel1L[pxCount])
+            validch2.append(channel2L[pxCount])
+        pxCount += 1
+    return (validch0, validch1, validch2)
+
+def get_px_values_cut(dfSingle, path, spaceType):
+    # return hue and sat values for valid px  
+    imagen = get_full_image(dfSingle, path)
+    
+    chimage= changeSpaceColor(imagen, spaceType)
+    channel0L, channel1L, channel2L=channel2list(chimage)
+ 
+    imageL = image2list(imagen)
+
+    validch0 = []
+    validch1 = []
+    validch2 = []
+    pxCount = 0
+    for px in imageL:
+        # (px)
+        if any(px):
+            validch0.append(channel0L[pxCount])
+            validch1.append(channel1L[pxCount])
+            validch2.append(channel2L[pxCount])
+        pxCount += 1
+    return (validch0, validch1, validch2)
+
+def get_px_one(imagen, spaceType):
+    # return hue and sat values for valid px      
     chimage= changeSpaceColor(imagen, spaceType)
     channel0L, channel1L, channel2L=channel2list(chimage)
  
@@ -94,18 +141,33 @@ def compute_histograms(df, path, spaceType):
 
     for i in range(len(df)):       
         # Gets images one by one
-        dfSingle = df.iloc[i]
+        dfSingle = df.iloc[0]
+        imageName = dfSingle['Image']  
+
         (channel0Single, channel1Single, channel2Single) = get_px_values(dfSingle, path, spaceType)
         
         channel0L.extend(channel0Single)
         channel1L.extend(channel1Single)
         channel2L.extend(channel2Single)
-    
-    plt.hist(channel0L, bins = 25, color = colors.pop(0))
-    plt.ylabel('f')
-    plt.xlabel('channel0')
-    plt.title('channel0L')
-    plt.show()
+        
+        fig=plt.figure()
+        ax=fig.add_subplot(111)
+        ax.plot([1,2,3])
+        plt.hist(channel0Single, bins = 25, color = colors.pop(0))
+        plt.ylabel('f')  
+        plt.xlabel('channel0')  
+        plt.title('channel0'+dfSingle)
+        fig.savefig('Histograma/'+imageName)
+#        imhistograma=cv2.imread('channel0.png',1) 
+#        cv2.imwrite('Cambios/imhistograma'+imageName[:-3]+'png', imhistograma)
+
+
+
+#    plt.hist(channel0L, bins = 25, color = colors.pop(0))
+#    plt.ylabel('f')
+#    plt.xlabel('channel0')
+#    plt.title('channel0L')
+#    plt.show()
     
 #    plt.hist(channel1L, bins = 25, color = colors.pop(0))
 #    plt.ylabel('f')
@@ -147,15 +209,28 @@ def changeSpaceColor(imagen, spaceType):
     else:
         return imagen
     
-def color_characterization(df, path):
+def white_balance_LAB(fullImage, spaceType):
+    result=changeSpaceColor(fullImage, spaceType)
+    avg_a = np.average(result[:, :, 1])
+    avg_b = np.average(result[:, :, 2])
+    result[:, :, 1] = result[:, :, 1] - ((avg_a - 128) * (result[:, :, 0] / 255.0) * 1.1)
+    result[:, :, 2] = result[:, :, 2] - ((avg_b - 128) * (result[:, :, 0] / 255.0) * 1.1)
+    result = cv2.cvtColor(result, cv2.COLOR_LAB2BGR)
+    return result
 
-   for i in range(len(df)):       
+def color_characterization(df, path, spaceType_prep, spaceType_hist):
+    #♣colors = ['k', 'r', 'g', 'b', 'm', 'c', 'y']
+    channel0L=[]
+    channel1L=[]
+    channel2L=[]
+
+    for i in range(len(df)):       
         # Gets images one by one
         dfSingle = df.iloc[i]
         imgBGR = get_full_image(dfSingle, path)    
         imageName = dfSingle['Image']  
          # Prepares mask files
-        bgr_ecualizado= preproces_image(imgBGR, 'HSV')
+        bgr_ecualizado= preproces_image(imgBGR, spaceType_prep)
         cv2.imwrite('Cambios/bgr_ecualizado_'+imageName[:-3]+'png', bgr_ecualizado)
 
         #lowpass filter
@@ -166,13 +241,98 @@ def color_characterization(df, path):
 #        imgBGR=bgr_ecualizado
 #        imgBGR=blur
         cv2.imwrite('Cambios/unsharp_image_'+imageName[:-3]+'png', unsharp_image)
-   
- 
-#        heir, contours, _ = cv2.findContours(morphology_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-#        if contours:
-#            for cnt in contours:
-#                x,y,w,h = cv2.boundingRect(cnt)
-#                cv2.drawContours(bitwiseRes, [cnt], 0,255,-1)
-#        
-#        imgBGR = cv2.cvtColor(imgRGB, cv2.COLOR_RGB2BGR)
-#        cv2.imwrite(path+'resultMask/resBB.'+imageName[:-3]+'png', imgBGR)
+        im_balance=white_balance_LAB(imgBGR,"LAB")
+        cv2.imwrite('Cambios/im_balance_'+imageName[:-3]+'png', im_balance)
+# Gets images one by one
+
+        (channel0Single, channel1Single, channel2Single) = get_px_one(im_balance, spaceType_hist)
+        
+        channel0L.extend(channel0Single)
+        channel1L.extend(channel1Single)
+        channel2L.extend(channel2Single)
+        
+        fig=plt.figure()
+        ax=fig.add_subplot(111)
+        ax.plot([1,2,3])
+        plt.hist(channel0Single, bins = 25, color= None)
+        plt.ylabel('f')  
+        plt.xlabel('channel0')  
+        plt.title('channel0'+dfSingle)
+        fig.savefig('Cambios/Histograma_'+spaceType_hist+imageName)
+        plt.close(fig)
+        
+        
+def equalize_3_channels(colorIm):
+    """
+    Image equalization for three channels
+    
+    Return: equalized image
+    """
+    for c in range(0, 2):
+       colorIm[:,:,c] = cv2.equalizeHist(colorIm[:,:,c])
+       
+    return colorIm
+
+def equalize_1_channel(grayIm):
+    grayIm = cv2.equalizeHist(grayIm)
+    return grayIm
+
+# image white balance
+
+# compute histogram
+def compute_histogram(im, channel,mask=None,bins=256):
+    """
+    channel: must be 0,1 or 2
+    """
+    hist = cv2.calcHist([im], [channel], mask, [bins], [0,bins])
+    return hist
+
+def histogram_region(im, channel, level):
+    """
+    im: image
+    level: level of segmentation
+    channel: 0,1,2
+    
+    return: list of histograms from the different image regions 
+    hist_channel = [ [hist_region1], [hist_region2],.., [hist_regionN] ]
+    
+    """
+    div = 2**level
+       
+    w, h = im.shape[0] , im.shape[1]
+    
+    w_step = int(w/div)
+    h_step = int(h/div)
+    
+    return [compute_histogram(im[y:y+h_step,x:x+w_step], channel) \
+    for x in range(0,w,w_step) \
+        if x+w_step <= w \
+    for y in range(0,h,h_step) \
+        if y+h_step<= h]
+
+# pyramid images compression
+# Gaussian pyramid
+def gaussian_pyramid(im, levels):
+    G = im.copy()
+    pyramid = [G]
+    for i in range(levels):
+        G = cv2.pyrDown(G)
+        pyramid.append(G)
+        
+    return pyramid
+
+# divide image in 4 zones
+def divide_image(im, division):
+    
+    w = im.shape[0]
+    h = im.shape[1]
+
+    
+    w_step = int(w/div)
+    h_step = int(h/div)
+
+    return [[y,x,y+h_step,x+w_step] \
+    for x in range(0,w,w_step) \
+        if x+w_step <= w \
+    for y in range(0,h,h_step) \
+        if y+h_step<= h]
