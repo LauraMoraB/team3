@@ -1,5 +1,5 @@
 import cv2
-import numpy as numpy
+import numpy as np
 from matplotlib import pyplot as plt
 from utils import get_image
 
@@ -22,8 +22,54 @@ def equalize_1_channel(grayIm):
 # image white balance
 
 # compute histogram
+def compute_histogram(im, channel, mask=None,bins=256):
+    """
+    channel: must be 0, 1 or 2
+    """
+    hist = cv2.calcHist([im], [channel], mask, [bins], [0,bins])
+    return hist
 
-# pyramid images compression
+def histogram_region(im, channel, level):
+    """
+    im: image
+    level: level of segmentation
+    channel: 0,1,2
+    
+    return: list of histograms from the different image regions 
+    hist_channel = [ [hist_region1], [hist_region2],.., [hist_regionN] ]
+    
+    """
+    div = 2**level
+       
+    w, h = im.shape[0] , im.shape[1]
+    
+    w_step = int(w/div)
+    h_step = int(h/div)
+    
+    return [compute_histogram(im[y:y+h_step,x:x+w_step], channel) \
+    for x in range(0,w,w_step) \
+        if x+w_step <= w \
+    for y in range(0,h,h_step) \
+        if y+h_step<= h]
 
-# divide image in 4 zones
+
+
+def divide_image(im, div):
+    """
+    im: image
+    div: number of regions per absis
+    
+    return: list of [y1, x1, y2, x2] from the different image regions 
+    """
+    w, h = im.shape[0] , im.shape[1]
+    
+    w_step = int(w/div)
+    h_step = int(h/div)
+
+    return [[y,x,y+h_step,x+w_step] \
+    for x in range(0,w,w_step) \
+        if x+w_step <= w \
+    for y in range(0,h,h_step) \
+        if y+h_step<= h]
+
     

@@ -10,3 +10,6 @@ ResultMask/
 *.xml
 *.txt
 *.pkl
+*.jpg
+*.jpg
+TrafficSigns/datasets/train/.DS_Store
