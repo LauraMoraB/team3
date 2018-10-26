@@ -2,6 +2,6 @@
 """
 Created on Tue Oct 23 19:34:42 2018
 
-@author: laura
+@author: Aitor
 """
 

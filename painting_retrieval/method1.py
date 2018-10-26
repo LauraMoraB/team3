@@ -1,7 +1,7 @@
 from task1 import get_image, compute_histogram, histogram_region
 
 
-def store_histogram_total(df, channel_name=['R','G','B'], level=0):  
+def store_histogram_total(df, path,channel_name=['B','G','R'], level=0):  
     """
     Method to store histograms into the dataframe
     
@@ -30,11 +30,32 @@ def store_histogram_total(df, channel_name=['R','G','B'], level=0):
     
     channels = range(len(channel_name))
    
-    hists= [[histogram_region(get_image(row[0][:], "dataset/"), c, level) \
+    hists= [[histogram_region(get_image(row[0][:], path), c, level) \
              for c in channels ] for index,row in df.iterrows()]
     
     
     df['level' + str(level) + "_" + channel_name[0]] = [item[0] for item in hists]
     df['level' + str(level) + "_" + channel_name[1]] = [item[1] for item in hists]
     df['level' + str(level) + "_" + channel_name[2]] = [item[2] for item in hists]
+
     
+def histograms_to_list(df, level, pos):
+    rf=[]
+    bf=[]
+    gf=[]
+    
+    R = 'level' + str(level) + "_R"
+    G = 'level' + str(level) + "_G"
+    B = 'level' + str(level) + "_B"
+    
+    r = df[R].iloc[pos]
+    g = df[G].iloc[pos]
+    b = df[B].iloc[pos]
+    
+    for i in range(len(r)):
+    
+        rf.extend([item[0] for item in r[i].tolist()])
+        gf.extend([item[0] for item in g[i].tolist()])
+        bf.extend([item[0] for item in b[i].tolist()])
+    
+    return rf+gf+bf
