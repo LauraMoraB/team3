@@ -30,7 +30,9 @@ def getX2results(pathDataset, sourceImageName):
         
         distance = x2Distance(equalized_hist_target, equalized_hist_source)
         distanceList.append(distance)
+        
     distanceList.sort()
+    
     return distanceList
         
 def getHellingerKernelResult(pathDataset, sourceImageName):
