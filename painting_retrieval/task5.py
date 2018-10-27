@@ -6,7 +6,6 @@ from task1 import compute_histogram
 from utils import plot_gray, get_image
 
 
-
 def texture_method1(df, path):
     method_result = []
     for i in range(len(df)):
@@ -129,4 +128,8 @@ def to_descriptor_format(data):
         for hist in list_hist:
             descriptor_list += hist.astype(np.uint8).tolist()
     return descriptor_list
+
+
+    
+    
     
