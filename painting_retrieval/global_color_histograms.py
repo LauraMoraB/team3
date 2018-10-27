@@ -68,11 +68,11 @@ def changeSpaceColor(imagen, spaceType):
     
 def preproces_image(fullImage, pathprep_resultDS, imageName):
     imeq=equalyse_luminance_image(fullImage,"HSV")
-    cv2.imwrite(pathprep_resultDS+'equalyse_luminance_image'+imageName[:-3]+'png', imeq)
+    cv2.imwrite(pathprep_resultDS+'equalyse_luminance/'+imageName[:-3]+'png', imeq)
     imlf=low_filter_unsharp(imeq)
-    cv2.imwrite(pathprep_resultDS+'low_filter_unsharp'+imageName[:-3]+'png', imlf)
+    cv2.imwrite(pathprep_resultDS+'low_filter_unsharp/'+imageName[:-3]+'png', imlf)
     im_wb=white_balance_LAB(imlf,"LAB")
-    cv2.imwrite(pathprep_resultDS+'white_balance_LAB'+imageName[:-3]+'png', im_wb)
+    cv2.imwrite(pathprep_resultDS+'white_balance_LAB/'+imageName[:-3]+'png', im_wb)
     return im_wb
 
 
@@ -111,6 +111,7 @@ def get_px_one(imagen, spaceType):
 def global_color(fullImage, spaceType, pathprep_resultDS, imageName):
     im_prep=preproces_image(fullImage, pathprep_resultDS,imageName)
     im_ch=changeSpaceColor(im_prep, spaceType)
+    cv2.imwrite(pathprep_resultDS+'Final/'+imageName[:-3]+'png', im_ch)
     return im_ch
     
 def global_color_hist(fullImage, spaceType_hist, pathprep_resultDS, imageName):  
