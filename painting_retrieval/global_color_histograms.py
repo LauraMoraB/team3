@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 26 19:14:35 2018
-
 @author: gaby1
 """
 from matplotlib import pyplot as plt
 import numpy as np
 import cv2
+from utils import create_dir
 import matplotlib
 matplotlib.use('Agg')
 
@@ -67,12 +67,16 @@ def changeSpaceColor(imagen, spaceType):
     
     
 def preproces_image(fullImage, pathprep_resultDS, imageName):
+    create_dir(pathprep_resultDS+'equalyse_luminance/')
+    create_dir(pathprep_resultDS+'low_filter_unsharp/')
+    create_dir(pathprep_resultDS+'white_balance_LAB/')
+
     imeq=equalyse_luminance_image(fullImage,"HSV")
-    cv2.imwrite(pathprep_resultDS+'equalyse_luminance_image'+imageName[:-3]+'png', imeq)
+    cv2.imwrite(pathprep_resultDS+'equalyse_luminance/'+imageName[:-3]+'jpg', imeq)
     imlf=low_filter_unsharp(imeq)
-    cv2.imwrite(pathprep_resultDS+'low_filter_unsharp'+imageName[:-3]+'png', imlf)
+    cv2.imwrite(pathprep_resultDS+'low_filter_unsharp/'+imageName[:-3]+'jpg', imlf)
     im_wb=white_balance_LAB(imlf,"LAB")
-    cv2.imwrite(pathprep_resultDS+'white_balance_LAB'+imageName[:-3]+'png', im_wb)
+    cv2.imwrite(pathprep_resultDS+'white_balance_LAB/'+imageName[:-3]+'jpg', im_wb)
     return im_wb
 
 
@@ -109,8 +113,11 @@ def get_px_one(imagen, spaceType):
     return (validch0, validch1, validch2)
 
 def global_color(fullImage, spaceType, pathprep_resultDS, imageName):
+    create_dir(pathprep_resultDS+'Final/')
+    
     im_prep=preproces_image(fullImage, pathprep_resultDS,imageName)
     im_ch=changeSpaceColor(im_prep, spaceType)
+    cv2.imwrite(pathprep_resultDS+'Final/'+imageName, im_ch)
     return im_ch
     
 def global_color_hist(fullImage, spaceType_hist, pathprep_resultDS, imageName):  
@@ -148,4 +155,3 @@ def save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSin
     plt.title('channel2'+dfSingle)
     fig2.savefig(pathResults+'Histograma_channel2_'+spaceType_hist+imageName)
     plt.close(fig3)
-    

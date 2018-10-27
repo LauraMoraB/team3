@@ -4,7 +4,6 @@ from matplotlib import pyplot as plt
 from utils import create_df, get_full_image, submission_list, save_pkl, mapk, get_image, plot_rgb, plot_gray, create_dir
 from method1 import store_histogram_total, histograms_to_list
 from task5 import haar_wavelet, haar_sticking
-from task3 import getX2results
 from global_color_histograms import global_color_hist,save_global_color_hist, global_color
 import pandas as pd
 
@@ -15,6 +14,7 @@ pathResults = "results/"
 pathprep_resultDS = "results_preprocesadoDS/"
 pathprep_resultQueries = "results_preprocesadoQueries/"
 
+# Crear directorios
 create_dir(pathResults)
 create_dir(pathprep_resultDS)
 create_dir(pathprep_resultQueries)
@@ -23,15 +23,16 @@ create_dir(pathprep_resultQueries)
 # Number of results per query
 k = 10
 build_dataset=True
-pass_queries=False
+pass_queries=True
 level=0
 
 #type of space 
-spaceType= "HSV" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
+spaceType= "HSV" #"BGR" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
 
 #choose prepoces
-prepoces =True
+prepoces = True
 
+dfDataset = create_df(pathDS)
 
 #choose global_color_histograms: image will be procesed and change space color and save global_color_hist in resuts_GVHistogram (create file )
 global_color_histograms = False
@@ -47,16 +48,15 @@ if global_color_histograms==True:
 
 #start		
 if build_dataset==True:
-    # Read Images
-    dfDataset = create_df(pathDS)
-    
+    # Read Images 
     if prepoces==True:
         for index, row in dfDataset.iterrows():
-            queryImage = row["Image"]
-            imgBGR = cv2.imread(queryImage,1)
+            imageName = row["Image"]
+            imgBGR = cv2.imread(pathDS+imageName,1)
+            
             global_color(imgBGR, spaceType, pathprep_resultDS, imageName)
 
-        store_histogram_total(dfDataset, pathprep_resultDS, spaceType, level=level)
+        store_histogram_total(dfDataset, pathprep_resultDS+"equalyse_luminance/", spaceType, level=level)
 
     else:
         # Save image descriptors
@@ -69,16 +69,17 @@ if pass_queries == True:
     if prepoces ==True :
         for index, row in dfQuery.iterrows():
             queryImage = row["Image"]
-            imgBGR = cv2.imread(queryImage,1)
-            global_color(imgBGR, spaceType, pathprep_resultQueries, imageName)
-
-        store_histogram_total(dfQuery,pathprep_resultQueries, spaceType, level=level)
+            imgBGR = cv2.imread(pathQueries+queryImage,1)
+            
+            global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage)
+        
+        store_histogram_total(dfQuery,pathprep_resultQueries+"equalyse_luminance/", spaceType, level=level)
     else:
         store_histogram_total(dfQuery,pathQueries, spaceType, level=level)
 
 
     # Create list of lists for all histograms in the dataset  
-    whole_hist_list = [histograms_to_list(row_ds, level) for _,row_ds in dfDataset.iterrows() ]
+    whole_hist_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfDataset.iterrows() ]
     
     # Compute distance for each query
     # distanceList = list of lists, where each internal list has the 10 lowest distances for each query image
