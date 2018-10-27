@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 from utils import create_df, submission_list, save_pkl, mapk, get_image, plot_rgb, plot_gray
 from method1 import store_histogram_total, histograms_to_list
 from task5 import haar_wavelet, haar_sticking
+from task3 import getX2results
 import pandas as pd
 
 # Paths
@@ -14,29 +15,28 @@ pathResults = "results/"
 k = 10
 build_dataset=True
 pass_queries=True
-level=2
-
-# Read Images
-dfDataset = create_df(pathDS)
-dfQuery = create_df(pathQueries)
+level=0
+channel_name="BGR"
 
 
 if build_dataset==True:
-    ## Save image descriptors
-    store_histogram_total(dfDataset, pathDS, channel_name=['B','G','R'], level=level)
+    # Read Images
+    dfDataset = create_df(pathDS)
+    
+    # Save image descriptors
+    store_histogram_total(dfDataset, pathDS, channel_name, level=level)
     
 if pass_queries == True:
-    # Despres s'ha de cridar la funcio que calcula distancies
-    queryImage=pathQueries+"ima_000000.jpg"
-    store_histogram_total(dfQuery,pathQueries, channel_name=['B','G','R'], level=level)
-    histogram_list_query = histograms_to_list(dfQuery, level, 0)
+    # Read and store queris images/descriptors
+    dfQuery = create_df(pathQueries)
+    store_histogram_total(dfQuery,pathQueries, channel_name, level=level)
 
-    for i in range(1):#(len(df)):
-        histogram_list_dataset = histograms_to_list(dfDataset, level, i)
-        # S'ha de retocar xk accepti aixo
-        #distanceList = getX2results(histogram_list_dataset,  histogram_list_query)
-
-
+        
+    whole_hist_list = [histograms_to_list(row_ds, level) for _,row_ds in dfDataset.iterrows() ]
+    
+    
+    distanceList = [getX2results(whole_hist_list,  histograms_to_list(row, level))  for index,row in dfQuery.iterrows() ]
+       
 
 # --> MORE HERE <-- #
 # --> MORE HERE <-- #
