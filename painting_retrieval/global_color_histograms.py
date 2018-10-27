@@ -45,7 +45,6 @@ def changeSpaceColor(imagen, spaceType):
         hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
         return hsv
     elif spaceType =="HLS":
-#        hls = cv2.cvtColor(imagen, cv2.COLOR_RGB2HLS )
         hls = cv2.cvtColor(imagen, cv2.COLOR_BGR2HLS )
         return hls
     
@@ -67,18 +66,14 @@ def changeSpaceColor(imagen, spaceType):
         return imagen
     
     
-def preproces_image(fullImage):
+def preproces_image(fullImage, ):
     imeq=equalyse_luminance_image(fullImage,"HSV")
     imlf=low_filter_unsharp(imeq)
     im_wb=white_balance_LAB(imlf,"LAB")
     return im_wb
 
-def global_color(fullImage, spaceType):
-    
-    im_prep=preproces_image(fullImage)
-    im_ch=changeSpaceColor(im_prep, spaceType)
-    
-    return im_ch
+
+
     
 def channel2list(image): 
    channel0, channel1, channel2 = image[:,:,0], image[:,:,1], image[:,:,2]
@@ -93,7 +88,6 @@ def image2list(image):
     return pxL
 
 def get_px_one(imagen, spaceType):
-    # return hue and sat values for valid px      
     chimage= changeSpaceColor(imagen, spaceType)
     channel0L, channel1L, channel2L=channel2list(chimage)
  
@@ -104,7 +98,6 @@ def get_px_one(imagen, spaceType):
     validch2 = []
     pxCount = 0
     for px in imageL:
-        # (px)
         if any(px):
             validch0.append(channel0L[pxCount])
             validch1.append(channel1L[pxCount])
@@ -112,7 +105,12 @@ def get_px_one(imagen, spaceType):
         pxCount += 1
     return (validch0, validch1, validch2)
 
-
+def global_color(fullImage, spaceType):
+    
+    im_prep=preproces_image(fullImage)
+    im_ch=changeSpaceColor(im_prep, spaceType)
+    return im_ch
+    
 def global_color_hist(fullImage, spaceType_hist):  
     imcolor=global_color(fullImage, spaceType_hist)
     (channel0Single, channel1Single, channel2Single) = get_px_one(imcolor, spaceType_hist)
