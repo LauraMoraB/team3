@@ -1,7 +1,7 @@
 from task1 import get_image, compute_histogram, histogram_region
 
 
-def store_histogram_total(df, path,channel_name=['B','G','R'], level=0):  
+def store_histogram_total(df, path,channel_name, level=0):  
     """
     Method to store histograms into the dataframe
     
@@ -27,6 +27,7 @@ def store_histogram_total(df, path,channel_name=['B','G','R'], level=0):
     |3|7|11|15|
     
     """
+    channel_name = list(channel_name)
     
     channels = range(len(channel_name))
    
@@ -39,18 +40,19 @@ def store_histogram_total(df, path,channel_name=['B','G','R'], level=0):
     df['level' + str(level) + "_" + channel_name[2]] = [item[2] for item in hists]
 
     
-def histograms_to_list(df, level, pos):
+def histograms_to_list(df_row, level, channel_name):
     rf=[]
     bf=[]
     gf=[]
+    channel_name = list(channel_name)
     
-    R = 'level' + str(level) + "_R"
-    G = 'level' + str(level) + "_G"
-    B = 'level' + str(level) + "_B"
+    R = 'level' + str(level) + "_"+channel_name[2]
+    G = 'level' + str(level) + "_"+channel_name[1]
+    B = 'level' + str(level) + "_"+channel_name[0]
     
-    r = df[R].iloc[pos]
-    g = df[G].iloc[pos]
-    b = df[B].iloc[pos]
+    r = df_row[R]
+    g = df_row[G]
+    b = df_row[B]
     
     for i in range(len(r)):
     

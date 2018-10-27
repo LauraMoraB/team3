@@ -4,6 +4,7 @@ import os
 import cv2
 from matplotlib import pyplot as plt
 import numpy as np
+import pickle
 
 def create_df(path_images):
     listImages =[]
@@ -87,8 +88,10 @@ def apk(actual, predicted, k=10):
 
     if not actual:
         return 0.0
-
-    return score / min(len(actual), k)
+    
+    result = score / min(len(actual), k)
+#    print('APK:', result)
+    return result
 
 ## Mean average precision at K calculation
 def mapk(actual, predicted, k=10):
@@ -116,3 +119,11 @@ def mapk(actual, predicted, k=10):
 
     """
     return np.mean([apk(a,p,k) for a,p in zip(actual, predicted)])
+
+def get_query_gt(pkl_fle):
+    resultList = []
+    with open(pkl_fle, 'rb') as f:
+        data = pickle.load(f)    
+    for key in data:
+        resultList.append(['ima_{:06d}.jpg'.format(data[key])])
+    return resultList

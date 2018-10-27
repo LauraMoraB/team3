@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Oct 26 19:14:35 2018
-
 @author: gaby1
 """
 from matplotlib import pyplot as plt
 import numpy as np
 import cv2
+from utils import create_dir
 import matplotlib
 matplotlib.use('Agg')
 
@@ -39,40 +39,43 @@ def white_balance_LAB(fullImage, spaceType): # spaceType="LAB"
     result = cv2.cvtColor(result, cv2.COLOR_LAB2BGR)
     return result
 
-def changeSpaceColor(imagen, spaceType):
-    
+def changeSpaceColor(imagen, spaceType): 
     if spaceType == "HSV":
-        hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
-        return hsv
+        imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
+        return imagen
     elif spaceType =="HLS":
-        hls = cv2.cvtColor(imagen, cv2.COLOR_BGR2HLS )
-        return hls
+        imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2HLS )
+        return imagen
     
     elif spaceType == "LAB":   
-        lab = cv2.cvtColor(imagen, cv2.COLOR_BGR2LAB)
-        return lab
+        imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2LAB)
+        return imagen
 
     elif spaceType == "YCrCb":   
-        ycrcb = cv2.cvtColor(imagen, cv2.COLOR_BGR2YCrCb)
-        return ycrcb
+        imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2YCrCb)
+        return imagen
 
     elif spaceType == "XYZ":   
-        xyz = cv2.cvtColor(imagen, cv2.COLOR_BGR2XYZ)
-        return xyz
+        imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2XYZ)
+        return imagen
     elif spaceType == "LUV":   
-        Luv = cv2.cvtColor(imagen, cv2.COLOR_BGR2Luv )
-        return Luv
+        imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2Luv )
+        return imagen
     else:
         return imagen
     
     
 def preproces_image(fullImage, pathprep_resultDS, imageName):
+    create_dir(pathprep_resultDS+'equalyse_luminance/')
+    create_dir(pathprep_resultDS+'low_filter_unsharp/')
+    create_dir(pathprep_resultDS+'white_balance_LAB/')
+
     imeq=equalyse_luminance_image(fullImage,"HSV")
-    cv2.imwrite(pathprep_resultDS+'equalyse_luminance/'+imageName[:-3]+'png', imeq)
+    cv2.imwrite(pathprep_resultDS+'equalyse_luminance/'+imageName[:-3]+'jpg', imeq)
     imlf=low_filter_unsharp(imeq)
-    cv2.imwrite(pathprep_resultDS+'low_filter_unsharp/'+imageName[:-3]+'png', imlf)
+    cv2.imwrite(pathprep_resultDS+'low_filter_unsharp/'+imageName[:-3]+'jpg', imlf)
     im_wb=white_balance_LAB(imlf,"LAB")
-    cv2.imwrite(pathprep_resultDS+'white_balance_LAB/'+imageName[:-3]+'png', im_wb)
+    cv2.imwrite(pathprep_resultDS+'white_balance_LAB/'+imageName[:-3]+'jpg', im_wb)
     return im_wb
 
 
@@ -108,10 +111,12 @@ def get_px_one(imagen, spaceType):
         pxCount += 1
     return (validch0, validch1, validch2)
 
-def global_color(fullImage, spaceType, pathprep_resultDS, imageName):
-    im_prep=preproces_image(fullImage, pathprep_resultDS,imageName)
-    im_ch=changeSpaceColor(im_prep, spaceType)
-    cv2.imwrite(pathprep_resultDS+'Final/'+imageName[:-3]+'png', im_ch)
+def global_color(fullImage, spaceType, pathprep_resultDS, imageName, prepoces):
+    create_dir(pathprep_resultDS+'Final/')
+    if prepoces == True:
+        fullImage=preproces_image(fullImage, pathprep_resultDS,imageName) 
+    im_ch=changeSpaceColor(fullImage, spaceType)    
+    cv2.imwrite(pathprep_resultDS+'Final/'+imageName, im_ch)
     return im_ch
     
 def global_color_hist(fullImage, spaceType_hist, pathprep_resultDS, imageName):  
