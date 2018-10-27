@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from matplotlib import pyplot as plt
-from utils import create_df, get_full_image, submission_list, save_pkl, mapk, get_image, plot_rgb, plot_gray
+from utils import create_df, get_full_image, submission_list, save_pkl, mapk, get_image, plot_rgb, plot_gray, create_dir
 from method1 import store_histogram_total, histograms_to_list
 from task5 import haar_wavelet, haar_sticking
 from task3 import getX2results
@@ -15,11 +15,15 @@ pathResults = "results/"
 pathprep_resultDS = "results_preprocesadoDS/"
 pathprep_resultQueries = "results_preprocesadoQueries/"
 
+create_dir(pathResults)
+create_dir(pathprep_resultDS)
+create_dir(pathprep_resultQueries)
+
 
 # Number of results per query
 k = 10
 build_dataset=True
-pass_queries=True
+pass_queries=False
 level=0
 
 #type of space 
@@ -30,7 +34,7 @@ prepoces =True
 
 
 #choose global_color_histograms: image will be procesed and change space color and save global_color_hist in resuts_GVHistogram (create file )
-global_color_histograms =False
+global_color_histograms = False
 
 if global_color_histograms==True:
 	for i in range(len(dfDataset)):       
@@ -53,9 +57,9 @@ if build_dataset==True:
             imageName = dfSingle['Image']
             global_color(imgBGR, spaceType, pathprep_resultDS, imageName)
 
-       store_histogram_total(dfDataset, pathprep_resultDS, spaceType, level=level)
+        store_histogram_total(dfDataset, pathprep_resultDS, spaceType, level=level)
 
-	else:
+    else:
         # Save image descriptors
         store_histogram_total(dfDataset, pathDS, spaceType, level=level)
 
@@ -77,7 +81,7 @@ if pass_queries == True:
     
     # Compute distance for each query
     # distanceList = list of lists, where each internal list has the 10 lowest distances for each query image
-    distanceList = [getX2results(whole_hist_list,  histograms_to_list(row, level))  for index,row in dfQuery.iterrows() ]
+    #distanceList = [getX2results(whole_hist_list,  histograms_to_list(row, level))  for index,row in dfQuery.iterrows() ]
        
 
 # --> MORE HERE <-- #
