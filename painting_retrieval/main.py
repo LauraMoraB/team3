@@ -1,11 +1,9 @@
 import cv2
-import numpy as np
-from matplotlib import pyplot as plt
 from utils import create_df, get_full_image, submission_list, save_pkl, mapk, get_image, plot_rgb, plot_gray, create_dir
 from method1 import store_histogram_total, histograms_to_list
 from task5 import haar_wavelet, haar_sticking
 from global_color_histograms import global_color_hist,save_global_color_hist, global_color
-import pandas as pd
+from task3 import getHellingerKernelResult, getHistInterseccionResult, getX2results
 
 # Paths
 pathDS = "dataset/"
@@ -22,20 +20,24 @@ create_dir(pathprep_resultQueries)
 
 # Number of results per query
 k = 10
+#Build database
 build_dataset=True
+#Make queries
 pass_queries=True
-level=0
-
-#type of space 
-spaceType= "RGB" #"BGR" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
-
 #choose prepoces
-prepoces = True
-
-dfDataset = create_df(pathDS)
-
+prepoces = False
 #choose global_color_histograms: image will be procesed and change space color and save global_color_hist in resuts_GVHistogram (create file )
 global_color_histograms = False
+#Numer of partitions of histograms
+level=0
+#type of space 
+spaceType= "BGR" #"BGR" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
+
+
+dfDataset = create_df(pathDS)
+dfQuery = create_df(pathQueries)
+
+
 
 if global_color_histograms==True:
 	for i in range(len(dfDataset)):       
@@ -56,16 +58,20 @@ if build_dataset==True:
             
             global_color(imgBGR, spaceType, pathprep_resultDS, imageName)
 
-        store_histogram_total(dfDataset, pathprep_resultDS+"equalyse_luminance/", spaceType, level=level)
+        a = store_histogram_total(dfDataset, pathprep_resultDS+"equalyse_luminance/", spaceType, level=level)
 
     else:
         # Save image descriptors
-        store_histogram_total(dfDataset, pathDS, spaceType, level=level)
+        a=store_histogram_total(dfDataset, pathDS, spaceType, level=level)
 
 
 if pass_queries == True:
-    # Read and store queris images/descriptors
-    dfQuery = create_df(pathQueries)
+    X2resultList = []
+    HIresultList = []
+    HKresultList = []
+
+    queryList = []
+
     if prepoces ==True :
         for index, row in dfQuery.iterrows():
             queryImage = row["Image"]
@@ -80,11 +86,18 @@ if pass_queries == True:
 
     # Create list of lists for all histograms in the dataset  
     whole_hist_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfDataset.iterrows() ]
-    #[[x2Distance(f, b) for f,b in zip(row["level0_R"], row1["level0_R"])] for index, row in dfQuery for index1, row1 in dfDataset]
+    
+    for index,row in dfQuery.iterrows():
+        histogram_query = histograms_to_list(row, level, spaceType)
+        queryList.append(row['Image'])
+        
+        X2resultList.append(getX2results(whole_hist_list, histogram_query,  k, dfDataset))
+        HIresultList.append(getHistInterseccionResult(whole_hist_list, histogram_query,  k, dfDataset))
+        HKresultList.append(getHellingerKernelResult(whole_hist_list, histogram_query,  k, dfDataset))
+        
     # Compute distance for each query
     # distanceList = list of lists, where each internal list has the 10 lowest distances for each query image
     #distanceList = [getX2results(whole_hist_list,  histograms_to_list(row, level))  for index,row in dfQuery.iterrows() ]
-       
 
 # --> MORE HERE <-- #
 # --> MORE HERE <-- #
