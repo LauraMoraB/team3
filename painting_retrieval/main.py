@@ -1,4 +1,6 @@
 import cv2
+import numpy as np
+from matplotlib import pyplot as plt
 from utils import create_df, get_full_image, save_pkl, mapk, plot_rgb, plot_gray, create_dir, get_query_gt
 from method1 import store_histogram_total, histograms_to_list
 from task5 import texture_method1
@@ -48,19 +50,17 @@ if global_color_histograms==True:
 
 
 if build_dataset==True:
-    # Read Images
-    if prepoces==True:
-        for index, row in dfDataset.iterrows():
-            imageName = row["Image"]
-            imgBGR = cv2.imread(pathDS+imageName,1)
+    # Read Images 
+    for index, row in dfDataset.iterrows():
+        imageName = row["Image"]
+        imgBGR = cv2.imread(pathDS+imageName,1)
+        if prepoces==True:            
+            global_color(imgBGR, spaceType, pathprep_resultDS, imageName, True)    
+        else:
+            global_color(imgBGR, spaceType, pathprep_resultDS, imageName, False)
 
-            global_color(imgBGR, spaceType, pathprep_resultDS, imageName)
+    store_histogram_total(dfDataset, pathprep_resultDS+"Final/", spaceType, level=level)
 
-        store_histogram_total(dfDataset, pathprep_resultDS+"equalyse_luminance/", spaceType, level=level)
-
-    else:
-        # Save image descriptors
-        store_histogram_total(dfDataset, pathDS, spaceType, level=level)
 
 
 if pass_queries == True:
@@ -70,19 +70,19 @@ if pass_queries == True:
 
     queryList = []
 
-    if prepoces ==True :
-        for index, row in dfQuery.iterrows():
-            queryImage = row["Image"]
-            imgBGR = cv2.imread(pathQueries+queryImage,1)
+   # Read and store queris images/descriptors
+    for index, row in dfQuery.iterrows():
+        queryImage = row["Image"]
+        imgBGR = cv2.imread(pathQueries+queryImage,1)
+        if prepoces==True:            
+            global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, True)    
+        else:
+            global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, False)
+                 
+    store_histogram_total(dfQuery, pathprep_resultQueries+"Final/", spaceType, level=level)
+    
 
-            global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage)
-
-        store_histogram_total(dfQuery,pathprep_resultQueries+"equalyse_luminance/", spaceType, level=level)
-    else:
-        store_histogram_total(dfQuery,pathQueries, spaceType, level=level)
-
-
-    # Create list of lists for all histograms in the dataset
+    # Create list of lists for all histograms in the dataset  
     whole_hist_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfDataset.iterrows() ]
 
     for index,row in dfQuery.iterrows():
@@ -92,19 +92,20 @@ if pass_queries == True:
         X2resultList.append(getX2results(whole_hist_list, histogram_query,  k, dfDataset))
         HIresultList.append(getHistInterseccionResult(whole_hist_list, histogram_query,  k, dfDataset))
         HKresultList.append(getHellingerKernelResult(whole_hist_list, histogram_query,  k, dfDataset))
+    
 
 
     # Load provided GT
-    actualResult = get_query_gt(GT_file)
-    # Validation -> MAPK RESULT
-    mapkX2 = mapk(actualResult, X2resultList, k)
-    print('MAPK score using X2:',mapkX2)
-    mapkKI = mapk(actualResult, HIresultList, k)
-    print('MAPK score using HI:',mapkX2)
-    mapkHK = mapk(actualResult, HKresultList, k)
-    print('MAPK score using HK:',mapkX2)
-
-    # Save results into pkl format
-    save_pkl(X2resultList, pathResults)
-    save_pkl(HIresultList, pathResults)
-    save_pkl(HKresultList, pathResults)
+#    actualResult = get_query_gt(GT_file)
+#    # Validation -> MAPK RESULT
+#    mapkX2 = mapk(actualResult, X2resultList, k)
+#    print('MAPK score using X2:',mapkX2)
+#    mapkKI = mapk(actualResult, HIresultList, k)
+#    print('MAPK score using HI:',mapkX2)
+#    mapkHK = mapk(actualResult, HKresultList, k)
+#    print('MAPK score using HK:',mapkX2)
+#
+#    # Save results into pkl format
+#    save_pkl(X2resultList, pathResults)
+#    save_pkl(HIresultList, pathResults)
+#    save_pkl(HKresultList, pathResults)
