@@ -4,13 +4,13 @@ from matplotlib import pyplot as plt
 from utils import create_df, get_full_image, submission_list, save_pkl, mapk, get_image, plot_rgb, plot_gray
 from method1 import store_histogram_total, histograms_to_list
 from task5 import haar_wavelet, haar_sticking
-from task3 import getX2results
+from task3 import getX2results, getHellingerKernelResult, getHistInterseccionResult
 from global_color_histograms import global_color_hist,save_global_color_hist, global_color
 import pandas as pd
 
 # Paths
 pathDS = "dataset/"
-pathQueries = "queries/query_devel_random/"
+pathQueries = "queries/"
 pathResults = "results/"
 pathprep_resultDS = "results_preprocesadoDS/"
 pathprep_resultQueries = "results_preprocesadoQueries/"
@@ -18,7 +18,7 @@ pathprep_resultQueries = "results_preprocesadoQueries/"
 
 # Number of results per query
 k = 10
-build_dataset=True
+build_dataset=False
 pass_queries=True
 level=0
 
@@ -61,12 +61,28 @@ if build_dataset==True:
 
 
 if pass_queries == True:
+    X2resultList = []
+    HIresultList = []
+    HKresultList = []
+
+    queryList = []
     # Read and store queris images/descriptors
     dfQuery = create_df(pathQueries)
+    store_histogram_total(dfQuery,pathQueries, channel_name, level=level)
+ 
+    whole_hist_list = [histograms_to_list(row_ds, level) for _,row_ds in dfDataset.iterrows() ]
+    for index,row in dfQuery.iterrows():
+        histogram_query = histograms_to_list(row, level)
+        queryList.append(row['Image'])
+        
+        X2resultList.append(getX2results(whole_hist_list, histogram_query,  k, dfDataset))
+        HIresultList.append(getHistInterseccionResult(whole_hist_list, histogram_query,  k, dfDataset))
+        HKresultList.append(getHellingerKernelResult(whole_hist_list, histogram_query,  k, dfDataset))
     if prepoces ==True :
         imgBGR = cv2.imread(queryImage,1)
         global_color(imgBGR, spaceType, pathprep_resultQueries, imageName)
 
+#    distanceList = [getX2results(whole_hist_list,  histograms_to_list(row, level), k)  for index,row in dfQuery.iterrows() ]
         store_histogram_total(dfQuery,pathprep_resultQueries, spaceType, level=level)
     else:
         store_histogram_total(dfQuery,pathQueries, spaceType, level=level)
@@ -77,7 +93,6 @@ if pass_queries == True:
     
     # Compute distance for each query
     # distanceList = list of lists, where each internal list has the 10 lowest distances for each query image
-    distanceList = [getX2results(whole_hist_list,  histograms_to_list(row, level))  for index,row in dfQuery.iterrows() ]
        
 
 # --> MORE HERE <-- #
