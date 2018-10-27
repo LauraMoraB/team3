@@ -1,40 +1,82 @@
 import cv2
+import numpy as np
 from matplotlib import pyplot as plt
-from utils import create_df, submission_list, save_pkl, mapk, get_image, plot_rgb, plot_gray
+from utils import create_df, get_full_image, submission_list, save_pkl, mapk, get_image, plot_rgb, plot_gray
 from method1 import store_histogram_total, histograms_to_list
 from task5 import haar_wavelet, haar_sticking
 from task3 import getX2results
+from global_color_histograms import global_color_hist,save_global_color_hist, global_color
 import pandas as pd
 
 # Paths
 pathDS = "dataset/"
 pathQueries = "queries/query_devel_random/"
 pathResults = "results/"
+pathprep_resultDS = "results_preprocesadoDS/"
+pathprep_resultQueries = "results_preprocesadoQueries/"
+
 
 # Number of results per query
 k = 10
 build_dataset=True
 pass_queries=True
 level=0
-channel_name="BGR"
+
+#type of space 
+spaceType= "HSV" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
+
+#choose prepoces
+prepoces =True
 
 
+#choose global_color_histograms: image will be procesed and change space color and save global_color_hist in resuts_GVHistogram (create file )
+global_color_histograms =False
+
+if global_color_histograms==True:
+	for i in range(len(dfDataset)):       
+		dfSingle = dfDataset.iloc[i]
+		imgBGR = get_full_image(dfSingle, pathDS)    
+		imageName = dfSingle['Image']  
+		channel0Single, channel1Single, channel2Single = global_color_hist(imgBGR, spaceType, pathprep_resultDS, imageName)
+		save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSingle,spaceType, imageName,pathResults)
+
+
+#start		
 if build_dataset==True:
     # Read Images
     dfDataset = create_df(pathDS)
     
-    # Save image descriptors
-    store_histogram_total(dfDataset, pathDS, channel_name, level=level)
-    
+    if prepoces==True:
+        for i in range(len(dfDataset)):
+            dfSingle = dfDataset.iloc[i]
+            imgBGR = get_full_image(dfSingle, pathDS)
+            imageName = dfSingle['Image']
+            global_color(imgBGR, spaceType, pathprep_resultDS, imageName)
+
+       store_histogram_total(dfDataset, pathprep_resultDS, spaceType, level=level)
+
+	else:
+        # Save image descriptors
+        store_histogram_total(dfDataset, pathDS, spaceType, level=level)
+
+
 if pass_queries == True:
     # Read and store queris images/descriptors
     dfQuery = create_df(pathQueries)
-    store_histogram_total(dfQuery,pathQueries, channel_name, level=level)
+    if prepoces ==True :
+        imgBGR = cv2.imread(queryImage,1)
+        global_color(imgBGR, spaceType, pathprep_resultQueries, imageName)
 
-        
+        store_histogram_total(dfQuery,pathprep_resultQueries, spaceType, level=level)
+    else:
+        store_histogram_total(dfQuery,pathQueries, spaceType, level=level)
+
+
+    # Create list of lists for all histograms in the dataset  
     whole_hist_list = [histograms_to_list(row_ds, level) for _,row_ds in dfDataset.iterrows() ]
     
-    
+    # Compute distance for each query
+    # distanceList = list of lists, where each internal list has the 10 lowest distances for each query image
     distanceList = [getX2results(whole_hist_list,  histograms_to_list(row, level))  for index,row in dfQuery.iterrows() ]
        
 
@@ -61,4 +103,4 @@ if pass_queries == True:
 #
 #query_list = result_list
 #evaluation = mapk(query_list, result_list, k)
-#save_pkl(result_list, pathResults)
+#save_pkl(result_list, pathResults)        
