@@ -1,7 +1,9 @@
 import cv2
-from utils import create_df, get_full_image, submission_list, save_pkl, mapk, get_image, plot_rgb, plot_gray, create_dir
+import numpy as np
+from matplotlib import pyplot as plt
+from utils import create_df, get_full_image, save_pkl, mapk, plot_rgb, plot_gray, create_dir, get_query_gt
 from method1 import store_histogram_total, histograms_to_list
-from task5 import haar_wavelet, haar_sticking
+from task5 import texture_method1
 from global_color_histograms import global_color_hist,save_global_color_hist, global_color
 from task3 import getHellingerKernelResult, getHistInterseccionResult, getX2results
 
@@ -11,6 +13,7 @@ pathQueries = "queries/query_devel_random/"
 pathResults = "results/"
 pathprep_resultDS = "results_preprocesadoDS/"
 pathprep_resultQueries = "results_preprocesadoQueries/"
+GT_file = "queries/GT/query_corresp_simple_devel.pkl"
 
 # Crear directorios
 create_dir(pathResults)
@@ -37,32 +40,27 @@ spaceType= "BGR" #"BGR" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
 dfDataset = create_df(pathDS)
 dfQuery = create_df(pathQueries)
 
-
-
 if global_color_histograms==True:
-	for i in range(len(dfDataset)):       
+	for i in range(len(dfDataset)):
 		dfSingle = dfDataset.iloc[i]
-		imgBGR = get_full_image(dfSingle, pathDS)    
-		imageName = dfSingle['Image']  
+		imgBGR = get_full_image(dfSingle, pathDS)
+		imageName = dfSingle['Image']
 		channel0Single, channel1Single, channel2Single = global_color_hist(imgBGR, spaceType, pathprep_resultDS, imageName)
 		save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSingle,spaceType, imageName,pathResults)
 
 
-#start		
 if build_dataset==True:
     # Read Images 
-    if prepoces==True:
-        for index, row in dfDataset.iterrows():
-            imageName = row["Image"]
-            imgBGR = cv2.imread(pathDS+imageName,1)
-            
-            global_color(imgBGR, spaceType, pathprep_resultDS, imageName)
+    for index, row in dfDataset.iterrows():
+        imageName = row["Image"]
+        imgBGR = cv2.imread(pathDS+imageName,1)
+        if prepoces==True:            
+            global_color(imgBGR, spaceType, pathprep_resultDS, imageName, True)    
+        else:
+            global_color(imgBGR, spaceType, pathprep_resultDS, imageName, False)
 
-        a = store_histogram_total(dfDataset, pathprep_resultDS+"equalyse_luminance/", spaceType, level=level)
+    store_histogram_total(dfDataset, pathprep_resultDS+"Final/", spaceType, level=level)
 
-    else:
-        # Save image descriptors
-        a=store_histogram_total(dfDataset, pathDS, spaceType, level=level)
 
 
 if pass_queries == True:
@@ -72,54 +70,42 @@ if pass_queries == True:
 
     queryList = []
 
-    if prepoces ==True :
-        for index, row in dfQuery.iterrows():
-            queryImage = row["Image"]
-            imgBGR = cv2.imread(pathQueries+queryImage,1)
-            
-            global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage)
-        
-        store_histogram_total(dfQuery,pathprep_resultQueries+"equalyse_luminance/", spaceType, level=level)
-    else:
-        store_histogram_total(dfQuery,pathQueries, spaceType, level=level)
-
+   # Read and store queris images/descriptors
+    for index, row in dfQuery.iterrows():
+        queryImage = row["Image"]
+        imgBGR = cv2.imread(pathQueries+queryImage,1)
+        if prepoces==True:            
+            global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, True)    
+        else:
+            global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, False)
+                 
+    store_histogram_total(dfQuery, pathprep_resultQueries+"Final/", spaceType, level=level)
+    
 
     # Create list of lists for all histograms in the dataset  
     whole_hist_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfDataset.iterrows() ]
-    
+
     for index,row in dfQuery.iterrows():
         histogram_query = histograms_to_list(row, level, spaceType)
         queryList.append(row['Image'])
-        
+
         X2resultList.append(getX2results(whole_hist_list, histogram_query,  k, dfDataset))
         HIresultList.append(getHistInterseccionResult(whole_hist_list, histogram_query,  k, dfDataset))
         HKresultList.append(getHellingerKernelResult(whole_hist_list, histogram_query,  k, dfDataset))
-        
-    # Compute distance for each query
-    # distanceList = list of lists, where each internal list has the 10 lowest distances for each query image
-    #distanceList = [getX2results(whole_hist_list,  histograms_to_list(row, level))  for index,row in dfQuery.iterrows() ]
+    
 
-# --> MORE HERE <-- #
-# --> MORE HERE <-- #
-# --> MORE HERE <-- #
-# --> MORE HERE <-- #
+
+    # Load provided GT
+#    actualResult = get_query_gt(GT_file)
+#    # Validation -> MAPK RESULT
+#    mapkX2 = mapk(actualResult, X2resultList, k)
+#    print('MAPK score using X2:',mapkX2)
+#    mapkKI = mapk(actualResult, HIresultList, k)
+#    print('MAPK score using HI:',mapkX2)
+#    mapkHK = mapk(actualResult, HKresultList, k)
+#    print('MAPK score using HK:',mapkX2)
 #
-## Texture Descriptors - Haar Wavelets technique + GLCM
-#imgTest = get_image(df.iloc[0]['Image'], pathDS)
-#grayImg = cv2.cvtColor(imgTest, cv2.COLOR_BGR2GRAY)
-#coeff = haar_wavelet(grayImg, level = 0)
-#imgHaar = haar_sticking(coeff, level = 0)
-#plot_gray(imgHaar)
-#
-## Save and Evalaute Results..
-#resultTest = pd.DataFrame({
-#    'Image' : ['im1', 'im3', 'im67', 'im97', 'im69', 'im46'],
-#    'Order' : [2, 1, 0, 1, 0, 2],
-#    'Query': [1, 1, 1, 2, 2, 2],
-#    })
-#
-#result_list = submission_list(resultTest)
-#
-#query_list = result_list
-#evaluation = mapk(query_list, result_list, k)
-#save_pkl(result_list, pathResults)        
+#    # Save results into pkl format
+#    save_pkl(X2resultList, pathResults)
+#    save_pkl(HIresultList, pathResults)
+#    save_pkl(HKresultList, pathResults)
