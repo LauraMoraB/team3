@@ -41,7 +41,7 @@ def histogram_region(im, channel, level):
     """
     div = 2**level
        
-    w, h = im.shape[0] , im.shape[1]
+    w, h = im.shape[1] , im.shape[0]
     
     w_step = int(w/div)
     h_step = int(h/div)
@@ -61,7 +61,7 @@ def divide_image(im, div):
     
     return: list of [y1, x1, y2, x2] from the different image regions 
     """
-    w, h = im.shape[0] , im.shape[1]
+    w, h = im.shape[1] , im.shape[0]
     
     w_step = int(w/div)
     h_step = int(h/div)

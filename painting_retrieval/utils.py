@@ -20,6 +20,10 @@ def create_dir(pathSave):
     if not os.path.exists(pathSave):
         os.makedirs(pathSave)
 
+def get_full_image(dfSingle, path):
+    return cv2.imread(path + dfSingle['Image'],1)
+	
+	
 def get_image(im, path):
     return cv2.imread(path+im, 1)
 
