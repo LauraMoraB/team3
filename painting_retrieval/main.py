@@ -27,7 +27,7 @@ pass_queries=True
 level=0
 
 #type of space 
-spaceType= "HSV" #"BGR" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
+spaceType= "RGB" #"BGR" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
 
 #choose prepoces
 prepoces = True
@@ -80,7 +80,7 @@ if pass_queries == True:
 
     # Create list of lists for all histograms in the dataset  
     whole_hist_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfDataset.iterrows() ]
-    
+    #[[x2Distance(f, b) for f,b in zip(row["level0_R"], row1["level0_R"])] for index, row in dfQuery for index1, row1 in dfDataset]
     # Compute distance for each query
     # distanceList = list of lists, where each internal list has the 10 lowest distances for each query image
     #distanceList = [getX2results(whole_hist_list,  histograms_to_list(row, level))  for index,row in dfQuery.iterrows() ]
