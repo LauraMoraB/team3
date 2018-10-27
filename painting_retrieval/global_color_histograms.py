@@ -66,10 +66,13 @@ def changeSpaceColor(imagen, spaceType):
         return imagen
     
     
-def preproces_image(fullImage, ):
+def preproces_image(fullImage, pathprep_resultDS, imageName):
     imeq=equalyse_luminance_image(fullImage,"HSV")
+    cv2.imwrite(pathprep_resultDS+'equalyse_luminance_image'+imageName[:-3]+'png', imeq)
     imlf=low_filter_unsharp(imeq)
+    cv2.imwrite(pathprep_resultDS+'low_filter_unsharp'+imageName[:-3]+'png', imlf)
     im_wb=white_balance_LAB(imlf,"LAB")
+    cv2.imwrite(pathprep_resultDS+'white_balance_LAB'+imageName[:-3]+'png', im_wb)
     return im_wb
 
 
@@ -105,19 +108,17 @@ def get_px_one(imagen, spaceType):
         pxCount += 1
     return (validch0, validch1, validch2)
 
-def global_color(fullImage, spaceType):
-    
-    im_prep=preproces_image(fullImage)
+def global_color(fullImage, spaceType, pathprep_resultDS, imageName):
+    im_prep=preproces_image(fullImage, pathprep_resultDS,imageName)
     im_ch=changeSpaceColor(im_prep, spaceType)
     return im_ch
     
-def global_color_hist(fullImage, spaceType_hist):  
-    imcolor=global_color(fullImage, spaceType_hist)
-    (channel0Single, channel1Single, channel2Single) = get_px_one(imcolor, spaceType_hist)
-    
+def global_color_hist(fullImage, spaceType_hist, pathprep_resultDS, imageName):  
+    imcolor=global_color(fullImage, spaceType_hist,pathprep_resultDS, imageName)
+    (channel0Single, channel1Single, channel2Single) = get_px_one(imcolor, spaceType_hist)    
     return (channel0Single, channel1Single, channel2Single)
 
-def save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSingle,spaceType_hist, imageName):
+def save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSingle,spaceType_hist, imageName, pathResults):
     fig=plt.figure()
     ax=fig.add_subplot(111)
     ax.plot([1,2,3])
@@ -125,7 +126,7 @@ def save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSin
     plt.ylabel('f')  
     plt.xlabel('channel0')  
     plt.title('channel0'+dfSingle)
-    fig.savefig('resuts/Histograma_channel0_'+spaceType_hist+imageName)
+    fig.savefig(pathResults+'Histograma_channel0_'+spaceType_hist+imageName)
     plt.close(fig)
    
     fig2=plt.figure()
@@ -135,7 +136,7 @@ def save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSin
     plt.ylabel('f')  
     plt.xlabel('channel1')  
     plt.title('channel1'+dfSingle)
-    fig2.savefig('resuts/Histograma_channel1_'+spaceType_hist+imageName)
+    fig2.savefig(pathResults+'Histograma_channel1_'+spaceType_hist+imageName)
     plt.close(fig2)
 
     fig3=plt.figure()
@@ -145,6 +146,6 @@ def save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSin
     plt.ylabel('f')  
     plt.xlabel('channel2')  
     plt.title('channel2'+dfSingle)
-    fig2.savefig('resuts/Histograma_channel2_'+spaceType_hist+imageName)
+    fig2.savefig(pathResults+'Histograma_channel2_'+spaceType_hist+imageName)
     plt.close(fig3)
     

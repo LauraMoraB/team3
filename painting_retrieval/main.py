@@ -1,56 +1,105 @@
 import cv2
 import numpy as np
+from matplotlib import pyplot as plt
+from utils import create_df, get_full_image, submission_list, save_pkl, mapk, get_image, plot_rgb, plot_gray
+from method1 import store_histogram_total, histograms_to_list
+from task5 import haar_wavelet, haar_sticking
+from global_color_histograms import global_color_hist,save_global_color_hist, global_color
+import pandas as pd
 
-from utils import create_df, get_full_image, plot_rgb
-from task1 import color_characterization, compute_histograms, divide_image
-from method1 import store_histogram_total
-from global_color_histograms import global_color_hist,save_global_color_hist
 # Paths
-pathDS = "dataset/museum_set_random/"
-pathDSquery = "query_devel/query_devel_random/"
+pathDS = "dataset/"
+pathQueries = "queries/query_devel_random/"
+pathResults = "results/"
+pathprep_resultDS = "results_preprocesadoDS/"
+pathprep_resultQueries = "results_preprocesadoQueries/"
+
+
+# Number of results per query
+k = 10
+build_dataset=True
+pass_queries=False
+level=2
+#type of space 
+spaceType= "HSV" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
 
 # Read Images
-df = create_df(pathDS)
+dfDataset = create_df(pathDS)
+dfQuery = create_df(pathQueries)
 
-#ch1="HistR"
-#ch3="HistB"
-#ch2="HistG"
-#df = store_histogram_total(df, ch1, ch2, ch3,pathDS)
-#hists= store_histogram_total(df, channel_name=['R','G','B'], level=1)
+#choose prepoces
+prepoces =True
 
 
-# Compute HistogramGaby
-dfq = create_df(pathDSquery)
-#color_characterization(df, pathDS, 'HSV')
-color_characterization(df, pathDS, 'HSV', "HLS")
+#choose global_color_histograms: image will be procesed and change space color and save global_color_hist in resuts_GVHistogram (create file )
 
-#compute_histograms(df, pathDS,'HSV')
-#def prueba(df, pathDS):
+global_color_histograms =False
+
+if global_color_histograms==True:
+	for i in range(len(dfDataset)):       
+		dfSingle = dfDataset.iloc[i]
+		imgBGR = get_full_image(dfSingle, pathDS)    
+		imageName = dfSingle['Image']  
+		channel0Single, channel1Single, channel2Single = global_color_hist(imgBGR, spaceType, pathprep_resultDS, imageName)
+		save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSingle,spaceType, imageName,pathResults)
 
 
-#para ejecutar global**********************************************************************************************************
-#for i in range(len(df)):       
-#    # Gets images one by one
-#    dfSingle = df.iloc[i]
-#    imgBGR = get_full_image(dfSingle, pathDS)    
-#    imageName = dfSingle['Image']  
-#    spaceType_hist= "HSV"
-#    channel0Single, channel1Single, channel2Single = global_color_hist(imgBGR, spaceType_hist)
-#    save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSingle,spaceType_hist, imageName)
-#Fin ejecutar global**********************************************************************************************************
-## ....
-## divide Image in 4 regions LAURA
-#hists= store_histogram_total(df, channel_name=['R','G','B'], level=1)
+
+#start		
+if build_dataset==True:
+   if prepoces==True:
+      for i in range(len(dfDataset)):
+          dfSingle = dfDataset.iloc[i]
+          imgBGR = get_full_image(dfSingle, pathDS)
+          imageName = dfSingle['Image']
+          global_color(imgBGR, spaceType, pathprep_resultDS, imageName)
+#      store_histogram_total(dfDataset, pathprep_resultDS, spaceType, level=level)
+#	else:
+#		## Save image descriptors
+#      store_histogram_total(dfDataset, pathDS, spaceType, level=level)
+
+
+   
+if pass_queries == True :
+    # Despres s'ha de cridar la funcio que calcula distancies
+    imageName="ima_000000.jpg"
+    queryImage=pathQueries+imageName
+    if prepoces ==True :
+        imgBGR = cv2.imread(queryImage,1)
+        global_color(imgBGR, spaceType, pathprep_resultQueries, imageName)
+
+        store_histogram_total(dfQuery,pathprep_resultQueries, spaceType, level=level)
+    else:
+        store_histogram_total(dfQuery,pathQueries, spaceType, level=level)
+    
+#    histogram_list_query = histograms_to_list(dfQuery, level, 0)
+#    for i in range(1):#(len(df)):
+#        histogram_list_dataset = histograms_to_list(dfDataset, level, i)
+		# S'ha de retocar xk accepti aixo
+		#distanceList = getX2results(histogram_list_dataset,  histogram_list_query)
+
+
+# --> MORE HERE <-- #
+# --> MORE HERE <-- #
+# --> MORE HERE <-- #
+# --> MORE HERE <-- #
 #
-#dfSingle = df.iloc[2]
-#im = get_full_image(dfSingle, pathDS)
-#portions = divide_image(im, 2)
-## compute hist for those regions
-
-
-# Save Results..
-# save results
-#tuple (image-name, listOfList)
-#listOfPositions = [ [startX, startY, endX, endY], [startX2, startY2, endX2, endY2],... ]
-#listOfHistogram = [ [[r],[g],[b]] , [[r2],[g2],[b2]] ]  
-# 
+## Texture Descriptors - Haar Wavelets technique + GLCM
+#imgTest = get_image(df.iloc[0]['Image'], pathDS)
+#grayImg = cv2.cvtColor(imgTest, cv2.COLOR_BGR2GRAY)
+#coeff = haar_wavelet(grayImg, level = 0)
+#imgHaar = haar_sticking(coeff, level = 0)
+#plot_gray(imgHaar)
+#
+## Save and Evalaute Results..
+#resultTest = pd.DataFrame({
+#    'Image' : ['im1', 'im3', 'im67', 'im97', 'im69', 'im46'],
+#    'Order' : [2, 1, 0, 1, 0, 2],
+#    'Query': [1, 1, 1, 2, 2, 2],
+#    })
+#
+#result_list = submission_list(resultTest)
+#
+#query_list = result_list
+#evaluation = mapk(query_list, result_list, k)
+#save_pkl(result_list, pathResults)        
