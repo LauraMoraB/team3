@@ -51,10 +51,9 @@ if build_dataset==True:
     dfDataset = create_df(pathDS)
     
     if prepoces==True:
-        for i in range(len(dfDataset)):
-            dfSingle = dfDataset.iloc[i]
-            imgBGR = get_full_image(dfSingle, pathDS)
-            imageName = dfSingle['Image']
+        for index, row in dfDataset.iterrows():
+            queryImage = row["Image"]
+            imgBGR = cv2.imread(queryImage,1)
             global_color(imgBGR, spaceType, pathprep_resultDS, imageName)
 
         store_histogram_total(dfDataset, pathprep_resultDS, spaceType, level=level)
@@ -68,8 +67,10 @@ if pass_queries == True:
     # Read and store queris images/descriptors
     dfQuery = create_df(pathQueries)
     if prepoces ==True :
-        imgBGR = cv2.imread(queryImage,1)
-        global_color(imgBGR, spaceType, pathprep_resultQueries, imageName)
+        for index, row in dfQuery.iterrows():
+            queryImage = row["Image"]
+            imgBGR = cv2.imread(queryImage,1)
+            global_color(imgBGR, spaceType, pathprep_resultQueries, imageName)
 
         store_histogram_total(dfQuery,pathprep_resultQueries, spaceType, level=level)
     else:
