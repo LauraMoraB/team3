@@ -39,7 +39,7 @@ def compute_normColor(im, channel):
     return pixel_candidates
  
 
-def preproces_image(fullImage,spaceType):
+def preproces_image_chV(fullImage,spaceType):
     ch_image=changeSpaceColor(fullImage, spaceType)
     if(spaceType=="HSV"):
         hsv_planes = cv2.split(ch_image)
@@ -50,6 +50,16 @@ def preproces_image(fullImage,spaceType):
         hsv = cv2.merge(hsv_planes)
         
         ch_image = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR ) 
+        
+    return ch_image
+def preproces_image_changecontrast(fullImage,spaceType):#spaceType="YUV"
+    ch_image=changeSpaceColor(fullImage, spaceType)
+    if(spaceType=="LAB"):  
+        LAB_planes = cv2.split(ch_image)
+        clahe = cv2.createCLAHE(clipLimit=3.0,tileGridSize=(8,8))       
+        LAB_planes[1] = clahe.apply(LAB_planes[1])        
+        imLAB = cv2.merge(LAB_planes)
+        ch_image = cv2.cvtColor(imLAB, cv2.COLOR_LAB2BGR ) 
         
     return ch_image
     
@@ -235,8 +245,16 @@ def color_characterization(df, path, spaceType_prep, spaceType_hist):
         imgBGR = get_full_image(dfSingle, path)    
         imageName = dfSingle['Image']  
          # Prepares mask files
-        bgr_ecualizado= preproces_image(imgBGR, spaceType_prep)
+        im_balance=white_balance_LAB(imgBGR,"LAB")
+        imgBGR=im_balance
+        cv2.imwrite('Cambios/im_balance_'+imageName[:-3]+'png', im_balance)
+        
+        bgr_ecualizado= preproces_image_chV(imgBGR, spaceType_prep)
         cv2.imwrite('Cambios/bgr_ecualizado_'+imageName[:-3]+'png', bgr_ecualizado)
+
+#        im_eq_incres=preproces_image_changecontrast(im_balance,"LAB")
+#        cv2.imwrite('Cambios/preproces_image_changecontrast'+imageName[:-3]+'png', im_eq_incres)
+
 
         #lowpass filter
 #        blur =cv2.bilateralFilter(bgr_ecualizado,5,100,100) 
@@ -246,11 +264,10 @@ def color_characterization(df, path, spaceType_prep, spaceType_hist):
 #        imgBGR=bgr_ecualizado
 #        imgBGR=blur
         cv2.imwrite('Cambios/unsharp_image_'+imageName[:-3]+'png', unsharp_image)
-        im_balance=white_balance_LAB(imgBGR,"LAB")
-        cv2.imwrite('Cambios/im_balance_'+imageName[:-3]+'png', im_balance)
+        
 # Gets images one by one
 
-        (channel0Single, channel1Single, channel2Single) = get_px_one(im_balance, spaceType_hist)
+        (channel0Single, channel1Single, channel2Single) = get_px_one(imgBGR, spaceType_hist)
         
         channel0L.extend(channel0Single)
         channel1L.extend(channel1Single)

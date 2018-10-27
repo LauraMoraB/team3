@@ -22,22 +22,22 @@ df = create_df(pathDS)
 # Compute HistogramGaby
 dfq = create_df(pathDSquery)
 #color_characterization(df, pathDS, 'HSV')
-#color_characterization(df, pathDS, 'HSV', "HLS")
+color_characterization(df, pathDS, 'HSV', "HLS")
 
 #compute_histograms(df, pathDS,'HSV')
 #def prueba(df, pathDS):
 
-#preproces_image(fullImage)
-#global_color(fullImage, spaceType)
-for i in range(len(df)):       
-    # Gets images one by one
-    dfSingle = df.iloc[i]
-    imgBGR = get_full_image(dfSingle, pathDS)    
-    imageName = dfSingle['Image']  
-    spaceType_hist= "HSV"
-    channel0Single, channel1Single, channel2Single = global_color_hist(imgBGR, spaceType_hist)
-    save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSingle,spaceType_hist, imageName)
 
+#para ejecutar global**********************************************************************************************************
+#for i in range(len(df)):       
+#    # Gets images one by one
+#    dfSingle = df.iloc[i]
+#    imgBGR = get_full_image(dfSingle, pathDS)    
+#    imageName = dfSingle['Image']  
+#    spaceType_hist= "HSV"
+#    channel0Single, channel1Single, channel2Single = global_color_hist(imgBGR, spaceType_hist)
+#    save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSingle,spaceType_hist, imageName)
+#Fin ejecutar global**********************************************************************************************************
 ## ....
 ## divide Image in 4 regions LAURA
 #hists= store_histogram_total(df, channel_name=['R','G','B'], level=1)
