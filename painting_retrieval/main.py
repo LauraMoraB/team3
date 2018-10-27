@@ -3,17 +3,17 @@ from matplotlib import pyplot as plt
 from utils import create_df, submission_list, save_pkl, mapk, get_image, plot_rgb, plot_gray
 from method1 import store_histogram_total, histograms_to_list
 from task5 import haar_wavelet, haar_sticking
-from task3 import getX2results
+from task3 import getX2results, getHellingerKernelResult, getHistInterseccionResult
 import pandas as pd
 
 # Paths
 pathDS = "dataset/"
-pathQueries = "queries/query_devel_random/"
+pathQueries = "queries/"
 pathResults = "results/"
 
 # Number of results per query
 k = 10
-build_dataset=True
+build_dataset=False
 pass_queries=True
 level=0
 channel_name="BGR"
@@ -27,15 +27,25 @@ if build_dataset==True:
     store_histogram_total(dfDataset, pathDS, channel_name, level=level)
     
 if pass_queries == True:
+    X2resultList = []
+    HIresultList = []
+    HKresultList = []
+
+    queryList = []
     # Read and store queris images/descriptors
     dfQuery = create_df(pathQueries)
     store_histogram_total(dfQuery,pathQueries, channel_name, level=level)
-
-        
+ 
     whole_hist_list = [histograms_to_list(row_ds, level) for _,row_ds in dfDataset.iterrows() ]
-    
-    
-    distanceList = [getX2results(whole_hist_list,  histograms_to_list(row, level))  for index,row in dfQuery.iterrows() ]
+    for index,row in dfQuery.iterrows():
+        histogram_query = histograms_to_list(row, level)
+        queryList.append(row['Image'])
+        
+        X2resultList.append(getX2results(whole_hist_list, histogram_query,  k, dfDataset))
+        HIresultList.append(getHistInterseccionResult(whole_hist_list, histogram_query,  k, dfDataset))
+        HKresultList.append(getHellingerKernelResult(whole_hist_list, histogram_query,  k, dfDataset))
+
+#    distanceList = [getX2results(whole_hist_list,  histograms_to_list(row, level), k)  for index,row in dfQuery.iterrows() ]
        
 
 # --> MORE HERE <-- #
