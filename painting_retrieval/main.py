@@ -17,8 +17,8 @@ pathprep_resultQueries = "results_preprocesadoQueries/"
 
 # Number of results per query
 k = 10
-build_dataset=True
-pass_queries=False
+build_dataset=False
+pass_queries=True
 level=2
 #type of space 
 spaceType= "HSV" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
@@ -68,9 +68,9 @@ if pass_queries == True :
         imgBGR = cv2.imread(queryImage,1)
         global_color(imgBGR, spaceType, pathprep_resultQueries, imageName)
 
-        store_histogram_total(dfQuery,pathprep_resultQueries, spaceType, level=level)
-    else:
-        store_histogram_total(dfQuery,pathQueries, spaceType, level=level)
+#        store_histogram_total(dfQuery,pathprep_resultQueries, spaceType, level=level)
+#    else:
+#        store_histogram_total(dfQuery,pathQueries, spaceType, level=level)
     
 #    histogram_list_query = histograms_to_list(dfQuery, level, 0)
 #    for i in range(1):#(len(df)):
