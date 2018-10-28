@@ -29,7 +29,7 @@ def getHellingerKernelResult(histogram_list_dataset, histogram_query, K, dfDatas
         distance = hellingerKernel(histogram_dataset, histogram_query)
         dictList[name] = distance
 
-    pairedList = sorted(dictList.items(), key = operator.itemgetter(1))
+    pairedList = sorted(dictList.items(), key = operator.itemgetter(1), reverse = True)
     simlarityList = list(zip(*pairedList))[0]
     simlarityList =  simlarityList[:K]
     return list(simlarityList)
@@ -44,7 +44,7 @@ def getHistInterseccionResult(histogram_list_dataset, histogram_query, K, dfData
         distance = histIntersection(histogram_dataset, histogram_query)
         dictList[name] = distance
 
-    pairedList = sorted(dictList.items(), key = operator.itemgetter(1))
+    pairedList = sorted(dictList.items(), key = operator.itemgetter(1), reverse = True)
     intersectionList = list(zip(*pairedList))[0]
     intersectionList =  intersectionList[:K]
     return list(intersectionList)

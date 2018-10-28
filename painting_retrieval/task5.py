@@ -13,10 +13,11 @@ def texture_method1(df, path):
         name = dfSingle['Image']
         im = get_image(name, path).astype(np.uint8)
         gIm = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-        plot_gray(gIm)
-#        method_result.append((name, texture_region(gIm, method = 0, level_div = 0, level_wavelet = 0)[0]))
-        texture_im = texture_region(gIm, method = 0, level_div = 0, level_wavelet = 0)
-        method_result.append(texture_im[0].copy())
+        texture_im = texture_region(gIm, method = 0, level_div = 2, level_wavelet = 0)
+
+        flat_texture_im = [item for sublist in texture_im for item in sublist]
+
+        method_result.append(flat_texture_im)
     return method_result
     
 def haar_wavelet(im, level = 0):
@@ -93,8 +94,8 @@ def compute_texture(im, method, level):
             result.append(compute_histogram(uint8_im(component), 0))
         elif(method == 1):
             result.append(GLCM(uint8_im(component)))        
-    imgHaar = haar_sticking(coeff, level)
-    plot_gray(imgHaar)
+#    imgHaar = haar_sticking(coeff, level)
+#    plot_gray(imgHaar)
     return to_descriptor_format(result.copy())
 
 

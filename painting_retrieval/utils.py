@@ -38,7 +38,7 @@ def plot_rgb(im):
 
 def save_pkl(list_of_list, path):
     create_dir(path)
-    with open(path+'results.pkl', 'wb') as f:
+    with open(path+'result.pkl', 'wb') as f:
         pickle.dump(list_of_list, f)
 
 def submission_list(df):

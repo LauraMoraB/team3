@@ -12,12 +12,17 @@ pathResults = "results/"
 pathprep_resultDS = "results_preprocesadoDS/"
 pathprep_resultQueries = "results_preprocesadoQueries/"
 GT_file = "queries/GT/query_corresp_simple_devel.pkl"
+pathResultsM1 = "results/method1/"
+pathResultsM2 = "results/method2/"
+pathResultsM3 = "results/method3/"
+pathQueriesTest = "queries_test/"
 
 # Crear directorios
-create_dir(pathResults)
 create_dir(pathprep_resultDS)
 create_dir(pathprep_resultQueries)
-
+create_dir(pathResultsM1)
+create_dir(pathResultsM2)
+create_dir(pathResultsM3)
 
 # Number of results per query
 k = 10
@@ -33,10 +38,13 @@ global_color_histograms = False
 level=0
 #type of space
 spaceType= "HSV" #"BGR" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
-
+# Final evaluation and Test
+performEvaluation = 0
+performTest = 1
 
 dfDataset = create_df(pathDS)
 dfQuery = create_df(pathQueries)
+dfQueryTest = create_df(pathQueriesTest)
 
 if global_color_histograms==True:
 	for i in range(len(dfDataset)):
@@ -83,28 +91,31 @@ if pass_queries == True:
 
 
     # Create list of lists for all histograms in the dataset
-    whole_hist_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfDataset.iterrows() ]
-
-    for index,row in dfQuery.iterrows():
-        histogram_query = histograms_to_list(row, level, spaceType)
-        queryList.append(row['Image'])
+#    whole_hist_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfDataset.iterrows() ]
+    whole_hist_list = texture_method1(dfDataset, pathDS)
+    if(performEvaluation == 1):
+        whole_query_list = texture_method1(dfQuery, pathQueries)
+    elif(performTest == 1):
+        whole_query_list = texture_method1(dfQueryTest, pathQueriesTest) 
+    
+    for query in whole_query_list:
+        histogram_query = query
 
         X2resultList.append(getX2results(whole_hist_list, histogram_query,  k, dfDataset))
         HIresultList.append(getHistInterseccionResult(whole_hist_list, histogram_query,  k, dfDataset))
         HKresultList.append(getHellingerKernelResult(whole_hist_list, histogram_query,  k, dfDataset))
 
+    if(performEvaluation == 1):
+        # Load provided GT
+        actualResult = get_query_gt(GT_file)
+        # Validation -> MAPK RESULT
+        mapkX2 = mapk(actualResult, X2resultList, k)
+        print('MAPK score using X2:',mapkX2)
+        mapkKI = mapk(actualResult, HIresultList, k)
+        print('MAPK score using HI:',mapkKI)
+        mapkHK = mapk(actualResult, HKresultList, k)
+        print('MAPK score using HK:',mapkHK)
 
-    # Load provided GT
-    actualResult = get_query_gt(GT_file)
-    # Validation -> MAPK RESULT
-    mapkX2 = mapk(actualResult, X2resultList, k)
-    print('MAPK score using X2:',mapkX2)
-    mapkKI = mapk(actualResult, HIresultList, k)
-    print('MAPK score using HI:',mapkX2)
-    mapkHK = mapk(actualResult, HKresultList, k)
-    print('MAPK score using HK:',mapkX2)
-
-    # Save results into pkl format
-    save_pkl(X2resultList, pathResults)
-    save_pkl(HIresultList, pathResults)
-    save_pkl(HKresultList, pathResults)
+    elif(performTest == 1):
+    # Save results for X2 whicih gives best performance
+        save_pkl(X2resultList, pathResultsM3)
