@@ -1,7 +1,5 @@
 from task2 import  hellingerKernel, histIntersection, x2Distance
 import operator
-import task2
-import numpy as np
 
 
 def getX2results(histogram_list_dataset, histogram_query, K, dfDataset):

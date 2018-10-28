@@ -24,9 +24,9 @@ create_dir(pathprep_resultQueries)
 # Number of results per query
 k = 10
 #Build database
-build_dataset=True
+build_dataset=False
 #Make queries
-pass_queries=True
+pass_queries=False
 #choose prepoces
 prepoces = False
 #choose global_color_histograms: image will be procesed and change space color and save global_color_hist in resuts_GVHistogram (create file )
@@ -35,6 +35,8 @@ global_color_histograms = False
 level=0
 #type of space 
 spaceType= "BGR" #"BGR" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
+#Return PLK validation
+validation = True
 
 
 dfDataset = create_df(pathDS)
@@ -95,17 +97,19 @@ if pass_queries == True:
     
 
 
-    # Load provided GT
-#    actualResult = get_query_gt(GT_file)
-#    # Validation -> MAPK RESULT
-#    mapkX2 = mapk(actualResult, X2resultList, k)
-#    print('MAPK score using X2:',mapkX2)
-#    mapkKI = mapk(actualResult, HIresultList, k)
-#    print('MAPK score using HI:',mapkX2)
-#    mapkHK = mapk(actualResult, HKresultList, k)
-#    print('MAPK score using HK:',mapkX2)
-#
-#    # Save results into pkl format
-#    save_pkl(X2resultList, pathResults)
-#    save_pkl(HIresultList, pathResults)
-#    save_pkl(HKresultList, pathResults)
+if validation == True:
+    
+    #Load provided GT
+    actualResult = get_query_gt(GT_file)
+    # Validation -> MAPK RESULT
+    mapkX2 = mapk(actualResult, X2resultList, k)
+    print('MAPK score using X2:',mapkX2)
+    mapkKI = mapk(actualResult, HIresultList, k)
+    print('MAPK score using HI:',mapkX2)
+    mapkHK = mapk(actualResult, HKresultList, k)
+    print('MAPK score using HK:',mapkX2)
+
+    # Save results into pkl format
+    save_pkl(X2resultList, pathResults)
+    save_pkl(HIresultList, pathResults)
+    save_pkl(HKresultList, pathResults)
