@@ -38,7 +38,7 @@ global_color_histograms = False
 performEvaluation = 1
 performTest = 0
 # which of the three different final methods is performed, 1 BGR, 2 LUV, 3 Wavelet
-method = 1
+method = 2
 #type of space and level
 if(method == 1):         
     spaceType= "BGR"
