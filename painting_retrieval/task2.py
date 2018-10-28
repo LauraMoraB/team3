@@ -9,7 +9,9 @@ def x2Distance(histTarget, histSource):
 
         division = np.divide(uperDiv,lowerDiv)
         diference = diference + division
+    
     return diference
+
 
 ##METHOD Histogram Intersection
 def histIntersection(histTarget, histSource):
@@ -24,4 +26,3 @@ def hellingerKernel(histTarget, histSource):
     for i in range(len(histSource)):
         similarity = similarity + np.sqrt(histSource[i]*histTarget[i])
     return similarity
-

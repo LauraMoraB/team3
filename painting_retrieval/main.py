@@ -1,4 +1,6 @@
 import cv2
+import numpy as np
+from matplotlib import pyplot as plt
 from utils import create_df, get_full_image, save_pkl, mapk, plot_rgb, plot_gray, create_dir, get_query_gt
 from method1 import store_histogram_total, histograms_to_list
 from task5 import texture_method1
@@ -7,7 +9,7 @@ from task3 import getHellingerKernelResult, getHistInterseccionResult, getX2resu
 
 # Paths
 pathDS = "dataset/"
-pathQueries = "queries/"
+pathQueries = "queries/query_devel_random/"
 pathResults = "results/"
 pathprep_resultDS = "results_preprocesadoDS/"
 pathprep_resultQueries = "results_preprocesadoQueries/"
@@ -57,18 +59,16 @@ if global_color_histograms==True:
 
 if build_dataset==True:
     # Read Images
-    if prepoces==True:
-        for index, row in dfDataset.iterrows():
-            imageName = row["Image"]
-            imgBGR = cv2.imread(pathDS+imageName,1)
+    for index, row in dfDataset.iterrows():
+        imageName = row["Image"]
+        imgBGR = cv2.imread(pathDS+imageName,1)
+        if prepoces==True:
+            global_color(imgBGR, spaceType, pathprep_resultDS, imageName, True)
+        else:
+            global_color(imgBGR, spaceType, pathprep_resultDS, imageName, False)
 
-            global_color(imgBGR, spaceType, pathprep_resultDS, imageName)
+    store_histogram_total(dfDataset, pathprep_resultDS+"Final/", spaceType, level=level)
 
-        store_histogram_total(dfDataset, pathprep_resultDS+"equalyse_luminance/", spaceType, level=level)
-
-    else:
-        # Save image descriptors
-        store_histogram_total(dfDataset, pathDS, spaceType, level=level)
 
 
 if pass_queries == True:
@@ -96,8 +96,8 @@ if pass_queries == True:
     if(performEvaluation == 1):
         whole_query_list = texture_method1(dfQuery, pathQueries)
     elif(performTest == 1):
-        whole_query_list = texture_method1(dfQueryTest, pathQueriesTest) 
-    
+        whole_query_list = texture_method1(dfQueryTest, pathQueriesTest)
+
     for query in whole_query_list:
         histogram_query = query
 
