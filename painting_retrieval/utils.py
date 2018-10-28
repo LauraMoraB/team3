@@ -4,7 +4,6 @@ import os
 import cv2
 from matplotlib import pyplot as plt
 import numpy as np
-import pickle
 
 def create_df(path_images):
     listImages =[]
