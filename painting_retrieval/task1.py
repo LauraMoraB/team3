@@ -21,12 +21,12 @@ def equalize_1_channel(grayIm):
 
 
 # compute histogram
-def compute_histogram(im, channel, mask=None,bins=128):
+def compute_histogram(im, channel, mask=None,bins=256):
     """
     channel: must be 0, 1 or 2
     """
     hist = cv2.calcHist([im], [channel], mask, [bins], [0,bins])
-    cv2.normalize(hist,hist,8,cv2.NORM_MINMAX)
+#    cv2.normalize(hist,hist,8,cv2.NORM_MINMAX)
     return hist
 
 def histogram_region(im, channel, level):

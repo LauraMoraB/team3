@@ -34,16 +34,18 @@ pass_queries=True
 prepoces = False
 #choose global_color_histograms: image will be procesed and change space color and save global_color_hist in resuts_GVHistogram (create file )
 global_color_histograms = False
-#Numer of partitions of histograms
-level=0
-#type of space
-spaceType= "HSV" #"BGR" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
 # Final evaluation and Test
 performEvaluation = 1
 performTest = 0
 # which of the three different final methods is performed, 1 BGR, 2 LUV, 3 Wavelet
-method = 3
-
+method = 1
+#type of space and level
+if(method == 1):         
+    spaceType= "BGR"
+    level=2
+elif(method == 2):         
+    spaceType= "LUV"
+    level=2
 
 dfDataset = create_df(pathDS)
 dfQuery = create_df(pathQueries)
@@ -70,42 +72,48 @@ if build_dataset==True:
 
     store_histogram_total(dfDataset, pathprep_resultDS+"Final/", spaceType, level=level)
 
-
 if pass_queries == True:
     X2resultList = []
     HIresultList = []
     HKresultList = []
-
-    queryList = []
-
-    if prepoces ==True :
-        for index, row in dfQuery.iterrows():
-            queryImage = row["Image"]
-            imgBGR = cv2.imread(pathQueries+queryImage,1)
-
-            global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage)
-
-        store_histogram_total(dfQuery,pathprep_resultQueries+"equalyse_luminance/", spaceType, level=level)
-    else:
-        store_histogram_total(dfQuery,pathQueries, spaceType, level=level)
-
-
+    # Create list of lists for all histograms in the query test/evaluation
+    if(performEvaluation == 1):
+        if(method == 1 or method == 2):         
+            if prepoces ==True :
+                for index, row in dfQuery.iterrows():
+                    queryImage = row["Image"]
+                    imgBGR = cv2.imread(pathQueries+queryImage,1)
+        
+                    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage)
+        
+                store_histogram_total(dfQuery,pathprep_resultQueries+"equalyse_luminance/", spaceType, level=level)
+            else:
+                store_histogram_total(dfQuery,pathQueries, spaceType, level=level)
+            whole_query_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfQuery.iterrows() ]
+        elif(method ==3):
+            whole_query_list = texture_method1(dfQuery, pathQueries)       
+    
+    elif(performTest == 1):
+        if(method == 1 or method == 2):         
+            if prepoces ==True :
+                for index, row in dfQueryTest.iterrows():
+                    queryImage = row["Image"]
+                    imgBGR = cv2.imread(pathQueriesTest+queryImage,1)
+        
+                    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage)
+        
+                store_histogram_total(dfQueryTest,pathprep_resultQueries+"equalyse_luminance/", spaceType, level=level)
+            else:
+                store_histogram_total(dfQueryTest,pathQueriesTest, spaceType, level=level)
+            whole_query_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfQueryTest.iterrows() ]
+        elif(method ==3):
+            whole_query_list = texture_method1(dfQueryTest, pathQueriesTest)
+            
     # Create list of lists for all histograms in the dataset
     if(method == 1 or method == 2):         
         whole_hist_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfDataset.iterrows() ]
     elif(method ==3):
         whole_hist_list = texture_method1(dfDataset, pathDS)
-        
-    if(performEvaluation == 1):
-        if(method == 1 or method == 2):         
-            whole_query_list = texture_method1(dfQuery, pathQueries)
-        elif(method ==3):
-            whole_query_list = texture_method1(dfQuery, pathQueries)            
-    elif(performTest == 1):
-        if(method == 1 or method == 2):         
-            whole_query_list = texture_method1(dfQueryTest, pathQueriesTest)
-        elif(method ==3):
-            whole_query_list = texture_method1(dfQueryTest, pathQueriesTest)
 
     for query in whole_query_list:
         histogram_query = query
