@@ -35,8 +35,8 @@ prepoces = False
 #choose global_color_histograms: image will be procesed and change space color and save global_color_hist in resuts_GVHistogram (create file )
 global_color_histograms = False
 # Final evaluation and Test
-performEvaluation = 1
-performTest = 0
+performEvaluation = 0
+performTest = 1
 # which of the three different final methods is performed, 1 BGR, 2 LUV, 3 Wavelet
 method = 2
 #type of space and level
@@ -79,32 +79,31 @@ if pass_queries == True:
     # Create list of lists for all histograms in the query test/evaluation
     if(performEvaluation == 1):
         if(method == 1 or method == 2):
-		for index, row in dfQuery.iterrows():
-        		queryImage = row["Image"]
-        		imgBGR = cv2.imread(pathQueries+queryImage,1)
-			if prepoces==True:            
-			    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, True)    
-			else:
-			    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, False)
+            for index, row in dfQuery.iterrows():
+                queryImage = row["Image"]
+                imgBGR = cv2.imread(pathQueries+queryImage,1)
+                if prepoces==True:
+                    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, True)    
+                else:
+                    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, False)
 
-    		store_histogram_total(dfQuery, pathprep_resultQueries+"Final/", spaceType, level=level)	
+            store_histogram_total(dfQuery, pathprep_resultQueries+"Final/", spaceType, level=level)	
             whole_query_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfQuery.iterrows() ]
-	
         elif(method ==3):
             whole_query_list = texture_method1(dfQuery, pathQueries)       
     
     elif(performTest == 1):
-        if(method == 1 or method == 2):         
-            	for index, row in dfQuery.iterrows():
-        		queryImage = row["Image"]
-        		imgBGR = cv2.imread(pathQueries+queryImage,1)
-			if prepoces==True:            
-			    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, True)    
-			else:
-			    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, False)
+        if(method == 1 or method == 2):
+            for index, row in dfQueryTest.iterrows():
+                queryImage = row["Image"]
+                imgBGR = cv2.imread(pathQueriesTest+queryImage,1)
+                if prepoces==True:
+                    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, True)    
+                else:
+                    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, False)
 
-    		store_histogram_total(dfQuery, pathprep_resultQueries+"Final/", spaceType, level=level)	            
-		whole_query_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfQueryTest.iterrows() ]
+            store_histogram_total(dfQueryTest, pathprep_resultQueries+"Final/", spaceType, level=level)	
+            whole_query_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfQueryTest.iterrows() ]
         elif(method ==3):
             whole_query_list = texture_method1(dfQueryTest, pathQueriesTest)
             
