@@ -74,6 +74,7 @@ if pass_queries == True:
     for index, row in dfQuery.iterrows():
         queryImage = row["Image"]
         imgBGR = cv2.imread(pathQueries+queryImage,1)
+        
         if prepoces==True:            
             global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, True)    
         else:
@@ -93,19 +94,18 @@ if pass_queries == True:
         HIresultList.append(getHistInterseccionResult(whole_hist_list, histogram_query,  k, dfDataset))
         HKresultList.append(getHellingerKernelResult(whole_hist_list, histogram_query,  k, dfDataset))
     
-
-
     # Load provided GT
-#    actualResult = get_query_gt(GT_file)
-#    # Validation -> MAPK RESULT
-#    mapkX2 = mapk(actualResult, X2resultList, k)
-#    print('MAPK score using X2:',mapkX2)
-#    mapkKI = mapk(actualResult, HIresultList, k)
-#    print('MAPK score using HI:',mapkX2)
-#    mapkHK = mapk(actualResult, HKresultList, k)
-#    print('MAPK score using HK:',mapkX2)
-#
-#    # Save results into pkl format
-#    save_pkl(X2resultList, pathResults)
-#    save_pkl(HIresultList, pathResults)
-#    save_pkl(HKresultList, pathResults)
+    actualResult = get_query_gt(GT_file)
+
+    # Validation -> MAPK RESULT
+    mapkX2 = mapk(actualResult, X2resultList, k)
+    print('MAPK score using X2:',mapkX2)
+    mapkKI = mapk(actualResult, HIresultList, k)
+    print('MAPK score using HI:',mapkX2)
+    mapkHK = mapk(actualResult, HKresultList, k)
+    print('MAPK score using HK:',mapkX2)
+
+    # Save results into pkl format
+    save_pkl(X2resultList, pathResults)
+    save_pkl(HIresultList, pathResults)
+    save_pkl(HKresultList, pathResults)

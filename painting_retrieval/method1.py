@@ -45,7 +45,7 @@ def histograms_to_list(df_row, level, channel_name):
     bf=[]
     gf=[]
     channel_name = list(channel_name)
-    
+    #print (channel_name)
     R = 'level' + str(level) + "_"+channel_name[2]
     G = 'level' + str(level) + "_"+channel_name[1]
     B = 'level' + str(level) + "_"+channel_name[0]
@@ -55,7 +55,7 @@ def histograms_to_list(df_row, level, channel_name):
     b = df_row[B]
     
     for i in range(len(r)):
-    
+        #print (r[i])
         rf.extend([item[0] for item in r[i].tolist()])
         gf.extend([item[0] for item in g[i].tolist()])
         bf.extend([item[0] for item in b[i].tolist()])

@@ -19,7 +19,6 @@ def equalize_1_channel(grayIm):
     grayIm = cv2.equalizeHist(grayIm)
     return grayIm
 
-# image white balance
 
 # compute histogram
 def compute_histogram(im, channel, mask=None,bins=256):
@@ -28,11 +27,11 @@ def compute_histogram(im, channel, mask=None,bins=256):
     """
     hist = cv2.calcHist([im], [channel], mask, [bins], [0,bins])
     
-    total_pixels = im.shape[0]*im.shape[1]
-    
-    hist_norm = [item/total_pixels for item in hist]
-
-    return hist_norm
+    #total_pixels = im.shape[0]*im.shape[1]
+    # cv2.normalize(hist,hist,8,cv2.NORM_MINMAX)
+    #hist_norm = [item/total_pixels for item in hist]
+    return hist
+    #return hist_norm
 
 def histogram_region(im, channel, level):
     """

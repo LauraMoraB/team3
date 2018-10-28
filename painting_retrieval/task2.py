@@ -26,4 +26,3 @@ def hellingerKernel(histTarget, histSource):
     for i in range(len(histSource)):
         similarity = similarity + np.sqrt(histSource[i]*histTarget[i])
     return similarity
-

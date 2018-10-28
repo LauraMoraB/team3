@@ -50,6 +50,3 @@ def getHistInterseccionResult(histogram_list_dataset, histogram_query, K, dfData
     intersectionList = list(zip(*pairedList))[0]
     intersectionList =  intersectionList[:K]
     return list(intersectionList)
-
-
-    
