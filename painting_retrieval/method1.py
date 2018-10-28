@@ -55,9 +55,9 @@ def histograms_to_list(df_row, level, channel_name):
     b = df_row[B]
     
     for i in range(len(r)):
-    
-        rf.extend([item[0] for item in r[i].tolist()])
-        gf.extend([item[0] for item in g[i].tolist()])
-        bf.extend([item[0] for item in b[i].tolist()])
-    
+        
+        rf.extend([item[0] for item in r[i]])#.tolist()])
+        gf.extend([item[0] for item in g[i]])#.tolist()])
+        bf.extend([item[0] for item in b[i]])#.tolist()])
+
     return rf+gf+bf
