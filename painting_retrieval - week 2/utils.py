@@ -1,4 +1,3 @@
-import pandas as pd
 import pickle
 import os
 import cv2
@@ -18,9 +17,12 @@ def create_dir(pathSave):
         os.makedirs(pathSave)
 		
 def get_gray_image(im, path):
-    print(path+im)
     imBGR = cv2.imread(path+im)
     return cv2.cvtColor(imBGR, cv2.COLOR_BGR2GRAY)
+
+def get_bgr_image(im, path):
+    imBGR = cv2.imread(path+im)
+    return imBGR
 
 def plot_gray(im):
     plt.imshow(im, cmap='gray')
@@ -30,6 +32,25 @@ def plot_rgb(im):
     plt.imshow(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
     plt.show()
 
+def plot_sift(sift, path):
+    imName, kps, descs = sift    
+    imGray = get_gray_image(imName, path)
+    imSift = cv2.drawKeypoints(imGray, kps, None)
+    plot_rgb(imSift)  
+
+def plot_matches(siftA, siftB, pathA, pathB, matches):
+    imNameA, kpsA, descsA = siftA    
+    imNameB, kpsB, descsB = siftB  
+    imA = get_bgr_image(imNameA, pathA)
+    imB = get_bgr_image(imNameB, pathB)
+    match_img = cv2.drawMatches(
+        imA, kpsA,
+        imB, kpsB,
+        matches, imB.copy(), flags=0)
+    plt.figure(figsize=(12,6))
+    plt.imshow(match_img)
+    plot_rgb(match_img)    
+    
 def save_pkl(list_of_list, path):
     create_dir(path)
     with open(path+'result.pkl', 'wb') as f:

@@ -1,5 +1,7 @@
 import cv2
-from utils import list_ds, save_pkl, mapk, create_dir, get_query_gt, plot_gray, get_gray_image
+import numpy as np
+from utils import list_ds, save_pkl, mapk, create_dir, get_query_gt, plot_gray, plot_rgb, plot_sift, plot_matches, get_gray_image
+import random
 
 def init():
     # --> BEGINING FOLDERS PREPARATION <-- #
@@ -20,99 +22,63 @@ def init():
     # Create all subdirectories on dictionary if tey dont already
     for path in paths:
         create_dir(paths[path])
+    print('All subfolders have been created')
     # --> END FOLDERS PREPARATION <-- #
     return paths
 
-def load_sift_descriptors(path, method = 0):
-    
-    im_list = list_ds(path)
+def load_sift_descriptors(path, rootSift = False, eps=1e-7):
     sift_result = []
+    # Get DS images names list   
+    im_list = list_ds(path)
     # Creates SIFT object
     sift = cv2.xfeatures2d.SIFT_create()
     for imName in im_list:
         # Load Gray version of each image
         imGray = get_gray_image(imName, path)
-        # Find KeyLpoints
+        # Find KeyLpoints and Sift Descriptors, info about KeyPoint objects -> https://docs.opencv.org/3.3.1/d2/d29/classcv_1_1KeyPoint.html
         (kps, descs) = sift.detectAndCompute(imGray, None)
+        # In case no kps were found
+        if len(kps) == 0:
+            (kps, descs) = ([], None)
+        # RootSift descriptor, sift improvement descriptor
+        elif(rootSift == True):
+            descs /= (descs.sum(axis=1, keepdims=True) + eps)
+            descs = np.sqrt(descs)            
+        # Append results
         sift_result.append([imName, kps, descs])    
-        print("# kps: {}, descriptors: {}".format(len(kps), descs.shape))
     return sift_result
         
-        
+def BFMatcher(N, siftA, siftB, pathA = '', pathB = '', plot = False):
+    imNameA, kpsA, descsA = siftA    
+    imNameB, kpsB, descsB = siftB    
+    # create a BFMatcher object which will match up the SIFT features
+    bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)    
+    # Useful info about DMatch objects -> https://docs.opencv.org/java/2.4.9/org/opencv/features2d/DMatch.html
+    matches = bf.match(descsA, descsB)
+    # Sort the matches in the order of their distance.
+    matches = sorted(matches, key = lambda x:x.distance)
+    # keep N top matches
+    matches = matches[0:N]
+    if(plot == True):
+        plot_matches(siftA, siftB, pathA, pathB, matches)        
+    return matches
 
-
-#
-#if pass_queries == True:
-#    X2resultList = []
-#    HIresultList = []
-#    HKresultList = []
-#    # Create list of lists for all histograms in the query test/evaluation
-#    if(performEvaluation == 1):
-#        if(method == 1 or method == 2):
-#            for index, row in dfQuery.iterrows():
-#                queryImage = row["Image"]
-#                imgBGR = cv2.imread(pathQueries+queryImage,1)
-#                if prepoces==True:
-#                    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, True)    
-#                else:
-#                    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, False)
-#
-#            store_histogram_total(dfQuery, pathprep_resultQueries+"Final/", spaceType, level=level)	
-#            whole_query_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfQuery.iterrows() ]
-#        elif(method ==3):
-#            whole_query_list = texture_method1(dfQuery, pathQueries)       
-#    
-#    elif(performTest == 1):
-#        if(method == 1 or method == 2):
-#            for index, row in dfQueryTest.iterrows():
-#                queryImage = row["Image"]
-#                imgBGR = cv2.imread(pathQueriesTest+queryImage,1)
-#                if prepoces==True:
-#                    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, True)    
-#                else:
-#                    global_color(imgBGR, spaceType, pathprep_resultQueries, queryImage, False)
-#
-#            store_histogram_total(dfQueryTest, pathprep_resultQueries+"Final/", spaceType, level=level)	
-#            whole_query_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfQueryTest.iterrows() ]
-#        elif(method ==3):
-#            whole_query_list = texture_method1(dfQueryTest, pathQueriesTest)
-#            
-#    # Create list of lists for all histograms in the dataset
-#    if(method == 1 or method == 2):         
-#        whole_hist_list = [histograms_to_list(row_ds, level, spaceType) for _,row_ds in dfDataset.iterrows() ]
-#    elif(method ==3):
-#        whole_hist_list = texture_method1(dfDataset, pathDS)
-#
-#    for query in whole_query_list:
-#        histogram_query = query
-#
-#        X2resultList.append(getX2results(whole_hist_list, histogram_query,  k, dfDataset))
-#        HIresultList.append(getHistInterseccionResult(whole_hist_list, histogram_query,  k, dfDataset))
-#        HKresultList.append(getHellingerKernelResult(whole_hist_list, histogram_query,  k, dfDataset))
-#
-#    if(performEvaluation == 1):
-#        # Load provided GT
-#        actualResult = get_query_gt(GT_file)
-#        # Validation -> MAPK RESULT
-#        mapkX2 = mapk(actualResult, X2resultList, k)
-#        print('MAPK score using X2:',mapkX2)
-#        mapkKI = mapk(actualResult, HIresultList, k)
-#        print('MAPK score using HI:',mapkKI)
-#        mapkHK = mapk(actualResult, HKresultList, k)
-#        print('MAPK score using HK:',mapkHK)
-#
-#    elif(performTest == 1):
-#    # Save results for X2 whicih gives best performance
-#        if(method == 1):
-#            save_pkl(X2resultList, pathResultsM1)
-#        elif(method == 2):
-#            save_pkl(X2resultList, pathResultsM2)
-#        elif(method == 3):
-#            save_pkl(X2resultList, pathResultsM3)
-#
-
+def demo():
+    # Example for ploting a sift image
+    print('Sift kps example on random image from ds:')
+    siftA = sift_ds[random.randint(0,len(sift_ds))]
+    plot_sift(siftA, paths['pathDS'])
+    print('Sift matching example on random image from ds:')
+    siftA = sift_ds[0]
+    siftB = sift_ds[0]
+    BFMatcher(50, siftA, siftB, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True)   
+    
 if __name__ == "__main__":
 
+    # Prepares folders
     paths = init()
-    sift = load_sift_descriptors(paths['pathDS'])
-    
+    # Creates list of list with sift kps and descriptors  -> [imName, kps, descs]
+    sift_ds = load_sift_descriptors(paths['pathDS'])
+    sift_validation = load_sift_descriptors(paths['pathQueriesValidation'])
+    # Demmonstration of status
+    demo()
