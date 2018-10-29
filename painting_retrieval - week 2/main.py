@@ -2,7 +2,6 @@ import random
 from utils import save_pkl, mapk, create_dir, plot_gray, plot_rgb, plot_sift, plot_matches
 from sift import compute_sift, BFMatcher
 
-
 def init():
     # --> BEGINING FOLDERS PREPARATION <-- #
     paths = {}
@@ -32,8 +31,8 @@ def demo():
     siftA = sift_ds[random.randint(0,len(sift_ds))]
     plot_sift(siftA, paths['pathDS'])
     print('Sift matching example on random image from ds:')
-    siftA = sift_ds[0]
-    siftB = sift_ds[0]
+    siftA = sift_ds[random.randint(0,len(sift_ds))]
+    siftB = sift_ds[random.randint(0,len(sift_ds))]
     BFMatcher(50, siftA, siftB, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True)   
     
 if __name__ == "__main__":
