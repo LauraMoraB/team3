@@ -5,27 +5,22 @@ import cv2
 from matplotlib import pyplot as plt
 import numpy as np
 
-def create_df(path_images):
+def list_ds(path_images):
     listImages =[]
     # Import Data from directories
     for filename in os.listdir(path_images):
         if filename.endswith(".jpg"):
             listImages.append(filename)
-    col = ["Image"]
-    df = pd.DataFrame(columns=col)
-    df["Image"] = listImages
-    return df
+    return listImages
 
 def create_dir(pathSave):
     if not os.path.exists(pathSave):
         os.makedirs(pathSave)
-
-def get_full_image(dfSingle, path):
-    return cv2.imread(path + dfSingle['Image'],1)
-	
-	
-def get_image(im, path):
-    return cv2.imread(path+im, 1)
+		
+def get_gray_image(im, path):
+    print(path+im)
+    imBGR = cv2.imread(path+im)
+    return cv2.cvtColor(imBGR, cv2.COLOR_BGR2GRAY)
 
 def plot_gray(im):
     plt.imshow(im, cmap='gray')
