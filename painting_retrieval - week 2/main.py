@@ -1,6 +1,7 @@
 import random
-from utils import save_pkl, mapk, create_dir, plot_gray, plot_rgb, plot_sift, plot_matches
-from sift import compute_sift, BFMatcher
+import numpy as np
+from utils import save_pkl, mapk, create_dir, plot_gray, plot_rgb, plot_sift, plot_matches, get_query_gt
+from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats
 
 def init():
     # --> BEGINING FOLDERS PREPARATION <-- #
@@ -37,10 +38,20 @@ def demo():
     
 if __name__ == "__main__":
 
-    # Prepares folders
-    paths = init()
-    # Creates list of list with sift kps and descriptors  -> [imName, kps, descs]
-    sift_ds = compute_sift(paths['pathDS'])
-    sift_validation = compute_sift(paths['pathQueriesValidation'])
-    # Demmonstration of status
-    demo()
+    RELOAD = True
+    if(RELOAD):
+        # Prepares folders
+        paths = init()
+        # Loads GT
+        GT_file = "queries_validation/GT/query_corresp_simple_devel.pkl"
+        gt_list = get_query_gt(GT_file)
+        # Creates list of list with sift kps and descriptors  -> [imName, kps, descs]
+        sift_ds = compute_sift(paths['pathDS'])
+        sift_validation = compute_sift(paths['pathQueriesValidation'])
+
+    N = 50
+    gt_matches = get_gt_distance(N, sift_ds, sift_validation, gt_list, paths)
+    get_distances_stats(gt_matches)
+        
+                
+        

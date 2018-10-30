@@ -3,7 +3,7 @@ import numpy as np
 from utils import list_ds, get_gray_image, plot_matches
 
 def compute_sift(path, rootSift = False, eps=1e-7):
-    sift_result = []
+    sift_result = {}
     # Get DS images names list   
     im_list = list_ds(path)
     # Creates SIFT object
@@ -21,7 +21,7 @@ def compute_sift(path, rootSift = False, eps=1e-7):
             descs /= (descs.sum(axis=1, keepdims=True) + eps)
             descs = np.sqrt(descs)            
         # Append results
-        sift_result.append([imName, kps, descs])    
+        sift_result[imName] = [imName, kps, descs] 
     return sift_result
 
 def BFMatcher(N, siftA, siftB, pathA = '', pathB = '', plot = False):
@@ -38,3 +38,39 @@ def BFMatcher(N, siftA, siftB, pathA = '', pathB = '', plot = False):
     if(plot == True):
         plot_matches(siftA, siftB, pathA, pathB, matches)        
     return matches
+
+def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths):   
+    i = 0
+    validationMatches = []
+    for imName in sift_validation:
+        siftA = sift_validation[imName]
+        siftB = sift_ds[gt_list[i][0]]
+        matchesBF = BFMatcher(N, siftA, siftB, pathA=paths['pathQueriesValidation'], pathB = paths['pathDS'], plot = True)  
+        distance = [o.distance for o in matchesBF]
+        validationMatches.append([imName, distance])
+        i += 1
+    return validationMatches
+
+def get_distances_stats(N, matches):
+    distances = []
+    for n in range(N):
+        for i in range(len(matches)):
+            try:
+                if(i == 0):
+                    distances.append([matches[i][1][n]])
+                else:
+                    distances[n].append(matches[i][1][n])
+            except IndexError:
+                    if(i == 0):
+                        distances.append([None])
+                    else:
+                        distances[n].append(None)
+    stats = []
+    for entry in distances:
+        try:
+            entry = [x for x in entry if x != None]
+        except ValueError:
+            pass 
+        stats.append([np.mean(entry),np.std(entry)])
+        
+    return np.array(stats)
