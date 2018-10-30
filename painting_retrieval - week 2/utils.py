@@ -70,6 +70,9 @@ def submission_list(df):
         project_result.append(query_result.copy())
     return project_result
 
+def slice_dict(d1, no, nf):
+    return dict(list(d1.items())[no:nf])
+
 ## Average precision at K calculation
 def apk(actual, predicted, k=10):
     """

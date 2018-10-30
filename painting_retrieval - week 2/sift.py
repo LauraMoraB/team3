@@ -46,7 +46,8 @@ def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths):
     for imName in sift_validation:
         siftA = sift_validation[imName]
         siftB = sift_ds[gt_list[i][0]]
-        matchesBF = BFMatcher(N, siftA, siftB, pathA=paths['pathQueriesValidation'], pathB = paths['pathDS'], plot = True)  
+        matchesBF = BFMatcher(N, siftA, siftB, pathA=paths['pathQueriesValidation'], 
+                              pathB = paths['pathDS'], plot = True)  
         distance = [o.distance for o in matchesBF]
         validationMatches.append([imName, distance])
         i += 1
@@ -81,10 +82,33 @@ def get_distances_stats(N, matches, plot = False):
                      result[:,1] - result[:,2]],fmt='.k', ecolor='gray', lw=1)
         plt.xlim(-1, N)   
         plt.ylabel('Distance')
-        plt.xlabel('Ordered descritpr #')
+        plt.xlabel('Ordered descritor #')
         plt.title('GT BFMatcher')
         plt.show()        
         
     return result
 
-
+def retreive_image(siftDs, siftQueries, paths, k, method = 0, th = 60, descsMin = 3)   :   
+    queriesResult = []
+    distancesResult = []
+    for imNameQuery in siftQueries:
+        matches = []
+        siftQuery = siftQueries[imNameQuery]
+        for imNameDs in siftDs:
+            siftIm = siftDs[imNameDs]
+            matchesBF = BFMatcher(100, siftQuery, siftIm, pathA=paths['pathQueriesValidation'], 
+                                  pathB = paths['pathDS'], plot = True)  
+            distance = [o.distance for o in matchesBF if o.distance <= th]
+            # if less than 3 matches found, not considered a match
+            if(len(distance) >= descsMin):
+                matches.append([imNameDs, distance])
+        # Sort images per number of matches under threshold level
+        matches = sorted(matches, key = lambda x:len(x[1]), reverse = True)
+        # if more than K matches, return the better K
+        if(len(matches) > k):
+            matches = matches[0:k] 
+        # Controuct query result
+        queriesResult.append([l[1] for l in matches ])
+        queriesResult.append([l[0] for l in matches ])
+            
+    return queriesResult, distancesResult

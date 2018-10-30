@@ -1,7 +1,7 @@
 import random
 import numpy as np
-from utils import save_pkl, mapk, create_dir, plot_gray, plot_rgb, plot_sift, plot_matches, get_query_gt
-from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats
+from utils import save_pkl, mapk, create_dir, plot_gray, plot_rgb, plot_sift, plot_matches, get_query_gt, slice_dict
+from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image
 
 def init():
     # --> BEGINING FOLDERS PREPARATION <-- #
@@ -29,11 +29,11 @@ def init():
 def demo():
     # Example for ploting a sift image
     print('Sift kps example on random image from ds:')
-    siftA = sift_ds[random.choice(list(sift_ds.keys()))]
+    siftA = siftDs[random.choice(list(siftDs.keys()))]
     plot_sift(siftA, paths['pathDS'])
     print('Sift matching example on random image from ds:')
-    siftA = sift_ds[random.choice(list(sift_ds.keys()))]
-    siftB = sift_ds[random.choice(list(sift_ds.keys()))]
+    siftA = siftDs[random.choice(list(siftDs.keys()))]
+    siftB = siftDs[random.choice(list(siftDs.keys()))]
     BFMatcher(50, siftA, siftB, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True)   
     
 if __name__ == "__main__":
@@ -43,17 +43,21 @@ if __name__ == "__main__":
         # Prepares folders
         paths = init()
         # Loads GT
-        GT_file = "queries_validation/GT/query_corresp_simple_devel.pkl"
-        gt_list = get_query_gt(GT_file)
+        gtFile = "queries_validation/GT/query_corresp_simple_devel.pkl"
+        gtList = get_query_gt(gtFile)
         # Creates list of list with sift kps and descriptors  -> [imName, kps, descs]
-        sift_ds = compute_sift(paths['pathDS'])
-        sift_validation = compute_sift(paths['pathQueriesValidation'])
+        siftDs = compute_sift(paths['pathDS'])
+        siftValidation = compute_sift(paths['pathQueriesValidation'])
 
     GT_MATCHING = False
     if(GT_MATCHING):
-        N = 25
-        gt_matches = get_gt_distance(N, sift_ds, sift_validation, gt_list, paths)
-        gt_stats = get_distances_stats(N, gt_matches, plot = True)
-        
-                
+        N = 30
+        gtMatches = get_gt_distance(N, siftDs, slice_dict(siftValidation,0,1), gtList, paths)
+        gtStats = get_distances_stats(N, gtMatches, plot = True)
+    
+    k = 10
+    quesriesResult, distancesResult = retreive_image(siftDs, siftValidation, paths, k, th = 100)
+    # Evaluation
+    mapk(gtList, quesriesResult)
+
         
