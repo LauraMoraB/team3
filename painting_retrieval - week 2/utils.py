@@ -34,8 +34,11 @@ def plot_rgb(im):
 
 def plot_sift(sift, path):
     imName, kps, descs = sift    
+    bgrGray = get_bgr_image(imName, path)
     imGray = get_gray_image(imName, path)
     imSift = cv2.drawKeypoints(imGray, kps, None)
+    plot_rgb(bgrGray)  
+    plot_gray(imGray)  
     plot_rgb(imSift)  
 
 def plot_matches(siftA, siftB, pathA, pathB, matches):

@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import matplotlib.pyplot as plt
 from utils import list_ds, get_gray_image, plot_matches
 
 def compute_sift(path, rootSift = False, eps=1e-7):
@@ -51,7 +52,7 @@ def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths):
         i += 1
     return validationMatches
 
-def get_distances_stats(N, matches):
+def get_distances_stats(N, matches, plot = False):
     distances = []
     for n in range(N):
         for i in range(len(matches)):
@@ -71,6 +72,19 @@ def get_distances_stats(N, matches):
             entry = [x for x in entry if x != None]
         except ValueError:
             pass 
-        stats.append([np.mean(entry),np.std(entry)])
+        stats.append([np.min(entry),np.max(entry),np.mean(entry),np.std(entry)])
+
+    result = np.array(stats)
+    if(plot == True):
+        plt.errorbar(np.arange(N), result[:,2], result[:,3], fmt='ok', lw=3)
+        plt.errorbar(np.arange(N), result[:,2], [result[:,2] - result[:,0], 
+                     result[:,1] - result[:,2]],fmt='.k', ecolor='gray', lw=1)
+        plt.xlim(-1, N)   
+        plt.ylabel('Distance')
+        plt.xlabel('Ordered descritpr #')
+        plt.title('GT BFMatcher')
+        plt.show()        
         
-    return np.array(stats)
+    return result
+
+

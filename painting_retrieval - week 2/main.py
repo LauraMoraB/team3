@@ -29,16 +29,16 @@ def init():
 def demo():
     # Example for ploting a sift image
     print('Sift kps example on random image from ds:')
-    siftA = sift_ds[random.randint(0,len(sift_ds))]
+    siftA = sift_ds[random.choice(list(sift_ds.keys()))]
     plot_sift(siftA, paths['pathDS'])
     print('Sift matching example on random image from ds:')
-    siftA = sift_ds[random.randint(0,len(sift_ds))]
-    siftB = sift_ds[random.randint(0,len(sift_ds))]
+    siftA = sift_ds[random.choice(list(sift_ds.keys()))]
+    siftB = sift_ds[random.choice(list(sift_ds.keys()))]
     BFMatcher(50, siftA, siftB, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True)   
     
 if __name__ == "__main__":
 
-    RELOAD = True
+    RELOAD = False
     if(RELOAD):
         # Prepares folders
         paths = init()
@@ -49,9 +49,11 @@ if __name__ == "__main__":
         sift_ds = compute_sift(paths['pathDS'])
         sift_validation = compute_sift(paths['pathQueriesValidation'])
 
-    N = 50
-    gt_matches = get_gt_distance(N, sift_ds, sift_validation, gt_list, paths)
-    get_distances_stats(gt_matches)
+    GT_MATCHING = False
+    if(GT_MATCHING):
+        N = 25
+        gt_matches = get_gt_distance(N, sift_ds, sift_validation, gt_list, paths)
+        gt_stats = get_distances_stats(N, gt_matches, plot = True)
         
                 
         
