@@ -47,8 +47,8 @@ if __name__ == "__main__":
         gtList = get_query_gt(gtFile)
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
-        siftDs = compute_sift(paths['pathDS'])
-        siftValidation = compute_sift(paths['pathQueriesValidation'])
+        siftDs = compute_sift(paths['pathDS'], rootSift = True)
+        siftValidation = compute_sift(paths['pathQueriesValidation'], rootSift = True)
 
     GT_MATCHING = False
     if(GT_MATCHING):
@@ -64,12 +64,12 @@ if __name__ == "__main__":
     # Number of images retrieval per query
     k = 10
     # Max distance to consider a good match
-    th = 100
+    th = 0.2
     # Min number of matches to considerer a good retrieval
-    descsMin = 3
+    descsMin = 2
     
     quesriesResult, distancesResult = retreive_image(siftDs, 
-                                                     slice_dict(siftValidation,0,1), 
+                                                     siftValidation,#slice_dict(siftValidation,0,1), 
                                                      paths, k, th, descsMin)
     # Evaluation
     mapkResult = mapk(gtList, quesriesResult, k)
