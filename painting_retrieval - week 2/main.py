@@ -1,6 +1,5 @@
 import random
-import numpy as np
-from utils import save_pkl, mapk, create_dir, plot_gray, plot_rgb, plot_sift, plot_matches, get_query_gt, slice_dict
+from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift
 from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image
 
 def init():
@@ -12,12 +11,11 @@ def init():
     paths['pathGTValidation'] = "queries_validation/GT/"
     paths['pathQueriesTest'] = "queries_test/"
     paths['pathGTTest'] = "queries_test/GT/"
-    # General Results Path
+    # Results Path
     paths['pathResult'] = "results/"
-    # Delivery Results Path
-    paths['pathResultsM1'] = "results/method1/"
-    paths['pathResultsM2'] = "results/method2/"
-    paths['pathResultsM3'] = "results/method3/"
+    # Delivery Methods Path
+    paths['pathResults1'] = "results/sift/"
+    paths['pathResults2'] = "results/rootsift/"
     
     # Create all subdirectories on dictionary if tey dont already
     for path in paths:
@@ -38,7 +36,12 @@ def demo():
     
 if __name__ == "__main__":
 
-    RELOAD = False
+    RELOAD = True
+    GT_MATCHING = False
+    RETRIEVAL = False
+    ROOTSIFT = True
+    SAVE_RESULTS = False
+
     if(RELOAD):
         # Prepares folders
         paths = init()
@@ -47,8 +50,8 @@ if __name__ == "__main__":
         gtList = get_query_gt(gtFile)
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
-        siftDs = compute_sift(paths['pathDS'], rootSift = True)
-        siftValidation = compute_sift(paths['pathQueriesValidation'], rootSift = True)
+        siftDs = compute_sift(paths['pathDS'], rootSift = ROOTSIFT)
+        siftValidation = compute_sift(paths['pathQueriesValidation'], rootSift = ROOTSIFT)
 
     GT_MATCHING = False
     if(GT_MATCHING):
@@ -59,20 +62,32 @@ if __name__ == "__main__":
         # Compute distance Stats for GT correspondences
         gtStats = get_distances_stats(N, gtMatches, plot = True)
 
-    # --> BEGINING Image Retrieval Sift + BF <-- #
-    
-    # Number of images retrieval per query
-    k = 10
-    # Max distance to consider a good match
-    th = 0.2
-    # Min number of matches to considerer a good retrieval
-    descsMin = 2
-    
-    quesriesResult, distancesResult = retreive_image(siftDs, 
-                                                     siftValidation,#slice_dict(siftValidation,0,1), 
-                                                     paths, k, th, descsMin)
-    # Evaluation
-    mapkResult = mapk(gtList, quesriesResult, k)
-    print('MAPK@'+str(k)+':',mapkResult)
+    if(RETRIEVAL):   
+        # Number of images retrieval per query
+        k = 10
+        # Max distance to consider good matches
+        if(ROOTSIFT == False):
+            th = 100
+        else:
+            th = 0.2
+        # Min number of matches to considerer a good retrieval
+        descsMin = 2
+        # Returns queries retrival + theis distances + debugging & tuning
+        quesriesResult, distancesResult = retreive_image(siftDs, 
+                                                         siftValidation,#slice_dict(siftValidation,0,1), 
+                                                         paths, k, th, descsMin)
+        # Evaluation
+        for n in range(k):
+            mapkResult = mapk(gtList, quesriesResult, n+1)
+            print('MAPK@'+str(n+1)+':',mapkResult)
+            
+    # Save Results, modify path accordingly to the  Method beeing used
+    if(SAVE_RESULTS):   
+        if(ROOTSIFT == False):
+            pathResult =  paths['pathResults1']
+        else:
+            pathResult =  paths['pathResults2']
+        save_pkl(quesriesResult, pathResult)
+
 
         

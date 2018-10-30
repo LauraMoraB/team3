@@ -4,6 +4,7 @@ import cv2
 from matplotlib import pyplot as plt
 import numpy as np
 
+# Returns list of images in a path
 def list_ds(path_images):
     listImages =[]
     # Import Data from directories
@@ -12,14 +13,17 @@ def list_ds(path_images):
             listImages.append(filename)
     return listImages
 
+# Creates directories if not already created
 def create_dir(pathSave):
     if not os.path.exists(pathSave):
         os.makedirs(pathSave)
-		
+
+# Return numpy array with gray scale image		
 def get_gray_image(im, path):
     imBGR = cv2.imread(path+im)
     return cv2.cvtColor(imBGR, cv2.COLOR_BGR2GRAY)
 
+# Return numpy array with BGR scale image		
 def get_bgr_image(im, path):
     imBGR = cv2.imread(path+im)
     return imBGR
@@ -32,6 +36,7 @@ def plot_rgb(im):
     plt.imshow(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
     plt.show()
 
+# Plots Image + sift kps
 def plot_sift(sift, path):
     imName, kps, descs = sift    
     bgrGray = get_bgr_image(imName, path)
@@ -41,6 +46,7 @@ def plot_sift(sift, path):
     plot_gray(imGray)  
     plot_rgb(imSift)  
 
+# Plots matches between two images
 def plot_matches(siftA, siftB, pathA, pathB, matches):
     imNameA, kpsA, descsA = siftA    
     imNameB, kpsB, descsB = siftB  
@@ -53,23 +59,23 @@ def plot_matches(siftA, siftB, pathA, pathB, matches):
     plt.figure(figsize=(12,6))
     plt.imshow(match_img)
     plot_rgb(match_img)    
-    
+ 
+# Save list in PKL format    
 def save_pkl(list_of_list, path):
     create_dir(path)
     with open(path+'result.pkl', 'wb') as f:
         pickle.dump(list_of_list, f)
+        
+# Read pkl file GT and returns it as a list        
+def get_query_gt(pkl_fle):
+    resultList = []
+    with open(pkl_fle, 'rb') as f:
+        data = pickle.load(f)    
+    for key in data:
+        resultList.append(['ima_{:06d}.jpg'.format(data[key])])
+    return resultList
 
-def submission_list(df):
-    project_result = []
-    for query in df.Query.unique():
-        dfQuery = df[df.Query == query]
-        query_result = []
-        for i in range(len(dfQuery)):
-            dfImg = dfQuery[dfQuery.Order == i]
-            query_result.append(dfImg['Image'].values[0])
-        project_result.append(query_result.copy())
-    return project_result
-
+# Slice dictionary as list objects
 def slice_dict(d1, no, nf):
     return dict(list(d1.items())[no:nf])
 
@@ -140,11 +146,3 @@ def mapk(actual, predicted, k=10):
 
     """
     return np.mean([apk(a,p,k) for a,p in zip(actual, predicted)])
-
-def get_query_gt(pkl_fle):
-    resultList = []
-    with open(pkl_fle, 'rb') as f:
-        data = pickle.load(f)    
-    for key in data:
-        resultList.append(['ima_{:06d}.jpg'.format(data[key])])
-    return resultList
