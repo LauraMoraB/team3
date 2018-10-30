@@ -42,22 +42,37 @@ if __name__ == "__main__":
     if(RELOAD):
         # Prepares folders
         paths = init()
-        # Loads GT
+        # Loads GT (from previous week, ds not available at the moment)
         gtFile = "queries_validation/GT/query_corresp_simple_devel.pkl"
         gtList = get_query_gt(gtFile)
-        # Creates list of list with sift kps and descriptors  -> [imName, kps, descs]
+        # Creates dictionary of list with SIFT kps and descriptors  
+        # FORMAT-> sift['imName']= [imName, kps, descs]
         siftDs = compute_sift(paths['pathDS'])
         siftValidation = compute_sift(paths['pathQueriesValidation'])
 
     GT_MATCHING = False
     if(GT_MATCHING):
+        # N Used for Stats polotting
         N = 30
-        gtMatches = get_gt_distance(N, siftDs, slice_dict(siftValidation,0,1), gtList, paths)
+        # Matches Validation query with their GT correspondences
+        gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths)
+        # Compute distance Stats for GT correspondences
         gtStats = get_distances_stats(N, gtMatches, plot = True)
+
+    # --> BEGINING Image Retrieval Sift + BF <-- #
     
+    # Number of images retrieval per query
     k = 10
-    quesriesResult, distancesResult = retreive_image(siftDs, siftValidation, paths, k, th = 100)
+    # Max distance to consider a good match
+    th = 100
+    # Min number of matches to considerer a good retrieval
+    descsMin = 3
+    
+    quesriesResult, distancesResult = retreive_image(siftDs, 
+                                                     slice_dict(siftValidation,0,1), 
+                                                     paths, k, th, descsMin)
     # Evaluation
-    mapk(gtList, quesriesResult)
+    mapkResult = mapk(gtList, quesriesResult, k)
+    print('MAPK@'+str(k)+':',mapkResult)
 
         

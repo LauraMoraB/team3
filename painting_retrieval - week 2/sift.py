@@ -88,7 +88,7 @@ def get_distances_stats(N, matches, plot = False):
         
     return result
 
-def retreive_image(siftDs, siftQueries, paths, k, method = 0, th = 60, descsMin = 3)   :   
+def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3)   :   
     queriesResult = []
     distancesResult = []
     for imNameQuery in siftQueries:
@@ -108,7 +108,7 @@ def retreive_image(siftDs, siftQueries, paths, k, method = 0, th = 60, descsMin 
         if(len(matches) > k):
             matches = matches[0:k] 
         # Controuct query result
-        queriesResult.append([l[1] for l in matches ])
+        distancesResult.append([l[1] for l in matches ])
         queriesResult.append([l[0] for l in matches ])
             
     return queriesResult, distancesResult
