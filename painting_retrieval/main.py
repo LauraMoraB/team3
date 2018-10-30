@@ -24,33 +24,34 @@ create_dir(pathprep_resultQueries)
 # Number of results per query
 k = 10
 #Build database
-build_dataset=True
+build_dataset= True
 #Make queries
 pass_queries=True
 #choose prepoces
-prepoces = False
+#prepoces = True
 #choose global_color_histograms: image will be procesed and change space color and save global_color_hist in resuts_GVHistogram (create file )
 global_color_histograms = False
 #Numer of partitions of histograms
 level=0
 #type of space
-spaceType= "HSV" #"BGR" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
+spaceType= "LUV" #"HSV" #"BGR" #"HSV", "HSL","LAB", "YCrCb","XYZ","LUV"
 
 
 dfDataset = create_df(pathDS)
 dfQuery = create_df(pathQueries)
 
 if global_color_histograms==True:
-	for i in range(len(dfDataset)):
-		dfSingle = dfDataset.iloc[i]
-		imgBGR = get_full_image(dfSingle, pathDS)
-		imageName = dfSingle['Image']
-		channel0Single, channel1Single, channel2Single = global_color_hist(imgBGR, spaceType, pathprep_resultDS, imageName)
-		save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSingle,spaceType, imageName,pathResults)
+   for i in range(len(dfDataset)):
+      dfSingle = dfDataset.iloc[i]
+      imgBGR = get_full_image(dfSingle, pathDS)
+      imageName = dfSingle['Image']
+      channel0Single, channel1Single, channel2Single = global_color_hist(imgBGR, spaceType, pathprep_resultDS, imageName,False)
+      save_global_color_hist(channel0Single, channel1Single, channel2Single, dfSingle,spaceType, imageName,pathResults)
 
 
 if build_dataset==True:
     # Read Images 
+    prepoces =False
     for index, row in dfDataset.iterrows():
         imageName = row["Image"]
         imgBGR = cv2.imread(pathDS+imageName,1)
@@ -58,6 +59,7 @@ if build_dataset==True:
             global_color(imgBGR, spaceType, pathprep_resultDS, imageName, True)    
         else:
             global_color(imgBGR, spaceType, pathprep_resultDS, imageName, False)
+
 
     store_histogram_total(dfDataset, pathprep_resultDS+"Final/", spaceType, level=level)
 
@@ -69,7 +71,7 @@ if pass_queries == True:
     HKresultList = []
 
     queryList = []
-
+    prepoces=False
    # Read and store queris images/descriptors
     for index, row in dfQuery.iterrows():
         queryImage = row["Image"]
@@ -96,16 +98,16 @@ if pass_queries == True:
 
 
     # Load provided GT
-#    actualResult = get_query_gt(GT_file)
-#    # Validation -> MAPK RESULT
-#    mapkX2 = mapk(actualResult, X2resultList, k)
-#    print('MAPK score using X2:',mapkX2)
-#    mapkKI = mapk(actualResult, HIresultList, k)
-#    print('MAPK score using HI:',mapkX2)
-#    mapkHK = mapk(actualResult, HKresultList, k)
-#    print('MAPK score using HK:',mapkX2)
-#
-#    # Save results into pkl format
-#    save_pkl(X2resultList, pathResults)
-#    save_pkl(HIresultList, pathResults)
-#    save_pkl(HKresultList, pathResults)
+    actualResult = get_query_gt(GT_file)
+    # Validation -> MAPK RESULT
+    mapkX2 = mapk(actualResult, X2resultList, k)
+    print('MAPK score using X2:',mapkX2)
+    mapkKI = mapk(actualResult, HIresultList, k)
+    print('MAPK score using HI:',mapkX2)
+    mapkHK = mapk(actualResult, HKresultList, k)
+    print('MAPK score using HK:',mapkX2)
+
+    # Save results into pkl format
+    save_pkl(X2resultList, pathResults)
+    save_pkl(HIresultList, pathResults)
+    save_pkl(HKresultList, pathResults)

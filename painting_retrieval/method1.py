@@ -34,18 +34,18 @@ def store_histogram_total(df, path,channel_name, level=0):
     hists= [[histogram_region(get_image(row[0][:], path), c, level) \
              for c in channels ] for index,row in df.iterrows()]
     
-    
     df['level' + str(level) + "_" + channel_name[0]] = [item[0] for item in hists]
     df['level' + str(level) + "_" + channel_name[1]] = [item[1] for item in hists]
     df['level' + str(level) + "_" + channel_name[2]] = [item[2] for item in hists]
 
+    return hists
     
 def histograms_to_list(df_row, level, channel_name):
     rf=[]
     bf=[]
     gf=[]
     channel_name = list(channel_name)
-    
+    #print (channel_name)
     R = 'level' + str(level) + "_"+channel_name[2]
     G = 'level' + str(level) + "_"+channel_name[1]
     B = 'level' + str(level) + "_"+channel_name[0]
@@ -55,7 +55,6 @@ def histograms_to_list(df_row, level, channel_name):
     b = df_row[B]
     
     for i in range(len(r)):
-    
         rf.extend([item[0] for item in r[i].tolist()])
         gf.extend([item[0] for item in g[i].tolist()])
         bf.extend([item[0] for item in b[i].tolist()])

@@ -40,6 +40,7 @@ def white_balance_LAB(fullImage, spaceType): # spaceType="LAB"
     return result
 
 def changeSpaceColor(imagen, spaceType): 
+    
     if spaceType == "HSV":
         imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
         return imagen
@@ -51,7 +52,7 @@ def changeSpaceColor(imagen, spaceType):
         imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2LAB)
         return imagen
 
-    elif spaceType == "YCrCb":   
+    elif spaceType == "YCC":   
         imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2YCrCb)
         return imagen
 
@@ -59,7 +60,7 @@ def changeSpaceColor(imagen, spaceType):
         imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2XYZ)
         return imagen
     elif spaceType == "LUV":   
-        imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2Luv )
+        imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2LUV )
         return imagen
     else:
         return imagen
@@ -111,16 +112,18 @@ def get_px_one(imagen, spaceType):
         pxCount += 1
     return (validch0, validch1, validch2)
 
+
 def global_color(fullImage, spaceType, pathprep_resultDS, imageName, prepoces):
-    create_dir(pathprep_resultDS+'Final/')
+    create_dir(pathprep_resultDS+'Final/')  
     if prepoces == True:
         fullImage=preproces_image(fullImage, pathprep_resultDS,imageName) 
+
     im_ch=changeSpaceColor(fullImage, spaceType)    
     cv2.imwrite(pathprep_resultDS+'Final/'+imageName, im_ch)
     return im_ch
     
-def global_color_hist(fullImage, spaceType_hist, pathprep_resultDS, imageName):  
-    imcolor=global_color(fullImage, spaceType_hist,pathprep_resultDS, imageName)
+def global_color_hist(fullImage, spaceType_hist, pathprep_resultDS, imageName, prepoces):     
+    imcolor=global_color(fullImage, spaceType_hist,pathprep_resultDS, imageName, prepoces)
     (channel0Single, channel1Single, channel2Single) = get_px_one(imcolor, spaceType_hist)    
     return (channel0Single, channel1Single, channel2Single)
 
