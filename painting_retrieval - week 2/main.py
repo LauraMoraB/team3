@@ -37,7 +37,7 @@ def demo():
 if __name__ == "__main__":
 
     RELOAD = True
-    GT_MATCHING = False
+    GT_MATCHING = True
     RETRIEVAL = False
     ROOTSIFT = True
     SAVE_RESULTS = False
@@ -53,10 +53,9 @@ if __name__ == "__main__":
         siftDs = compute_sift(paths['pathDS'], rootSift = ROOTSIFT)
         siftValidation = compute_sift(paths['pathQueriesValidation'], rootSift = ROOTSIFT)
 
-    GT_MATCHING = False
     if(GT_MATCHING):
-        # N Used for Stats polotting
-        N = 30
+        # N Used for Stats  and plotting
+        N = 20
         # Matches Validation query with their GT correspondences
         gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths)
         # Compute distance Stats for GT correspondences
