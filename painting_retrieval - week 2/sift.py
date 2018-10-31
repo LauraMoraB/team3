@@ -67,8 +67,9 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, plot = 
         # Contruct query result to be returend
         distancesResult.append([l[1] for l in matches ])
         queriesResult.append([l[0] for l in matches ])
-        if(not queriesResult):
-            queriesResult = [-1]
+    for entry in queriesResult:
+        if(not entry):
+            entry.append(-1)
     return queriesResult, distancesResult
 
 # Computes distances taking into account GT pairs
