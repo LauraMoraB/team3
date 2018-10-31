@@ -1,6 +1,7 @@
 import random
 from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift
 from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image
+import time
 
 def init():
     # --> BEGINING FOLDERS PREPARATION <-- #
@@ -36,13 +37,13 @@ def demo():
     
 if __name__ == "__main__":
 
-    RELOAD = False
+    RELOAD = True
     GT_MATCHING = False
     RETRIEVAL = True
     ROOTSIFT = True
-    SAVE_RESULTS = False
+    SAVE_RESULTS = True
     RESIZE = True
-    PLOTS = True
+    PLOTS = False
     
     if(RELOAD):
         # Prepares folders
@@ -70,13 +71,18 @@ if __name__ == "__main__":
         if(ROOTSIFT == False):
             th = 100
         else:
-            th = 0.1
+            th = 0.12
         # Min number of matches to considerer a good retrieval
         descsMin = 3
         # Returns queries retrival + theis distances + debugging & tuning
+        start = time.time()
         quesriesResult, distancesResult = retreive_image(siftDs, 
-                                                         slice_dict(siftValidation,10,13), 
+                                                         siftValidation,#slice_dict(siftValidation,29,30), 
                                                          paths, k, th, descsMin, PLOTS, RESIZE)
+        end = time.time()
+        tTime= end - start
+        print('Total time:',tTime)
+        
         # Evaluation
         for n in range(k):
             mapkResult = mapk(gtList, quesriesResult, n+1)
