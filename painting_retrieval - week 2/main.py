@@ -28,7 +28,7 @@ def demo():
     # Example for ploting a sift image
     print('Sift kps example on random image from ds:')
     siftA = siftDs[random.choice(list(siftDs.keys()))]
-    plot_sift(siftA, paths['pathDS'])
+    plot_sift(siftA, paths['pathDS'], resize = False)
     print('Sift matching example on random image from ds:')
     siftA = siftDs[random.choice(list(siftDs.keys()))]
     siftB = siftDs[random.choice(list(siftDs.keys()))]
@@ -36,30 +36,32 @@ def demo():
     
 if __name__ == "__main__":
 
-    RELOAD = True
-    GT_MATCHING = True
-    RETRIEVAL = False
+    RELOAD = False
+    GT_MATCHING = False
+    RETRIEVAL = True
     ROOTSIFT = True
     SAVE_RESULTS = False
-
+    RESIZE = True
+    PLOTS = True
+    
     if(RELOAD):
         # Prepares folders
         paths = init()
         # Loads GT (from previous week, ds not available at the moment)
-        gtFile = "queries_validation/GT/query_corresp_simple_devel.pkl"
+        gtFile = "queries_validation/GT/w4_query_devel.pkl"
         gtList = get_query_gt(gtFile)
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
-        siftDs = compute_sift(paths['pathDS'], rootSift = ROOTSIFT)
-        siftValidation = compute_sift(paths['pathQueriesValidation'], rootSift = ROOTSIFT)
+        siftDs = compute_sift(paths['pathDS'], resize = RESIZE, rootSift = ROOTSIFT)
+        siftValidation = compute_sift(paths['pathQueriesValidation'], resize = RESIZE, rootSift = ROOTSIFT)
 
     if(GT_MATCHING):
         # N Used for Stats  and plotting
         N = 20
         # Matches Validation query with their GT correspondences
-        gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths)
+        gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths, resize = RESIZE)
         # Compute distance Stats for GT correspondences
-        gtStats = get_distances_stats(N, gtMatches, plot = True)
+        gtStats = get_distances_stats(N, gtMatches, plot = PLOTS)
 
     if(RETRIEVAL):   
         # Number of images retrieval per query
@@ -68,13 +70,13 @@ if __name__ == "__main__":
         if(ROOTSIFT == False):
             th = 100
         else:
-            th = 0.2
+            th = 0.1
         # Min number of matches to considerer a good retrieval
-        descsMin = 2
+        descsMin = 3
         # Returns queries retrival + theis distances + debugging & tuning
         quesriesResult, distancesResult = retreive_image(siftDs, 
-                                                         siftValidation,#slice_dict(siftValidation,0,1), 
-                                                         paths, k, th, descsMin)
+                                                         slice_dict(siftValidation,10,13), 
+                                                         paths, k, th, descsMin, PLOTS, RESIZE)
         # Evaluation
         for n in range(k):
             mapkResult = mapk(gtList, quesriesResult, n+1)
