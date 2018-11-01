@@ -17,7 +17,8 @@ def compute_sift(path, rootSift = False, eps=1e-7):
         # In case no kps were found
         if len(kps) == 0:
             (kps, descs) = ([], None)
-        # RootSift descriptor, sift improvement descriptor
+        # RootSift descriptor, sift improvement descriptor# apply the Hellinger kernel by first L1-normalizing and taking the 
+		 # square-root
         elif(rootSift == True):
             descs /= (descs.sum(axis=1, keepdims=True) + eps)
             descs = np.sqrt(descs)            

@@ -1,13 +1,19 @@
 import random
-from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift
+import numpy as np
+import cv2
+from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift,list_ds
 from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image
 
 def init():
     # --> BEGINING FOLDERS PREPARATION <-- #
     paths = {}
     # Images Path --> Add new entry in the dictionary for new subfodlers!
-    paths['pathDS'] = "dataset/"
-    paths['pathQueriesValidation'] = "queries_validation/"
+#    paths['pathDS'] = "dataset/"
+#    paths['pathQueriesValidation'] = "queries/"
+
+    paths['pathDS'] = "BBDD_W4/"
+    paths['pathQueriesValidation'] = "query_devel_W4/"
+#    paths['pathQueriesGiro'] = "Giro/"
     paths['pathGTValidation'] = "queries_validation/GT/"
     paths['pathQueriesTest'] = "queries_test/"
     paths['pathGTTest'] = "queries_test/GT/"
@@ -38,9 +44,26 @@ if __name__ == "__main__":
 
     RELOAD = True
     GT_MATCHING = True
-    RETRIEVAL = False
+    RETRIEVAL = True
     ROOTSIFT = True
-    SAVE_RESULTS = False
+    SAVE_RESULTS = True
+    
+#    paths = init()
+#    im_list = list_ds(paths['pathQueriesValidation'] )
+#
+#    for imName in im_list:
+#        # Load Gray version of each image
+#        imBGR = cv2.imread(paths['pathQueriesValidation'] +imName)
+#    
+#        rows,cols,ch = imBGR.shape
+#    
+#        pts1 = np.float32([[50,50],[200,50],[50,200]])
+#        pts2 = np.float32([[10,100],[200,50],[100,250]])
+#        
+#        M = cv2.getAffineTransform(pts1,pts2)
+#        
+#        dst = cv2.warpAffine(imBGR,M,(cols,rows))
+#        cv2.imwrite(paths['pathQueriesGiro']+imName, dst)
 
     if(RELOAD):
         # Prepares folders
@@ -50,8 +73,11 @@ if __name__ == "__main__":
         gtList = get_query_gt(gtFile)
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
-        siftDs = compute_sift(paths['pathDS'], rootSift = ROOTSIFT)
-        siftValidation = compute_sift(paths['pathQueriesValidation'], rootSift = ROOTSIFT)
+        siftDs = compute_sift(paths['pathDS'], rootSift = ROOTSIFT, eps=1e-7)
+        
+
+
+        siftValidation = compute_sift(paths['pathQueriesValidation'], rootSift = ROOTSIFT, eps=1e-7)
 
     if(GT_MATCHING):
         # N Used for Stats  and plotting
