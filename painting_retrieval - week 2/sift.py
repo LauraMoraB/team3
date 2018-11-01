@@ -3,7 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from utils import list_ds, get_gray_image, plot_matches
 
-def compute_sift(path, rootSift = False, eps=1e-7):
+
+def compute_sift(path, resize = False, rootSift = False, eps = 1e-7):
     sift_result = {}
     # Get DS images names list   
     im_list = list_ds(path)
@@ -11,7 +12,7 @@ def compute_sift(path, rootSift = False, eps=1e-7):
     sift = cv2.xfeatures2d.SIFT_create()
     for imName in im_list:
         # Load Gray version of each image
-        imGray = get_gray_image(imName, path)
+        imGray = get_gray_image(imName, path, resize)
         # Find KeyLpoints and Sift Descriptors, info about KeyPoint objects -> https://docs.opencv.org/3.3.1/d2/d29/classcv_1_1KeyPoint.html
         (kps, descs) = sift.detectAndCompute(imGray, None)
         # In case no kps were found
@@ -26,7 +27,7 @@ def compute_sift(path, rootSift = False, eps=1e-7):
         sift_result[imName] = [imName, kps, descs] 
     return sift_result
 
-def BFMatcher(N, siftA, siftB, pathA = '', pathB = '', plot = False):
+def BFMatcher(N, siftA, siftB, pathA = '', pathB = '', plot = False, resize = False):
     imNameA, kpsA, descsA = siftA    
     imNameB, kpsB, descsB = siftB    
     # create a BFMatcher object which will match up the SIFT features
@@ -39,11 +40,11 @@ def BFMatcher(N, siftA, siftB, pathA = '', pathB = '', plot = False):
     matches = matches[0:N]
     if(plot == True):
         # Plots both images + theirs coincident matches
-        plot_matches(siftA, siftB, pathA, pathB, matches)        
+        plot_matches(siftA, siftB, pathA, pathB, matches, resize)      
     return matches
 
 
-def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3):   
+def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, plot = False, resize = False):  
     queriesResult = []
     distancesResult = []
     for imNameQuery in siftQueries:
@@ -52,8 +53,9 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3):
         for imNameDs in siftDs:
             siftIm = siftDs[imNameDs]
             # As a default just return 100 best matches per image, could be incresed
+            print('Matching',imNameQuery,'and',imNameDs)
             matchesBF = BFMatcher(100, siftQuery, siftIm, pathA=paths['pathQueriesValidation'], 
-                                  pathB = paths['pathDS'], plot = True)  
+                                  pathB = paths['pathDS'], plot = plot, resize = resize)
             distance = [o.distance for o in matchesBF if o.distance <= th]
             # if less than descsMin matches found, not considered a match
             if(len(distance) >= descsMin):
@@ -66,20 +68,28 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3):
         # Contruct query result to be returend
         distancesResult.append([l[1] for l in matches ])
         queriesResult.append([l[0] for l in matches ])
-            
+    for entry in queriesResult:
+        if(not entry):
+            entry.append(-1)
     return queriesResult, distancesResult
 
 # Computes distances taking into account GT pairs
-def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths):   
+def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, resize = False):
     i = 0
     validationMatches = []
     for imName in sift_validation:
-        siftA = sift_validation[imName]
-        siftB = sift_ds[gt_list[i][0]]
-        matchesBF = BFMatcher(N, siftA, siftB, pathA=paths['pathQueriesValidation'], 
-                              pathB = paths['pathDS'], plot = True)  
-        distance = [o.distance for o in matchesBF]
-        validationMatches.append([imName, distance])
+        imQuery = gt_list[i][0]
+        print(imQuery)
+        if(imQuery == -1):    
+            # Image not in the DS
+            None
+        else:
+            siftA = sift_validation[imName]
+            siftB = sift_ds[imQuery]
+            matchesBF = BFMatcher(N, siftA, siftB, pathA=paths['pathQueriesValidation'], 
+                                  pathB = paths['pathDS'], plot = True, resize = resize)  
+            distance = [o.distance for o in matchesBF]
+            validationMatches.append([imName, distance])
         i += 1
     return validationMatches
 
