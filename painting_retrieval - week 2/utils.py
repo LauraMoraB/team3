@@ -21,12 +21,12 @@ def create_dir(pathSave):
         os.makedirs(pathSave)
 
 # Return numpy array with gray scale image		
-def get_gray_image(im, path, resize = False, sizeLimit = 1000):
+def get_gray_image(im, path, resize = False, sizeLimit = 500):
     imBGR = get_bgr_image(im, path, resize, sizeLimit)
     return cv2.cvtColor(imBGR, cv2.COLOR_BGR2GRAY)
 
 # Return numpy array with BGR scale image		
-def get_bgr_image(im, path, resize = False, sizeLimit = 1000):
+def get_bgr_image(im, path, resize = False, sizeLimit = 500):
     imBGR = cv2.imread(path+im)
     if(resize == True):
         (h, w) = imBGR.shape[:2]

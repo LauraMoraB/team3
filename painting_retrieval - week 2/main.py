@@ -71,7 +71,7 @@ if __name__ == "__main__":
         if(ROOTSIFT == False):
             th = 100
         else:
-            th = 0.12
+            th = 0.15
         # Min number of matches to considerer a good retrieval
         descsMin = 3
         # Returns queries retrival + theis distances + debugging & tuning
