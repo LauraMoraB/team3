@@ -17,10 +17,11 @@ def init():
     paths['pathResults1'] = "results/sift/"
     paths['pathResults2'] = "results/rootsift/"
     
-    # Create all subdirectories on dictionary if tey dont already
+    # Create all subdirectories on dictionary if they dont already
     for path in paths:
         create_dir(paths[path])
     print('All subfolders have been created')
+    
     # --> END FOLDERS PREPARATION <-- #
     return paths
 
@@ -35,10 +36,10 @@ def demo():
     BFMatcher(50, siftA, siftB, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True)   
     
 if __name__ == "__main__":
-
+    # Si posem 
     RELOAD = True
-    GT_MATCHING = True
-    RETRIEVAL = False
+    GT_MATCHING = False
+    RETRIEVAL = True
     ROOTSIFT = True
     SAVE_RESULTS = False
 
@@ -71,10 +72,12 @@ if __name__ == "__main__":
             th = 0.2
         # Min number of matches to considerer a good retrieval
         descsMin = 2
+        
         # Returns queries retrival + theis distances + debugging & tuning
         quesriesResult, distancesResult = retreive_image(siftDs, 
-                                                         siftValidation,#slice_dict(siftValidation,0,1), 
+                                                         slice_dict(siftValidation,0,1), 
                                                          paths, k, th, descsMin)
+        # siftValidation
         # Evaluation
         for n in range(k):
             mapkResult = mapk(gtList, quesriesResult, n+1)
@@ -86,6 +89,7 @@ if __name__ == "__main__":
             pathResult =  paths['pathResults1']
         else:
             pathResult =  paths['pathResults2']
+            
         save_pkl(quesriesResult, pathResult)
 
 

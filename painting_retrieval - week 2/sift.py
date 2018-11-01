@@ -20,7 +20,8 @@ def compute_sift(path, rootSift = False, eps=1e-7):
         # RootSift descriptor, sift improvement descriptor
         elif(rootSift == True):
             descs /= (descs.sum(axis=1, keepdims=True) + eps)
-            descs = np.sqrt(descs)            
+            descs = np.sqrt(descs) 
+        # Puc pillar un altre descriptor i guardar els descs
         # Append results
         sift_result[imName] = [imName, kps, descs] 
     return sift_result
@@ -48,11 +49,13 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3):
     for imNameQuery in siftQueries:
         matches = []
         siftQuery = siftQueries[imNameQuery]
+     
         for imNameDs in siftDs:
             siftIm = siftDs[imNameDs]
             # As a default just return 100 best matches per image, could be incresed
             matchesBF = BFMatcher(100, siftQuery, siftIm, pathA=paths['pathQueriesValidation'], 
-                                  pathB = paths['pathDS'], plot = True)  
+                                  pathB = paths['pathDS'], plot = False)
+            
             distance = [o.distance for o in matchesBF if o.distance <= th]
             # if less than descsMin matches found, not considered a match
             if(len(distance) >= descsMin):
@@ -76,7 +79,7 @@ def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths):
         siftA = sift_validation[imName]
         siftB = sift_ds[gt_list[i][0]]
         matchesBF = BFMatcher(N, siftA, siftB, pathA=paths['pathQueriesValidation'], 
-                              pathB = paths['pathDS'], plot = True)  
+                              pathB = paths['pathDS'], plot = False)  
         distance = [o.distance for o in matchesBF]
         validationMatches.append([imName, distance])
         i += 1
