@@ -3,7 +3,17 @@ import os
 import cv2
 from matplotlib import pyplot as plt
 import numpy as np
+import random
+from resizeImage import image_resize
 
+def save_images(kp, imName, image):
+    
+    img_with_keypoints = cv2.drawKeypoints(image, kp, outImage=np.array([]), color=(0, 0, 255), 
+                                            flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    
+    cv2.imwrite("keypointsIm/"+str(round(random.random(),4))+imName, img_with_keypoints)
+    
+    
 # Returns list of images in a path
 def list_ds(path_images):
     listImages =[]
@@ -19,13 +29,21 @@ def create_dir(pathSave):
         os.makedirs(pathSave)
 
 # Return numpy array with gray scale image		
-def get_gray_image(im, path):
-    imBGR = cv2.imread(path+im)
+def get_gray_image(im, path, resize = False, sizeLimit = 500):
+    imBGR = get_bgr_image(im, path, resize, sizeLimit)
     return cv2.cvtColor(imBGR, cv2.COLOR_BGR2GRAY)
 
 # Return numpy array with BGR scale image		
-def get_bgr_image(im, path):
+def get_bgr_image(im, path, resize = False, sizeLimit = 500):
     imBGR = cv2.imread(path+im)
+    if(resize == True):
+        (h, w) = imBGR.shape[:2]
+        if(h>w):
+            if(h > sizeLimit):
+                imBGR = image_resize(imBGR, height = sizeLimit)
+        else:
+            if(w > sizeLimit):
+                imBGR = image_resize(imBGR, width = sizeLimit)
     return imBGR
 
 def plot_gray(im):
@@ -37,7 +55,7 @@ def plot_rgb(im):
     plt.show()
 
 # Plots Image + sift kps
-def plot_sift(sift, path):
+def plot_sift(sift, path, resize = False):
     imName, kps, descs = sift    
     bgrGray = get_bgr_image(imName, path)
     imGray = get_gray_image(imName, path)
@@ -47,11 +65,11 @@ def plot_sift(sift, path):
     plot_rgb(imSift)  
 
 # Plots matches between two images
-def plot_matches(siftA, siftB, pathA, pathB, matches):
+def plot_matches(siftA, siftB, pathA, pathB, matches, resize = False):
     imNameA, kpsA, descsA = siftA    
     imNameB, kpsB, descsB = siftB  
-    imA = get_bgr_image(imNameA, pathA)
-    imB = get_bgr_image(imNameB, pathB)
+    imA = get_bgr_image(imNameA, pathA, resize)
+    imB = get_bgr_image(imNameB, pathB, resize)
     match_img = cv2.drawMatches(
         imA, kpsA,
         imB, kpsB,
@@ -71,8 +89,14 @@ def get_query_gt(pkl_fle):
     resultList = []
     with open(pkl_fle, 'rb') as f:
         data = pickle.load(f)    
-    for key in data:
-        resultList.append(['ima_{:06d}.jpg'.format(data[key])])
+    for query in data:
+        queryList = []
+        for entry in query[1]:
+            if(entry >= 0):
+                queryList.append('ima_{:06d}.jpg'.format(entry))
+            else:
+                queryList.append(-1)
+        resultList.append(queryList)
     return resultList
 
 # Slice dictionary as list objects

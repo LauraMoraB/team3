@@ -12,3 +12,4 @@ ResultMask/
 *.jpg
 *.jpg
 TrafficSigns/datasets/train/.DS_Store
+*.pkl
