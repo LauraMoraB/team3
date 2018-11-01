@@ -69,14 +69,15 @@ if __name__ == "__main__":
         k = 10
         # Max distance to consider good matches
         if(ROOTSIFT == False):
-            th = 100
+            th = 90
+            descsMin = 15
         else:
             th = 0.15
+            descsMin = 5
         # Min number of matches to considerer a good retrieval
-        descsMin = 3
         # Returns queries retrival + theis distances + debugging & tuning
         start = time.time()
-        quesriesResult, distancesResult = retreive_image(siftDs, 
+        queriesResult, distancesResult = retreive_image(siftDs, 
                                                          siftValidation,#slice_dict(siftValidation,29,30), 
                                                          paths, k, th, descsMin, PLOTS, RESIZE)
         end = time.time()
@@ -85,7 +86,7 @@ if __name__ == "__main__":
         
         # Evaluation
         for n in range(k):
-            mapkResult = mapk(gtList, quesriesResult, n+1)
+            mapkResult = mapk(gtList, queriesResult, n+1)
             print('MAPK@'+str(n+1)+':',mapkResult)
             
     # Save Results, modify path accordingly to the  Method beeing used
@@ -94,7 +95,7 @@ if __name__ == "__main__":
             pathResult =  paths['pathResults1']
         else:
             pathResult =  paths['pathResults2']
-        save_pkl(quesriesResult, pathResult)
+        save_pkl(queriesResult, pathResult)
 
 
         
