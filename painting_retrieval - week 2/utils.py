@@ -3,9 +3,17 @@ import os
 import cv2
 from matplotlib import pyplot as plt
 import numpy as np
+import random
 from resizeImage import image_resize
 
-
+def save_images(kp, imName, image):
+    
+    img_with_keypoints = cv2.drawKeypoints(image, kp, outImage=np.array([]), color=(0, 0, 255), 
+                                            flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    
+    cv2.imwrite("keypointsIm/"+str(round(random.random(),4))+imName, img_with_keypoints)
+    
+    
 # Returns list of images in a path
 def list_ds(path_images):
     listImages =[]

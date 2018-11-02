@@ -13,3 +13,4 @@ ResultMask/
 *.jpg
 *.DS_Store
 TrafficSigns/datasets/*
+*.zip

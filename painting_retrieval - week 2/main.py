@@ -14,14 +14,17 @@ def init():
     paths['pathGTTest'] = "queries_test/GT/"
     # Results Path
     paths['pathResult'] = "results/"
+    
     # Delivery Methods Path
     paths['pathResults1'] = "results/sift/"
     paths['pathResults2'] = "results/rootsift/"
+    paths['pathResults3'] = "results/orb/"
     
-    # Create all subdirectories on dictionary if tey dont already
+    # Create all subdirectories on dictionary if they dont already
     for path in paths:
         create_dir(paths[path])
     print('All subfolders have been created')
+    
     # --> END FOLDERS PREPARATION <-- #
     return paths
 
@@ -33,17 +36,23 @@ def demo():
     print('Sift matching example on random image from ds:')
     siftA = siftDs[random.choice(list(siftDs.keys()))]
     siftB = siftDs[random.choice(list(siftDs.keys()))]
-    BFMatcher(50, siftA, siftB, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True)   
+    method = "SIFT"
+    BFMatcher(50, siftA, siftB, method, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True)   
     
 if __name__ == "__main__":
-
+    
     RELOAD = True
     GT_MATCHING = False
     RETRIEVAL = True
-    ROOTSIFT = True
-    SAVE_RESULTS = True
+    ROOTSIFT = False
+    SAVE_RESULTS = False
     RESIZE = True
     PLOTS = False
+    
+    # Define which Descriptor is used
+    # OPTIONS: SIFT / ORB
+    # IF ORB IS SELECTED, ROOTSIFT = FALSE
+    method = "ORB"
     
     if(RELOAD):
         # Prepares folders
@@ -53,33 +62,47 @@ if __name__ == "__main__":
         gtList = get_query_gt(gtFile)
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
-        siftDs = compute_sift(paths['pathDS'], resize = RESIZE, rootSift = ROOTSIFT)
-        siftValidation = compute_sift(paths['pathQueriesValidation'], resize = RESIZE, rootSift = ROOTSIFT)
+        
+        siftDs = compute_sift(paths['pathDS'], method, resize = RESIZE, rootSift = ROOTSIFT)
+        siftValidation = compute_sift(paths['pathQueriesValidation'], method, resize = RESIZE, rootSift = ROOTSIFT)
 
     if(GT_MATCHING):
+        
         # N Used for Stats  and plotting
         N = 20
         # Matches Validation query with their GT correspondences
-        gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths, resize = RESIZE)
+        gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths, 
+                                    resize = RESIZE)
         # Compute distance Stats for GT correspondences
         gtStats = get_distances_stats(N, gtMatches, plot = PLOTS)
+
 
     if(RETRIEVAL):   
         # Number of images retrieval per query
         k = 10
         # Max distance to consider good matches
-        if(ROOTSIFT == False):
-            th = 90
-            descsMin = 15
-        else:
-            th = 0.15
-            descsMin = 5
+        
+        if method == "SIFT":
+            if ROOTSIFT == False:
+                th = 90 
+                # Min number of matches to considerer a good retrieval
+                descsMin = 15
+            else:
+                th = 0.15
+                descsMin = 5
+                
+        elif method=="ORB":
+            th = 20
+            descsMin = 3
+            
         # Min number of matches to considerer a good retrieval
-        # Returns queries retrival + theis distances + debugging & tuning
+        # Returns queries retrival + their distances + debugging & tuning
         start = time.time()
-        queriesResult, distancesResult = retreive_image(siftDs, 
-                                                         siftValidation,#slice_dict(siftValidation,29,30), 
-                                                         paths, k, th, descsMin, PLOTS, RESIZE)
+        print("Starting comparison...")
+        quesriesResult, distancesResult, matches = retreive_image(siftDs, 
+                                                         siftValidation, 
+                                                         paths, k, th, descsMin,
+                                                         method, PLOTS, RESIZE)
         end = time.time()
         tTime= end - start
         print('Total time:',tTime)
@@ -90,12 +113,16 @@ if __name__ == "__main__":
             print('MAPK@'+str(n+1)+':',mapkResult)
             
     # Save Results, modify path accordingly to the  Method beeing used
-    if(SAVE_RESULTS):   
-        if(ROOTSIFT == False):
-            pathResult =  paths['pathResults1']
-        else:
-            pathResult =  paths['pathResults2']
-        save_pkl(queriesResult, pathResult)
+    if(SAVE_RESULTS):
+        if method == "SIFT":
+            if(ROOTSIFT == False):
+                pathResult =  paths['pathResults1']
+            else:
+                pathResult =  paths['pathResults2']
+        elif method == "ORB":
+            pathResult =  paths['pathResults3']
+            
+        save_pkl(quesriesResult, pathResult)
 
 
         
