@@ -81,7 +81,7 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
 def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, method="SIFT", plot = False, resize = False):  
     queriesResult = []
     distancesResult = []
-    finalMatch=[]
+#    finalMatch=[]
     
     for imNameQuery in siftQueries:
         matches = []
@@ -116,10 +116,10 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, method=
         distancesResult.append([ row[1] for row in matches ])
         queriesResult.append([ row[0]  for row in matches ] if tots<10 else [-1])
         
-        finalMatch.append(matches)
+#        finalMatch.append(matches)
     
     
-    return queriesResult, distancesResult, finalMatch
+    return queriesResult, distancesResult
 
 # Computes distances taking into account GT pairs
 def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, resize = False):

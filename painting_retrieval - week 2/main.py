@@ -99,7 +99,7 @@ if __name__ == "__main__":
         # Returns queries retrival + their distances + debugging & tuning
         start = time.time()
         print("Starting comparison...")
-        quesriesResult, distancesResult, matches = retreive_image(siftDs, 
+        queriesResult, distancesResult = retreive_image(siftDs, 
                                                          siftValidation, 
                                                          paths, k, th, descsMin,
                                                          method, PLOTS, RESIZE)
