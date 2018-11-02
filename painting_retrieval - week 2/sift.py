@@ -81,6 +81,7 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
 def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, method="SIFT", plot = False, resize = False):  
     queriesResult = []
     distancesResult = []
+    finalMatch=[]
     
     for imNameQuery in siftQueries:
         matches = []
@@ -88,30 +89,37 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, method=
      
         for imNameDs in siftDs:
             siftIm = siftDs[imNameDs]
+            
             # As a default just return 100 best matches per image, could be incresed
             matchesBF = BFMatcher(100, siftQuery, siftIm, method, pathA=paths['pathQueriesValidation'], 
                                   pathB = paths['pathDS'], plot = plot, resize = resize)
             
+            
             distance = [o.distance for o in matchesBF if o.distance <= th]
             
-            # if less than descsMin matches found, not considered a match
-            if(len(distance) >= descsMin):
-                matches.append([imNameDs, distance])
+            matches.append([imNameDs, distance])
 
         # Sort images per number of matches under threshold level
         matches = sorted(matches, key = lambda x:len(x[1]), reverse = True)
-        # if more than K matches, return the better K
-        if(len(matches) > k):
-            matches = matches[0:k] 
-        # Contruct query result to be returend
-        distancesResult.append([l[1] for l in matches ])
-        queriesResult.append([l[0] for l in matches ])
         
-    for entry in queriesResult:
-        if(not entry):
-            entry.append(-1)
-            
-    return queriesResult, distancesResult
+        if(len(matches) > k):
+            matches = matches[0:k]
+        
+        # Detect if image is not present in the Dataset
+        tots=0
+        for index,row in enumerate(matches):
+            # Comprobar si tots son mes petits a un threshold
+            if len(row[1]) < descsMin:
+               tots+=1
+              
+        # Contruct query result to be returend
+        distancesResult.append([ row[1] for row in matches ])
+        queriesResult.append([ row[0]  for row in matches ] if tots<10 else [-1])
+        
+        finalMatch.append(matches)
+    
+    
+    return queriesResult, distancesResult, finalMatch
 
 # Computes distances taking into account GT pairs
 def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, resize = False):

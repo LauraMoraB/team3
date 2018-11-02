@@ -14,9 +14,11 @@ def init():
     paths['pathGTTest'] = "queries_test/GT/"
     # Results Path
     paths['pathResult'] = "results/"
+    
     # Delivery Methods Path
     paths['pathResults1'] = "results/sift/"
     paths['pathResults2'] = "results/rootsift/"
+    paths['pathResults3'] = "results/orb/"
     
     # Create all subdirectories on dictionary if they dont already
     for path in paths:
@@ -39,18 +41,16 @@ def demo():
 if __name__ == "__main__":
     
     RELOAD = True
-    
     GT_MATCHING = False
     RETRIEVAL = True
     ROOTSIFT = False
     SAVE_RESULTS = False
-    RESIZE = False
+    RESIZE = True
     PLOTS = False
     
     # Define which Descriptor is used
     # OPTIONS: SIFT / ORB
     # IF ORB IS SELECTED, ROOTSIFT = FALSE
-    
     method = "ORB"
     
     if(RELOAD):
@@ -70,7 +70,8 @@ if __name__ == "__main__":
         # N Used for Stats  and plotting
         N = 20
         # Matches Validation query with their GT correspondences
-        gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths, resize = RESIZE)
+        gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths, 
+                                    resize = RESIZE)
         # Compute distance Stats for GT correspondences
         gtStats = get_distances_stats(N, gtMatches, plot = PLOTS)
 
@@ -82,19 +83,22 @@ if __name__ == "__main__":
         
         if method == "SIFT":
             if ROOTSIFT == False:
-                th = 90  
+                th = 90 
+                # Min number of matches to considerer a good retrieval
+                descsMin = 15
             else:
-                th = 0.12
+                th = 0.15
+                descsMin = 3
                 
         elif method=="ORB":
             th = 20
+            descsMin = 3
             
         # Min number of matches to considerer a good retrieval
-        descsMin = 3
-        
         # Returns queries retrival + their distances + debugging & tuning
         start = time.time()
-        quesriesResult, distancesResult = retreive_image(siftDs, 
+        print("Starting comparison...")
+        quesriesResult, distancesResult, matches = retreive_image(siftDs, 
                                                          siftValidation, 
                                                          paths, k, th, descsMin,
                                                          method, PLOTS, RESIZE)
@@ -108,11 +112,14 @@ if __name__ == "__main__":
             print('MAPK@'+str(n+1)+':',mapkResult)
             
     # Save Results, modify path accordingly to the  Method beeing used
-    if(SAVE_RESULTS):   
-        if(ROOTSIFT == False):
-            pathResult =  paths['pathResults1']
-        else:
-            pathResult =  paths['pathResults2']
+    if(SAVE_RESULTS):
+        if method == "SIFT":
+            if(ROOTSIFT == False):
+                pathResult =  paths['pathResults1']
+            else:
+                pathResult =  paths['pathResults2']
+        elif method == "ORB":
+            pathResult =  paths['pathResults3']
             
         save_pkl(quesriesResult, pathResult)
 
