@@ -1,7 +1,8 @@
 import random
 from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift
-from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image
+from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image, compute_threshold
 import time
+from flann import retreive_image_withFlann
 
 def init():
     # --> BEGINING FOLDERS PREPARATION <-- #
@@ -45,14 +46,15 @@ if __name__ == "__main__":
     GT_MATCHING = False
     RETRIEVAL = True
     ROOTSIFT = False
-    SAVE_RESULTS = True
-    RESIZE = False
+    SAVE_RESULTS = False
+    RESIZE = True
     PLOTS = False
     
     # Define which Descriptor is used
-    # OPTIONS: SIFT / ORB
+    # OPTIONS: SIFT/ ORB / DAISY
     # IF ORB IS SELECTED, ROOTSIFT = FALSE
     method = "DAISY"
+    matcherType = "Flann"
     
     if(RELOAD):
         # Prepares folders
@@ -62,8 +64,14 @@ if __name__ == "__main__":
         gtList = get_query_gt(gtFile)
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
+        print ("Computing Features and Descriptors for dataset..")
         
+        start = time.time()
         siftDs = compute_sift(paths['pathDS'], method, resize = RESIZE, rootSift = ROOTSIFT)
+        end = time.time()
+        tTime= end - start
+        print('Total time:',tTime)
+        
         siftValidation = compute_sift(paths['pathQueriesValidation'], method, resize = RESIZE, rootSift = ROOTSIFT)
 
     if(GT_MATCHING):
@@ -83,27 +91,26 @@ if __name__ == "__main__":
         k = 10
         # Max distance to consider good matches
         
-        if method == "SIFT" or method=="DAISY":
-            if ROOTSIFT == False:
-                th = 90 
-                # Min number of matches to considerer a good retrieval
-                descsMin = 15
-            else:
-                th = 0.15
-                descsMin = 5
-                
-        elif method=="ORB":
-            th = 25
-            descsMin = 5
-            
+        th, descsMin = compute_threshold(matcherType, method, ROOTSIFT)
+        
+        
         # Min number of matches to considerer a good retrieval
         # Returns queries retrival + their distances + debugging & tuning
         start = time.time()
         print("Starting comparison...")
-        queriesResult, distancesResult = retreive_image(siftDs, 
-                                                         siftValidation, 
-                                                         paths, k, th, descsMin,
-                                                         method, PLOTS, RESIZE)
+        
+        if matcherType == "Flann":
+            queriesResult, distancesResult, matches = retreive_image_withFlann(siftDs, 
+                                    siftValidation, paths, k, method,th, descsMin)
+            
+        elif matcherType == "BFMatcher":
+            queriesResult, distancesResult=retreive_image(siftDs, 
+                                    siftValidation, paths, k, th, descsMin,
+                                    method, PLOTS, RESIZE)
+        else:
+            print ("Invalid Matcher")
+        
+        
         end = time.time()
         tTime= end - start
         print('Total time:',tTime)
@@ -123,7 +130,7 @@ if __name__ == "__main__":
         elif method == "ORB":
             pathResult =  paths['pathResults3']
             
-        save_pkl(quesriesResult, pathResult)
+        save_pkl(queriesResult, pathResult)
 
 
         

@@ -3,15 +3,73 @@ import numpy as np
 import matplotlib.pyplot as plt
 from utils import list_ds, get_gray_image, plot_matches, save_images
 
+
+def compute_threshold(matcherType, method, ROOTSIFT):
+    if matcherType == "BFMatcher":
+        
+        if method == "SIFT":
+            if ROOTSIFT == False:
+                th = 90 
+                # Min number of matches to considerer a good retrieval
+                descsMin = 15
+            else:
+                th = 0.15
+                descsMin = 5
+                
+        elif method=="ORB":
+            th = 25
+            descsMin = 5
+            
+        else: 
+            print("invalid method: ", method)
+            
+    # si Flann       
+    else:
+        if method=="DAISY":
+            th = 0.15
+            descsMin = 3
+            
+        elif method == "SIFT":
+            # valor distancia min
+            th = 0.7 
+            # Min number of matches to considerer a good retrieval
+            descsMin = 50
+            
+        elif method=="ORB":
+            th = 0.5
+            descsMin = 5
+        else: 
+            print("invalid method: ", method)
+        
+    return th, descsMin
+
+def feature_detection(featureType, im):
+    minHessian = 400
+    detector = cv2.xfeatures2d.SURF_create(hessianThreshold=minHessian)
+    return detector.detect(im)
+    
+
 def compute_kp_desc(im, method, descriptor):
+    """
+    Compute kps and desc depending of the chosen method
+    """
+    
+    if method == "DAISY":
+        keypoints = feature_detection("SURF", im)
+        desc = descriptor.compute(im, keypoints)    
+        return keypoints, desc
+    
+    else:
         return descriptor.detectAndCompute(im, None) 
         
 
 def init_method(method):
     if method == "SIFT":
         return cv2.xfeatures2d.SIFT_create()
+    
     elif method == "ORB":
         return cv2.ORB_create(nfeatures=500,scoreType=cv2.ORB_HARRIS_SCORE)
+    
     elif method == "DAISY":
         return cv2.xfeatures2d.DAISY_create()
     
@@ -50,7 +108,6 @@ def compute_sift(path, method, resize = False, rootSift = False, eps = 1e-7, sav
         elif(rootSift == True):
             descs /= (descs.sum(axis=1, keepdims=True) + eps)
             descs = np.sqrt(descs) 
-        
         # Append results        
         sift_result[imName] = [imName, kps, descs] 
     
