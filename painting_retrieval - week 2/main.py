@@ -1,7 +1,6 @@
 import random
 from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift
 from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image
-from Surf import compute_suft, get_gt_distance_nearest, Matcher_find_nearest,retreive_image_nearest
 import time
 
 def init():
@@ -29,7 +28,7 @@ def init():
     # --> END FOLDERS PREPARATION <-- #
     return paths
 
-def demosift():
+def demo():
     # Example for ploting a sift image
     print('Sift kps example on random image from ds:')
     siftA = siftDs[random.choice(list(siftDs.keys()))]
@@ -40,18 +39,8 @@ def demosift():
     method = "SIFT"
     BFMatcher(50, siftA, siftB, method, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True)   
     
-def demosurf():
-    # Example for ploting a sift image
-    print('Surf kps example on random image from ds:')
-    surfA = surftDs[random.choice(list(surftDs.keys()))]
-    plot_sift(surfA, paths['pathDS'], resize = False)
-    print('Surf matching example on random image from ds:')
-    surfA = surftDs[random.choice(list(surftDs.keys()))]
-    surfB = surftDs[random.choice(list(surftDs.keys()))]
-    Matcher_find_nearest(50, surfA, surfB, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True) 
-    
 if __name__ == "__main__":
-
+    
     RELOAD = True
     GT_MATCHING = False
     RETRIEVAL = True
@@ -63,7 +52,7 @@ if __name__ == "__main__":
     # Define which Descriptor is used
     # OPTIONS: SIFT / ORB
     # IF ORB IS SELECTED, ROOTSIFT = FALSE
-    method = "ORB"
+    method = "SIFT"
     
     if(RELOAD):
         # Prepares folders
@@ -87,8 +76,6 @@ if __name__ == "__main__":
         # Compute distance Stats for GT correspondences
         gtStats = get_distances_stats(N, gtMatches, plot = PLOTS)
 
-
-            
 
     if(RETRIEVAL):   
         # Number of images retrieval per query
