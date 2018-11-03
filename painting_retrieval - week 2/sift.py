@@ -12,6 +12,8 @@ def init_method(method):
         return cv2.xfeatures2d.SIFT_create()
     elif method == "ORB":
         return cv2.ORB_create(nfeatures=500,scoreType=cv2.ORB_HARRIS_SCORE)
+    elif method == "DAISY":
+        return cv2.xfeatures2d.DAISY_create()
     
 def define_measurement(method):
     
@@ -21,7 +23,6 @@ def define_measurement(method):
     elif method == "ORB":
         return cv2.NORM_HAMMING
         
-    
     
 def compute_sift(path, method, resize = False, rootSift = False, eps = 1e-7, save = False):
     sift_result = {}
@@ -70,11 +71,13 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
     
     # Sort the matches in the order of their distance.
     matches = sorted(matches, key = lambda x:x.distance)
+    
     # keep N top matches
     matches = matches[0:N]
     if(plot == True):
         # Plots both images + theirs coincident matches
-        plot_matches(siftA, siftB, pathA, pathB, matches, resize)      
+        plot_matches(siftA, siftB, pathA, pathB, matches, resize)
+        
     return matches
 
 
@@ -122,7 +125,7 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, method=
     return queriesResult, distancesResult
 
 # Computes distances taking into account GT pairs
-def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, resize = False):
+def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, method,resize = False):
     validationMatches = []
     
     for i,imName in enumerate(sift_validation):
@@ -136,7 +139,7 @@ def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, resize = False)
         else:
             siftA = sift_validation[imName]
             siftB = sift_ds[imQuery]
-            matchesBF = BFMatcher(N, siftA, siftB, pathA=paths['pathQueriesValidation'], 
+            matchesBF = BFMatcher(N, siftA, siftB, method,pathA=paths['pathQueriesValidation'], 
                                   pathB = paths['pathDS'], plot = True, resize = resize)  
             
                         
