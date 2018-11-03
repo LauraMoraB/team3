@@ -1,6 +1,7 @@
 import random
 from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift
 from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image
+from hog import compute_hog
 import time
 
 def init():
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     GT_MATCHING = False
     RETRIEVAL = True
     ROOTSIFT = True
-    SAVE_RESULTS = True
+    SAVE_RESULTS = False
     RESIZE = True
     PLOTS = False
     
@@ -53,8 +54,10 @@ if __name__ == "__main__":
         gtList = get_query_gt(gtFile)
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
-        siftDs = compute_sift(paths['pathDS'], resize = RESIZE, rootSift = ROOTSIFT)
-        siftValidation = compute_sift(paths['pathQueriesValidation'], resize = RESIZE, rootSift = ROOTSIFT)
+        hogDs = compute_hog(paths['pathDS'], resize = RESIZE)
+        hogValidation = compute_hog(paths['pathQueriesValidation'], resize = RESIZE)
+#        siftDs = compute_sift(paths['pathDS'], resize = RESIZE, rootSift = ROOTSIFT)
+#        siftValidation = compute_sift(paths['pathQueriesValidation'], resize = RESIZE, rootSift = ROOTSIFT)
 
     if(GT_MATCHING):
         # N Used for Stats  and plotting
@@ -77,9 +80,14 @@ if __name__ == "__main__":
         # Min number of matches to considerer a good retrieval
         # Returns queries retrival + theis distances + debugging & tuning
         start = time.time()
-        queriesResult, distancesResult = retreive_image(siftDs, 
-                                                         siftValidation,#slice_dict(siftValidation,29,30), 
+#        queriesResult, distancesResult = retreive_image(siftDs, 
+#                                                         siftValidation,#slice_dict(siftValidation,29,30), 
+#                                                         paths, k, th, descsMin, PLOTS, RESIZE)
+        
+        queriesResult, distancesResult = retreive_image(hogDs, 
+                                                         hogValidation,#slice_dict(siftValidation,29,30), 
                                                          paths, k, th, descsMin, PLOTS, RESIZE)
+        
         end = time.time()
         tTime= end - start
         print('Total time:',tTime)
