@@ -53,7 +53,7 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, plot = 
         for imNameDs in siftDs:
             siftIm = siftDs[imNameDs]
             # As a default just return 100 best matches per image, could be incresed
-            print('Matching',imNameQuery,'and',imNameDs)
+            #print('Matching',imNameQuery,'and',imNameDs)
             matchesBF = BFMatcher(100, siftQuery, siftIm, pathA=paths['pathQueriesValidation'], 
                                   pathB = paths['pathDS'], plot = plot, resize = resize)
             distance = [o.distance for o in matchesBF if o.distance <= th]
@@ -79,10 +79,9 @@ def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, resize = False)
     validationMatches = []
     for imName in sift_validation:
         imQuery = gt_list[i][0]
-        print(imQuery)
+        #print(imQuery)
         if(imQuery == -1):    
             # Image not in the DS
-            None
         else:
             siftA = sift_validation[imName]
             siftB = sift_ds[imQuery]

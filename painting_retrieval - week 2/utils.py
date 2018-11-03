@@ -21,12 +21,12 @@ def create_dir(pathSave):
         os.makedirs(pathSave)
 
 # Return numpy array with gray scale image		
-def get_gray_image(im, path, resize = False, sizeLimit = 500):
+def get_gray_image(im, path, resize = False, sizeLimit = 1000):
     imBGR = get_bgr_image(im, path, resize, sizeLimit)
     return cv2.cvtColor(imBGR, cv2.COLOR_BGR2GRAY)
 
 # Return numpy array with BGR scale image		
-def get_bgr_image(im, path, resize = False, sizeLimit = 500):
+def get_bgr_image(im, path, resize = False, sizeLimit = 1000):
     imBGR = cv2.imread(path+im)
     if(resize == True):
         (h, w) = imBGR.shape[:2]
@@ -57,6 +57,20 @@ def plot_sift(sift, path, resize = False):
     plot_rgb(imSift)  
 
 # Plots matches between two images
+def plot_matches_nearest(siftA, siftB, pathA, pathB, good_matches, resize = False, **draw_params):
+    imNameA, kpsA, descsA = siftA    
+    imNameB, kpsB, descsB = siftB  
+    imA = get_bgr_image(imNameA, pathA, resize)
+    imB = get_bgr_image(imNameB, pathB, resize)
+    
+    img_matches = np.empty((max(imA.shape[0], imB.shape[0]), imA.shape[1]+imB.shape[1], 3), dtype=np.uint8)
+    #cv2.drawMatches(imA, kpsA, imB, kpsB, good_matches, img_matches, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    img3 = cv2.drawMatchesKnn(imA,kpsA,imB,kpsB,good_matches,None,**draw_params)
+    plt.figure(figsize=(12,6))
+    plt.imshow(img_matches)
+    plot_rgb(img_matches)  
+    
+# Plots matches between two images
 def plot_matches(siftA, siftB, pathA, pathB, matches, resize = False):
     imNameA, kpsA, descsA = siftA    
     imNameB, kpsB, descsB = siftB  
@@ -68,8 +82,9 @@ def plot_matches(siftA, siftB, pathA, pathB, matches, resize = False):
         matches, imB.copy(), flags=0)
     plt.figure(figsize=(12,6))
     plt.imshow(match_img)
-    plot_rgb(match_img)    
- 
+    plot_rgb(match_img)
+    
+    
 # Save list in PKL format    
 def save_pkl(list_of_list, path):
     create_dir(path)

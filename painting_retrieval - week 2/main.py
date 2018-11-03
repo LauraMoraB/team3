@@ -1,6 +1,8 @@
 import random
 from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift
 from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image
+
+from Surf import compute_suft, get_gt_distance_nearest, Matcher_find_nearest,retreive_image_nearest
 import time
 
 def init():
@@ -25,7 +27,7 @@ def init():
     # --> END FOLDERS PREPARATION <-- #
     return paths
 
-def demo():
+def demosift():
     # Example for ploting a sift image
     print('Sift kps example on random image from ds:')
     siftA = siftDs[random.choice(list(siftDs.keys()))]
@@ -35,16 +37,27 @@ def demo():
     siftB = siftDs[random.choice(list(siftDs.keys()))]
     BFMatcher(50, siftA, siftB, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True)   
     
+def demosurf():
+    # Example for ploting a sift image
+    print('Surf kps example on random image from ds:')
+    surfA = surftDs[random.choice(list(surftDs.keys()))]
+    plot_sift(surfA, paths['pathDS'], resize = False)
+    print('Surf matching example on random image from ds:')
+    surfA = surftDs[random.choice(list(surftDs.keys()))]
+    surfB = surftDs[random.choice(list(surftDs.keys()))]
+    Matcher_find_nearest(50, surfA, surfB, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True) 
+    
 if __name__ == "__main__":
 
     RELOAD = True
-    GT_MATCHING = False
+    GT_MATCHING = True
     RETRIEVAL = True
-    ROOTSIFT = True
-    SAVE_RESULTS = True
-    RESIZE = True
+    ROOTSIFT = False
+    SAVE_RESULTS = False
+    RESIZE = False
     PLOTS = False
-    
+    metodo='SURF' #'SIFT' #'SURF'
+    #demosurf()
     if(RELOAD):
         # Prepares folders
         paths = init()
@@ -53,16 +66,29 @@ if __name__ == "__main__":
         gtList = get_query_gt(gtFile)
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
-        siftDs = compute_sift(paths['pathDS'], resize = RESIZE, rootSift = ROOTSIFT)
-        siftValidation = compute_sift(paths['pathQueriesValidation'], resize = RESIZE, rootSift = ROOTSIFT)
+        if (metodo=='SIFT'):
+            siftDs = compute_sift(paths['pathDS'], resize = RESIZE, rootSift = ROOTSIFT)
+            siftValidation = compute_sift(paths['pathQueriesValidation'], resize = RESIZE, rootSift = ROOTSIFT)
+        else:
+            surftDs = compute_suft(paths['pathDS'])
+            surtValidation = compute_suft(paths['pathQueriesValidation'])
 
     if(GT_MATCHING):
         # N Used for Stats  and plotting
         N = 20
-        # Matches Validation query with their GT correspondences
-        gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths, resize = RESIZE)
-        # Compute distance Stats for GT correspondences
-        gtStats = get_distances_stats(N, gtMatches, plot = PLOTS)
+        if (metodo=='SIFT'):
+            # Matches Validation query with their GT correspondences
+            gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths, resize = RESIZE)
+            # Compute distance Stats for GT correspondences
+            gtStats = get_distances_stats(N, gtMatches, plot = PLOTS)
+            
+        else:
+            
+            gtMatches = get_gt_distance_nearest(N, surftDs, surtValidation, gtList, paths, resize = RESIZE)
+            gtStats = get_distances_stats(N, gtMatches, plot = PLOTS)
+
+
+            
 
     if(RETRIEVAL):   
         # Number of images retrieval per query
@@ -75,12 +101,18 @@ if __name__ == "__main__":
             th = 0.15
             descsMin = 5
         # Min number of matches to considerer a good retrieval
-        descsMin = 2
         # Returns queries retrival + theis distances + debugging & tuning
         start = time.time()
-        queriesResult, distancesResult = retreive_image(siftDs, 
+        if (metodo=='SIFT'):
+            queriesResult, distancesResult = retreive_image(siftDs, 
                                                          siftValidation,#slice_dict(siftValidation,29,30), 
                                                          paths, k, th, descsMin, PLOTS, RESIZE)
+        else:
+            ratio_thresh = 0.7
+            queriesResult, distancesResult = retreive_image_nearest(surftDs, 
+                                                         surtValidation,#slice_dict(siftValidation,29,30), 
+                                                         paths, k, ratio_thresh , descsMin, PLOTS, RESIZE)
+           
         end = time.time()
         tTime= end - start
         print('Total time:',tTime)
