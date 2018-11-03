@@ -3,9 +3,17 @@ import os
 import cv2
 from matplotlib import pyplot as plt
 import numpy as np
+import random
 from resizeImage import image_resize
 
-
+def save_images(kp, imName, image):
+    
+    img_with_keypoints = cv2.drawKeypoints(image, kp, outImage=np.array([]), color=(0, 0, 255), 
+                                            flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+    
+    cv2.imwrite("keypointsIm/"+str(round(random.random(),4))+imName, img_with_keypoints)
+    
+    
 # Returns list of images in a path
 def list_ds(path_images):
     listImages =[]
@@ -21,12 +29,12 @@ def create_dir(pathSave):
         os.makedirs(pathSave)
 
 # Return numpy array with gray scale image		
-def get_gray_image(im, path, resize = False, sizeLimit = 1000):
+def get_gray_image(im, path, resize = False, sizeLimit = 500):
     imBGR = get_bgr_image(im, path, resize, sizeLimit)
     return cv2.cvtColor(imBGR, cv2.COLOR_BGR2GRAY)
 
 # Return numpy array with BGR scale image		
-def get_bgr_image(im, path, resize = False, sizeLimit = 1000):
+def get_bgr_image(im, path, resize = False, sizeLimit = 500):
     imBGR = cv2.imread(path+im)
     if(resize == True):
         (h, w) = imBGR.shape[:2]
@@ -82,9 +90,8 @@ def plot_matches(siftA, siftB, pathA, pathB, matches, resize = False):
         matches, imB.copy(), flags=0)
     plt.figure(figsize=(12,6))
     plt.imshow(match_img)
-    plot_rgb(match_img)
-    
-    
+    plot_rgb(match_img)    
+ 
 # Save list in PKL format    
 def save_pkl(list_of_list, path):
     create_dir(path)
