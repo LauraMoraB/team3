@@ -211,7 +211,7 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
     # Useful info about DMatch objects -> https://docs.opencv.org/java/2.4.9/org/opencv/features2d/DMatch.html
     
     # Declare objects
-    if method == "SURF":
+    if method == "SURF" or method == "HOG":
         bf = cv2.BFMatcher(distance_type)
     else:
         bf = cv2.BFMatcher(distance_type, crossCheck=True)
