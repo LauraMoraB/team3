@@ -59,8 +59,8 @@ if __name__ == "__main__":
         general_args = parser.add_argument_group("General arguments")
     
         
-        general_args.add_argument('-me', '--method', default="KAZE", choices=('SIFT', 'ORB', 'KAZE', 'SURF'))
-        general_args.add_argument('-ma', '--matcher',  default="BFMatcher",choices=('BFMatcher', 'Flann'))
+        general_args.add_argument('-me', '--method', default="ORB", choices=('SIFT', 'ORB', 'KAZE', 'SURF','HOG'))
+        general_args.add_argument('-ma', '--matcher',  default="Flann",choices=('BFMatcher', 'Flann'))
         general_args.add_argument("-rs", "--rootsift", default=False, action='store_true', help="Only for sift method")
 
         # create our group of mutually exclusive arguments

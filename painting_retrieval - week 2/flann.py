@@ -37,7 +37,6 @@ def Flann(top, siftA, siftB, method, th=0.5):
     else:
         matches =  matcher(descsA, descsB, method)
     
-    
     for i, m_n in enumerate(matches):
         if len(m_n) ==2:
             (m,n)=m_n

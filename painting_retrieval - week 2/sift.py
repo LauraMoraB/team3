@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import list_ds, get_gray_image, plot_matches, save_images
+from utils import list_ds, get_gray_image, plot_matches, save_images, get_bgr_image
 
 
 def compute_threshold(matcherType, method, ROOTSIFT):
@@ -23,7 +23,9 @@ def compute_threshold(matcherType, method, ROOTSIFT):
         elif method=="KAZE":
             th = 0.3
             descsMin = 5
-            
+        elif method =="HOG":
+            th = 1
+            descsMin = 5
         elif method=="FREAK":
             th = 25
             descsMin = 5
@@ -59,6 +61,10 @@ def compute_threshold(matcherType, method, ROOTSIFT):
             th = 0.35
             descsMin = 5
 
+            
+        elif method =="HOG":
+            th = 0.3
+            descsMin = 5
         else: 
             print("invalid method: ", method)
         
@@ -88,6 +94,12 @@ def compute_kp_desc(im, method, descriptor):
         desc = descriptor.compute(im, keypoints)   
         return keypoints, desc
     
+    elif method == "HOG":
+        locs = []
+
+        ders = descriptor.compute(im)
+        return (locs, ders)
+    
     else:
         return descriptor.detectAndCompute(im, None) 
         
@@ -99,6 +111,14 @@ def init_method(method):
     elif method == "ORB":
         return cv2.ORB_create(nfeatures=500,scoreType=cv2.ORB_HARRIS_SCORE)
     
+    elif method == "HOG":
+        winSize = (64,64)
+        blockSize = (32,32)
+        blockStride = (16,16)
+        cellSize = (16,16)
+        nbins = 9
+        return cv2.HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins )
+
     elif method == "DAISY":
         return cv2.xfeatures2d.DAISY_create()
 
@@ -106,6 +126,7 @@ def init_method(method):
         return cv2.xfeatures2d.FREAK_create()
     elif method=="KAZE":
         return cv2.KAZE_create(extended=True, upright=True, threshold=0.001)
+    
     elif method == "SURF":
 #        return cv2.xfeatures2d.SURF_create(300, nOctaves=3, nOctaveLayers=4, extended=False, upright=True)
         return cv2.xfeatures2d.SURF_create(1200)
@@ -122,9 +143,21 @@ def define_measurement(method):
     elif method == "SURF": #set to NORM_L1 or NORM_L2.
         return cv2.NORM_L1
 
+    
+    elif method == "HOG":
+        return cv2.NORM_L2
+    
     else: 
         return cv2.NORM_L2
         
+
+
+def define_prepared_image(method, imName, path, resize):
+    if method == "HOG":
+        return get_gray_image(imName, path, resize, 256)
+    else:
+        return get_gray_image(imName, path, resize)
+
     
     
 def compute_sift(path, method, resize = False, rootSift = False, eps = 1e-7, save = False):
@@ -137,16 +170,18 @@ def compute_sift(path, method, resize = False, rootSift = False, eps = 1e-7, sav
     
     for imName in im_list:
         # Load Gray version of each image
-        imGray = get_gray_image(imName, path, resize)
+        imSource = define_prepared_image(method, imName, path, resize)
         
         # Find KeyLpoints and Sift Descriptors, info about KeyPoint objects -> https://docs.opencv.org/3.3.1/d2/d29/classcv_1_1KeyPoint.html
-        (kps, descs) = compute_kp_desc(imGray, method, desc_init)
+        (kps, descs) = compute_kp_desc(imSource, method, desc_init)
         
         if save == True:
-            save_images(kps, imName, imGray)
+            save_images(kps, imName, imSource)
         
+        if method == 'HOG':
+            descs = descs.ravel()
         # In case no kps were found
-        if len(kps) == 0:
+        elif len(kps) == 0:
             (kps, descs) = ([], None)
             
         # RootSift descriptor, sift improvement descriptor
@@ -163,26 +198,34 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
     imNameA, kpsA, descsA = siftA    
     imNameB, kpsB, descsB = siftB   
     
+    # fix how data is stored
+    if method=="FREAK":
+        descsA=descsA[1]
+        descsB=descsB[1]
+        
     # create a BFMatcher object which will match up the SIFT features
     # select measurement for the BFMatcher  
     distance_type = define_measurement(method)
     
-    if method== "SURF":
+
+    # Useful info about DMatch objects -> https://docs.opencv.org/java/2.4.9/org/opencv/features2d/DMatch.html
+    
+    # Declare objects
+    if method == "SURF":
         bf = cv2.BFMatcher(distance_type)
     else:
         bf = cv2.BFMatcher(distance_type, crossCheck=True)
- 	
-        
-    if method=="FREAK":
-        descsA=descsA[1]
-        descsB=descsB[1]
-    
-    # Useful info about DMatch objects -> https://docs.opencv.org/java/2.4.9/org/opencv/features2d/DMatch.html
-    matches = bf.match(descsA, descsB)
+            
+    # Generate matches   
+    if method == "HOG":
+        match = bf.knnMatch(descsA, descsB, 1)
+        matches = [item for sublist in match for item in sublist]
+    else:
+        matches = bf.match(descsA, descsB)
     
     # Sort the matches in the order of their distance.
     matches = sorted(matches, key = lambda x:x.distance)
-    
+
     # keep N top matches
     matches = matches[0:N]
     if(plot == True):
