@@ -23,6 +23,7 @@ def init(mode):
     paths['pathResults2'] = paths['pathResult']+"/rootsift/"
     paths['pathResults3'] = paths['pathResult']+"/orb/"
     paths['pathResults4'] = paths['pathResult']+"/kaze/"
+    paths['pathResults5'] = paths['pathResult']+"/surf/"
 
     
     # Create all subdirectories on dictionary if they dont already
@@ -58,7 +59,7 @@ if __name__ == "__main__":
         general_args = parser.add_argument_group("General arguments")
     
         
-        general_args.add_argument('-me', '--method', default="KAZE", choices=('SIFT', 'ORB', 'KAZE'))
+        general_args.add_argument('-me', '--method', default="KAZE", choices=('SIFT', 'ORB', 'KAZE', 'SURF'))
         general_args.add_argument('-ma', '--matcher',  default="BFMatcher",choices=('BFMatcher', 'Flann'))
         general_args.add_argument("-rs", "--rootsift", default=False, action='store_true', help="Only for sift method")
 
@@ -179,6 +180,9 @@ if __name__ == "__main__":
         
         elif method=="KAZE":
             pathResult =  paths['pathResults4']
+        
+        elif method=="SURF":
+            pathResult =  paths['pathResults5']
         
         
         save_pkl(queriesResult, pathResult)

@@ -27,6 +27,11 @@ def compute_threshold(matcherType, method, ROOTSIFT):
         elif method=="FREAK":
             th = 25
             descsMin = 5
+
+        elif method=="SURF":
+            th = 0.35
+            descsMin = 5
+            
         else: 
             print("invalid method: ", method)
             
@@ -49,6 +54,11 @@ def compute_threshold(matcherType, method, ROOTSIFT):
         elif method=="KAZE":
             th = 0.3
             descsMin = 5
+
+        elif method=="SURF":
+            th = 0.35
+            descsMin = 5
+
         else: 
             print("invalid method: ", method)
         
@@ -96,6 +106,10 @@ def init_method(method):
         return cv2.xfeatures2d.FREAK_create()
     elif method=="KAZE":
         return cv2.KAZE_create(extended=True, upright=True, threshold=0.001)
+    elif method == "SURF":
+#        return cv2.xfeatures2d.SURF_create(300, nOctaves=3, nOctaveLayers=4, extended=False, upright=True)
+        return cv2.xfeatures2d.SURF_create(1200)
+
     
 def define_measurement(method):
     
@@ -104,9 +118,14 @@ def define_measurement(method):
     
     elif method == "ORB":
         return cv2.NORM_HAMMING
+    
+    elif method == "SURF": #set to NORM_L1 or NORM_L2.
+        return cv2.NORM_L1
+
     else: 
         return cv2.NORM_L2
         
+    
     
 def compute_sift(path, method, resize = False, rootSift = False, eps = 1e-7, save = False):
     sift_result = {}
@@ -148,8 +167,11 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
     # select measurement for the BFMatcher  
     distance_type = define_measurement(method)
     
-    bf = cv2.BFMatcher(distance_type, crossCheck=True)    
-    if method=="FREAK":
+    if (method== "SURF"):
+        bf = cv2.BFMatcher(distance_type)
+    else:
+        bf = cv2.BFMatcher(distance_type, crossCheck=True)
+ 	if method=="FREAK":
         descsA=descsA[1]
         descsB=descsB[1]
     # Useful info about DMatch objects -> https://docs.opencv.org/java/2.4.9/org/opencv/features2d/DMatch.html
