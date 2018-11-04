@@ -103,10 +103,10 @@ def init_method(method):
         return cv2.ORB_create(nfeatures=500,scoreType=cv2.ORB_HARRIS_SCORE)
     
     elif method == "HOG":
-        winSize = (32,32)
-        blockSize = (16,16)
-        blockStride = (8,8)
-        cellSize = (8,8)
+        winSize = (64,64)
+        blockSize = (32,32)
+        blockStride = (16,16)
+        cellSize = (16,16)
         nbins = 9
         return cv2.HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins )
 
@@ -127,7 +127,7 @@ def define_measurement(method):
         return cv2.NORM_HAMMING
     
     elif method == "HOG":
-        return cv2.NORM_L1
+        return cv2.NORM_L2
     
     else: 
         return cv2.NORM_L2
@@ -136,7 +136,7 @@ def define_measurement(method):
 
 def define_prepared_image(method, imName, path, resize):
     if method == "HOG":
-        return get_gray_image(imName, path, resize, 128)
+        return get_gray_image(imName, path, resize, 256)
     else:
         return get_gray_image(imName, path, resize)
 
@@ -197,7 +197,7 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
         matches = bf.match(descsA, descsB)
     # Sort the matches in the order of their distance.
     matches = sorted(matches, key = lambda x:x.distance)
-    
+    print("one")
     # keep N top matches
     matches = matches[0:N]
     if(plot == True):

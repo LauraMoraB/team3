@@ -42,19 +42,20 @@ def demo():
     
 if __name__ == "__main__":
     
-    RELOAD = False
+    RELOAD = True
     GT_MATCHING = False
     RETRIEVAL = True
     ROOTSIFT = False
     SAVE_RESULTS = False
     RESIZE = True
-    PLOTS = False
+        PLOTS = False
     
     # Define which Descriptor is used
     # OPTIONS: SIFT/ ORB / DAISY / KAZE / FREAK / HOG
     # IF ORB IS SELECTED, ROOTSIFT = FALSE
     method = "HOG"
-    matcherType = "Flann"
+    # OPTIONS BFMatcher / Flann
+    matcherType = "BFMatcher"
     
     if(RELOAD):
         # Prepares folders
