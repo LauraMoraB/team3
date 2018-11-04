@@ -11,4 +11,8 @@ ResultMask/
 *.txt
 *.jpg
 *.jpg
-TrafficSigns/datasets/train/.DS_Store
+*.DS_Store
+TrafficSigns/datasets/*
+*.zip
+*.zip
+*.zip
