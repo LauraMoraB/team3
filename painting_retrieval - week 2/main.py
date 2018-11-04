@@ -42,7 +42,7 @@ def demo():
     
 if __name__ == "__main__":
     
-    RELOAD = True
+    RELOAD = False
     GT_MATCHING = False
     RETRIEVAL = True
     ROOTSIFT = False
@@ -51,9 +51,9 @@ if __name__ == "__main__":
     PLOTS = False
     
     # Define which Descriptor is used
-    # OPTIONS: SIFT / ORB
+    # OPTIONS: SIFT / ORB / HOG
     # IF ORB IS SELECTED, ROOTSIFT = FALSE
-    method = "ORB"
+    method = "HOG"
     
     if(RELOAD):
         # Prepares folders
@@ -63,7 +63,7 @@ if __name__ == "__main__":
         gtList = get_query_gt(gtFile)
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
-        
+
         siftDs = compute_sift(paths['pathDS'], method, resize = RESIZE, rootSift = ROOTSIFT)
         siftValidation = compute_sift(paths['pathQueriesValidation'], method, resize = RESIZE, rootSift = ROOTSIFT)
 
@@ -95,6 +95,9 @@ if __name__ == "__main__":
         elif method=="ORB":
             th = 20
             descsMin = 3
+        elif method =="HOG":
+            th = 1
+            descsMin = 10
             
         # Min number of matches to considerer a good retrieval
         # Returns queries retrival + their distances + debugging & tuning
