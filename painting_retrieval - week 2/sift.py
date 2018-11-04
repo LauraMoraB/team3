@@ -126,6 +126,7 @@ def init_method(method):
         return cv2.xfeatures2d.FREAK_create()
     elif method=="KAZE":
         return cv2.KAZE_create(extended=True, upright=True, threshold=0.001)
+    
     elif method == "SURF":
 #        return cv2.xfeatures2d.SURF_create(300, nOctaves=3, nOctaveLayers=4, extended=False, upright=True)
         return cv2.xfeatures2d.SURF_create(1200)
@@ -197,28 +198,34 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
     imNameA, kpsA, descsA = siftA    
     imNameB, kpsB, descsB = siftB   
     
+    # fix how data is stored
+    if method=="FREAK":
+        descsA=descsA[1]
+        descsB=descsB[1]
+        
     # create a BFMatcher object which will match up the SIFT features
     # select measurement for the BFMatcher  
     distance_type = define_measurement(method)
     
 
     # Useful info about DMatch objects -> https://docs.opencv.org/java/2.4.9/org/opencv/features2d/DMatch.html
-    if method =="HOG":
-        bf = cv2.BFMatcher(distance_type, crossCheck=False)    
+    
+    # Declare objects
+    if method == "SURF":
+        bf = cv2.BFMatcher(distance_type)
+    else:
+        bf = cv2.BFMatcher(distance_type, crossCheck=True)
+            
+    # Generate matches   
+    if method == "HOG":
         match = bf.knnMatch(descsA, descsB, 1)
         matches = [item for sublist in match for item in sublist]
     else:
-        if (method== "SURF"):
-            bf = cv2.BFMatcher(distance_type)
-        else:
-            bf = cv2.BFMatcher(distance_type, crossCheck=True)
-        if method=="FREAK":
-            descsA=descsA[1]
-            descsB=descsB[1]
         matches = bf.match(descsA, descsB)
+    
     # Sort the matches in the order of their distance.
     matches = sorted(matches, key = lambda x:x.distance)
-    print("one")
+
     # keep N top matches
     matches = matches[0:N]
     if(plot == True):
