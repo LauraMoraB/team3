@@ -37,7 +37,7 @@ def demo():
     
 if __name__ == "__main__":
 
-    RELOAD = True
+    RELOAD = False
     GT_MATCHING = False
     RETRIEVAL = True
     ROOTSIFT = True
@@ -55,6 +55,7 @@ if __name__ == "__main__":
         # FORMAT-> sift['imName']= [imName, kps, descs]
         siftDs = compute_sift(paths['pathDS'], resize = RESIZE, rootSift = ROOTSIFT)
         siftValidation = compute_sift(paths['pathQueriesValidation'], resize = RESIZE, rootSift = ROOTSIFT)
+        siftTest = compute_sift(paths['pathQueriesTest'], resize = RESIZE, rootSift = ROOTSIFT)
 
     if(GT_MATCHING):
         # N Used for Stats  and plotting
@@ -77,8 +78,8 @@ if __name__ == "__main__":
         # Min number of matches to considerer a good retrieval
         # Returns queries retrival + theis distances + debugging & tuning
         start = time.time()
-        queriesResult, distancesResult = retreive_image(siftDs, 
-                                                         siftValidation,#slice_dict(siftValidation,29,30), 
+        queriesResult, distancesResult, thCount = retreive_image(siftDs, 
+                                                         siftTest,#slice_dict(siftTest,29, 30), 
                                                          paths, k, th, descsMin, PLOTS, RESIZE)
         end = time.time()
         tTime= end - start

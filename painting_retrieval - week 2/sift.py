@@ -46,6 +46,7 @@ def BFMatcher(N, siftA, siftB, pathA = '', pathB = '', plot = False, resize = Fa
 def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, plot = False, resize = False):  
     queriesResult = []
     distancesResult = []
+    thCount = []
     for imNameQuery in siftQueries:
         matches = []
         siftQuery = siftQueries[imNameQuery]
@@ -55,22 +56,30 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, plot = 
             print('Matching',imNameQuery,'and',imNameDs)
             matchesBF = BFMatcher(100, siftQuery, siftIm, pathA=paths['pathQueriesValidation'], 
                                   pathB = paths['pathDS'], plot = plot, resize = resize)
-            distance = [o.distance for o in matchesBF if o.distance <= th]
+            distance = [o.distance for o in matchesBF]
+            count = 0
+            for entry in distance:
+                if(entry <= th):
+                    count += 1
             # if less than descsMin matches found, not considered a match
-            if(len(distance) >= descsMin):
-                matches.append([imNameDs, distance])
+#            if(len(count_matches) >= descsMin):
+            matches.append([imNameDs, distance, count])
         # Sort images per number of matches under threshold level
-        matches = sorted(matches, key = lambda x:len(x[1]), reverse = True)
+        matches = sorted(matches, key = lambda x:x[2], reverse = True)
         # if more than K matches, return the better K
         if(len(matches) > k):
             matches = matches[0:k] 
         # Contruct query result to be returend
         distancesResult.append([l[1] for l in matches ])
         queriesResult.append([l[0] for l in matches ])
-    for entry in queriesResult:
-        if(not entry):
-            entry.append(-1)
-    return queriesResult, distancesResult
+        thCount.append([l[2] for l in matches ])
+    i=0
+    for entry in thCount:
+        if(all(i < descsMin for i in entry)):
+            queriesResult[i] = [-1]
+        i+=1
+        
+    return queriesResult, distancesResult, thCount
 
 # Computes distances taking into account GT pairs
 def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, resize = False):
