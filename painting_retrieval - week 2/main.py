@@ -59,7 +59,7 @@ if __name__ == "__main__":
     
         
         general_args.add_argument('-me', '--method', default="KAZE", choices=('SIFT', 'ORB', 'KAZE'))
-        general_args.add_argument('-ma', '--matcher',  default="BFMatcher",choices=('BFMatcher', 'FLann'))
+        general_args.add_argument('-ma', '--matcher',  default="BFMatcher",choices=('BFMatcher', 'Flann'))
         general_args.add_argument("-rs", "--rootsift", default=False, action='store_true', help="Only for sift method")
 
         # create our group of mutually exclusive arguments
