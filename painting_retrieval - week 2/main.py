@@ -1,7 +1,8 @@
 import random
 from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift
-from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image
+from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image, compute_threshold
 import time
+from flann import retreive_image_withFlann
 
 def init():
     # --> BEGINING FOLDERS PREPARATION <-- #
@@ -19,6 +20,7 @@ def init():
     paths['pathResults1'] = "results/sift/"
     paths['pathResults2'] = "results/rootsift/"
     paths['pathResults3'] = "results/orb/"
+    paths['pathResults4'] = "results/surf/"
     
     # Create all subdirectories on dictionary if they dont already
     for path in paths:
@@ -36,7 +38,7 @@ def demo():
     print('Sift matching example on random image from ds:')
     siftA = siftDs[random.choice(list(siftDs.keys()))]
     siftB = siftDs[random.choice(list(siftDs.keys()))]
-    method = "SIFT"
+    method = "DAISY"
     BFMatcher(50, siftA, siftB, method, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True)   
     
 if __name__ == "__main__":
@@ -45,25 +47,34 @@ if __name__ == "__main__":
     GT_MATCHING = False
     RETRIEVAL = True
     ROOTSIFT = False
-    SAVE_RESULTS = False
+    SAVE_RESULTS = True
     RESIZE = True
     PLOTS = False
     
     # Define which Descriptor is used
-    # OPTIONS: SIFT / ORB
+    # OPTIONS: SIFT / ORB /SURF / DAISY
     # IF ORB IS SELECTED, ROOTSIFT = FALSE
-    method = "SIFT"
+    method = "SURF"
+    # Define which matcher is used
+    #option: BFMatcher /Flann 
+    matcherType = "BFMatcher"
     
     if(RELOAD):
         # Prepares folders
         paths = init()
         # Loads GT (from previous week, ds not available at the moment)
-        gtFile = "queries_validation/GT/w4_query_devel.pkl"
-        gtList = get_query_gt(gtFile)
+#        gtFile = "queries_validation/GT/w4_query_devel.pkl"
+#        gtList = get_query_gt(gtFile)
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
+        print ("Computing Features and Descriptors for dataset..")
         
+        start = time.time()
         siftDs = compute_sift(paths['pathDS'], method, resize = RESIZE, rootSift = ROOTSIFT)
+        end = time.time()
+        tTime= end - start
+        print('Total 1 COMPUTE DS time:',tTime)
+        
         siftValidation = compute_sift(paths['pathQueriesValidation'], method, resize = RESIZE, rootSift = ROOTSIFT)
 
     if(GT_MATCHING):
@@ -71,8 +82,15 @@ if __name__ == "__main__":
         # N Used for Stats  and plotting
         N = 20
         # Matches Validation query with their GT correspondences
+        start = time.time()
+
         gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths, 
+                                    method,
                                     resize = RESIZE)
+        end = time.time()
+        tTime= end - start
+        print('Total get_gt_distance time:',tTime)
+
         # Compute distance Stats for GT correspondences
         gtStats = get_distances_stats(N, gtMatches, plot = PLOTS)
 
@@ -82,27 +100,26 @@ if __name__ == "__main__":
         k = 10
         # Max distance to consider good matches
         
-        if method == "SIFT":
-            if ROOTSIFT == False:
-                th = 90 
-                # Min number of matches to considerer a good retrieval
-                descsMin = 15
-            else:
-                th = 0.15
-                descsMin = 5
-                
-        elif method=="ORB":
-            th = 20
-            descsMin = 3
-            
+        th, descsMin = compute_threshold(matcherType, method, ROOTSIFT)
+        
+        
         # Min number of matches to considerer a good retrieval
         # Returns queries retrival + their distances + debugging & tuning
         start = time.time()
         print("Starting comparison...")
-        queriesResult, distancesResult = retreive_image(siftDs, 
-                                                         siftValidation, 
-                                                         paths, k, th, descsMin,
-                                                         method, PLOTS, RESIZE)
+        
+        if matcherType == "Flann":
+            queriesResult, distancesResult, matches = retreive_image_withFlann(siftDs, 
+                                    siftValidation, paths, k, method,th, descsMin)
+            
+        elif matcherType == "BFMatcher":
+            queriesResult, distancesResult=retreive_image(siftDs, 
+                                    siftValidation, paths, k, th, descsMin,
+                                    method, PLOTS, RESIZE)
+        else:
+            print ("Invalid Matcher")
+        
+        
         end = time.time()
         tTime= end - start
         print('Total time:',tTime)
@@ -121,8 +138,11 @@ if __name__ == "__main__":
                 pathResult =  paths['pathResults2']
         elif method == "ORB":
             pathResult =  paths['pathResults3']
+        
+        elif method == "SURF":
+            pathResult =  paths['pathResults4']
             
-        save_pkl(quesriesResult, pathResult)
+        save_pkl(queriesResult, pathResult)
 
 
         

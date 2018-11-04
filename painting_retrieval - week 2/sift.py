@@ -3,15 +3,89 @@ import numpy as np
 import matplotlib.pyplot as plt
 from utils import list_ds, get_gray_image, plot_matches, save_images
 
+
+def compute_threshold(matcherType, method, ROOTSIFT):
+    if matcherType == "BFMatcher":
+        
+        if method == "SIFT":
+            if ROOTSIFT == False:
+                th = 90 
+                # Min number of matches to considerer a good retrieval
+                descsMin = 15
+            else:
+                th = 0.15
+                descsMin = 5
+                
+        elif method=="ORB":
+            th = 25
+            descsMin = 5
+            
+        elif method=="SURF":
+            th = 0.35
+            descsMin = 5
+            
+        else: 
+            print("invalid method: ", method)
+            
+    # si Flann       
+    else:
+        if method=="DAISY":
+            th = 0.15
+            descsMin = 3
+            
+        elif method == "SIFT":
+            # valor distancia min
+            th = 0.7 
+            # Min number of matches to considerer a good retrieval
+            descsMin = 50
+            
+        elif method=="ORB":
+            th = 0.5
+            descsMin = 5
+            
+        elif method=="SURF":
+            th = 0.35
+            descsMin = 5
+
+        else: 
+            print("invalid method: ", method)
+        
+    return th, descsMin
+
+def feature_detection(featureType, im):
+    minHessian = 400
+    detector = cv2.xfeatures2d.SURF_create(hessianThreshold=minHessian)
+    return detector.detect(im)
+    
+
 def compute_kp_desc(im, method, descriptor):
+    """
+    Compute kps and desc depending of the chosen method
+    """
+    
+    if method == "DAISY":
+        keypoints = feature_detection("SURF", im)
+        desc = descriptor.compute(im, keypoints)    
+        return keypoints, desc
+    
+    else:
         return descriptor.detectAndCompute(im, None) 
         
 
 def init_method(method):
     if method == "SIFT":
         return cv2.xfeatures2d.SIFT_create()
+    
     elif method == "ORB":
         return cv2.ORB_create(nfeatures=500,scoreType=cv2.ORB_HARRIS_SCORE)
+    
+    elif method == "DAISY":
+        return cv2.xfeatures2d.DAISY_create()
+
+    elif method == "SURF":
+#        return cv2.xfeatures2d.SURF_create(1400, nOctaves=3, nOctaveLayers=4, extended=False, upright=True)
+        return cv2.xfeatures2d.SURF_create(1200)
+
     
 def define_measurement(method):
     
@@ -20,6 +94,12 @@ def define_measurement(method):
     
     elif method == "ORB":
         return cv2.NORM_HAMMING
+    
+    elif method == "DAISY": #set to NORM_L1 or NORM_L2.
+        return cv2.NORM_L1
+    
+    elif method == "SURF": #set to NORM_L1 or NORM_L2.
+        return cv2.NORM_L1
         
     
     
@@ -49,7 +129,6 @@ def compute_sift(path, method, resize = False, rootSift = False, eps = 1e-7, sav
         elif(rootSift == True):
             descs /= (descs.sum(axis=1, keepdims=True) + eps)
             descs = np.sqrt(descs) 
-        
         # Append results        
         sift_result[imName] = [imName, kps, descs] 
     
@@ -63,18 +142,23 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
     # select measurement for the BFMatcher  
     distance_type = define_measurement(method)
     
-    bf = cv2.BFMatcher(distance_type, crossCheck=True)    
-    
+    if (method== "SURF" or method=="DAISY"):
+        bf = cv2.BFMatcher(distance_type)
+    else:
+        bf = cv2.BFMatcher(distance_type, crossCheck = True)    
+
     # Useful info about DMatch objects -> https://docs.opencv.org/java/2.4.9/org/opencv/features2d/DMatch.html
     matches = bf.match(descsA, descsB)
     
     # Sort the matches in the order of their distance.
     matches = sorted(matches, key = lambda x:x.distance)
+    
     # keep N top matches
     matches = matches[0:N]
     if(plot == True):
         # Plots both images + theirs coincident matches
-        plot_matches(siftA, siftB, pathA, pathB, matches, resize)      
+        plot_matches(siftA, siftB, pathA, pathB, matches, resize)
+        
     return matches
 
 
@@ -122,7 +206,7 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, method=
     return queriesResult, distancesResult
 
 # Computes distances taking into account GT pairs
-def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, resize = False):
+def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, method,resize = False):
     validationMatches = []
     
     for i,imName in enumerate(sift_validation):
@@ -136,7 +220,7 @@ def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, resize = False)
         else:
             siftA = sift_validation[imName]
             siftB = sift_ds[imQuery]
-            matchesBF = BFMatcher(N, siftA, siftB, pathA=paths['pathQueriesValidation'], 
+            matchesBF = BFMatcher(N, siftA, siftB, method,pathA=paths['pathQueriesValidation'], 
                                   pathB = paths['pathDS'], plot = True, resize = resize)  
             
                         
