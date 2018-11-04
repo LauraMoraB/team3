@@ -5,11 +5,10 @@ from utils import list_ds, get_gray_image, plot_matches, save_images, get_bgr_im
 
 def compute_kp_desc(im, method, descriptor):
     if method == "HOG":
-        ders = []
         locs = []
-        winStride =(8, 8)
+        winStride =(32, 32)
         padding =(0, 0)
-        ders = descriptor.compute(im, winStride, padding ,locs)
+        ders = descriptor.compute(im)
         return (locs, ders)
     else:
         return descriptor.detectAndCompute(im, None) 
@@ -42,7 +41,7 @@ def define_measurement(method):
 
 def define_prepared_image(method, imName, path, resize):
     if method == "HOG":
-        return get_gray_image(imName, path, resize)
+        return get_gray_image(imName, path, resize, 128)
     else:
         return get_gray_image(imName, path, resize)
 
@@ -90,14 +89,15 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
     # select measurement for the BFMatcher  
     distance_type = define_measurement(method)
     
-    bf = cv2.BFMatcher(distance_type, crossCheck=True)    
     
     # Useful info about DMatch objects -> https://docs.opencv.org/java/2.4.9/org/opencv/features2d/DMatch.html
     if method =="HOG":
-        matches = bf.knnMatch(descsA, descsB, k=2)
+        bf = cv2.BFMatcher(distance_type, crossCheck=False)    
+        match = bf.knnMatch(descsA, descsB, 1)
+        matches = [item for sublist in match for item in sublist]
     else:
+        bf = cv2.BFMatcher(distance_type, crossCheck=True)    
         matches = bf.match(descsA, descsB)
-    print("one Image")
     # Sort the matches in the order of their distance.
     matches = sorted(matches, key = lambda x:x.distance)
     # keep N top matches
