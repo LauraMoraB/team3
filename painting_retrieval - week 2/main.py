@@ -51,9 +51,9 @@ if __name__ == "__main__":
     PLOTS = False
     
     # Define which Descriptor is used
-    # OPTIONS: SIFT/ ORB / DAISY
+    # OPTIONS: SIFT/ ORB / DAISY / KAZE / FREAK
     # IF ORB IS SELECTED, ROOTSIFT = FALSE
-    method = "DAISY"
+    method = "KAZE"
     matcherType = "Flann"
     
     if(RELOAD):
@@ -104,7 +104,7 @@ if __name__ == "__main__":
                                     siftValidation, paths, k, method,th, descsMin)
             
         elif matcherType == "BFMatcher":
-            queriesResult, distancesResult=retreive_image(siftDs, 
+            queriesResult, distancesResult, matches=retreive_image(siftDs, 
                                     siftValidation, paths, k, th, descsMin,
                                     method, PLOTS, RESIZE)
         else:

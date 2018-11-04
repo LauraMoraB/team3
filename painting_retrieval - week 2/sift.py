@@ -20,13 +20,20 @@ def compute_threshold(matcherType, method, ROOTSIFT):
             th = 25
             descsMin = 5
             
+        elif method=="KAZE":
+            th = 0.3
+            descsMin = 5
+            
+        elif method=="FREAK":
+            th = 25
+            descsMin = 5
         else: 
             print("invalid method: ", method)
             
     # si Flann       
     else:
         if method=="DAISY":
-            th = 0.15
+            th = 0.5
             descsMin = 3
             
         elif method == "SIFT":
@@ -38,15 +45,26 @@ def compute_threshold(matcherType, method, ROOTSIFT):
         elif method=="ORB":
             th = 0.5
             descsMin = 5
+            
+        elif method=="KAZE":
+            th = 0.3
+            descsMin = 5
         else: 
             print("invalid method: ", method)
         
     return th, descsMin
 
 def feature_detection(featureType, im):
-    minHessian = 400
-    detector = cv2.xfeatures2d.SURF_create(hessianThreshold=minHessian)
-    return detector.detect(im)
+    
+    if featureType=="SURF":
+        minHessian = 100
+        detector = cv2.xfeatures2d.SURF_create(hessianThreshold=minHessian)
+        return detector.detect(im)
+        
+    elif featureType=="FAST":
+        # Initiate FAST object with default values
+        fast = cv2.FastFeatureDetector_create()
+        return fast.detect(im,None)
     
 
 def compute_kp_desc(im, method, descriptor):
@@ -54,9 +72,10 @@ def compute_kp_desc(im, method, descriptor):
     Compute kps and desc depending of the chosen method
     """
     
-    if method == "DAISY":
+    if method == "DAISY" or method=="FREAK":
+        # FAST / SURF
         keypoints = feature_detection("SURF", im)
-        desc = descriptor.compute(im, keypoints)    
+        desc = descriptor.compute(im, keypoints)   
         return keypoints, desc
     
     else:
@@ -72,6 +91,11 @@ def init_method(method):
     
     elif method == "DAISY":
         return cv2.xfeatures2d.DAISY_create()
+
+    elif method == "FREAK":
+        return cv2.xfeatures2d.FREAK_create()
+    elif method=="KAZE":
+        return cv2.KAZE_create(extended=True, upright=True, threshold=0.001)
     
 def define_measurement(method):
     
@@ -80,6 +104,8 @@ def define_measurement(method):
     
     elif method == "ORB":
         return cv2.NORM_HAMMING
+    else: 
+        return cv2.NORM_L2
         
     
 def compute_sift(path, method, resize = False, rootSift = False, eps = 1e-7, save = False):
@@ -108,6 +134,7 @@ def compute_sift(path, method, resize = False, rootSift = False, eps = 1e-7, sav
         elif(rootSift == True):
             descs /= (descs.sum(axis=1, keepdims=True) + eps)
             descs = np.sqrt(descs) 
+            
         # Append results        
         sift_result[imName] = [imName, kps, descs] 
     
@@ -122,7 +149,9 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
     distance_type = define_measurement(method)
     
     bf = cv2.BFMatcher(distance_type, crossCheck=True)    
-    
+    if method=="FREAK":
+        descsA=descsA[1]
+        descsB=descsB[1]
     # Useful info about DMatch objects -> https://docs.opencv.org/java/2.4.9/org/opencv/features2d/DMatch.html
     matches = bf.match(descsA, descsB)
     
@@ -141,7 +170,7 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
 def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, method="SIFT", plot = False, resize = False):  
     queriesResult = []
     distancesResult = []
-#    finalMatch=[]
+    finalMatch=[]
     
     for imNameQuery in siftQueries:
         matches = []
@@ -176,10 +205,10 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, method=
         distancesResult.append([ row[1] for row in matches ])
         queriesResult.append([ row[0]  for row in matches ] if tots<10 else [-1])
         
-#        finalMatch.append(matches)
+        finalMatch.append(matches)
     
     
-    return queriesResult, distancesResult
+    return queriesResult, distancesResult, finalMatch
 
 # Computes distances taking into account GT pairs
 def get_gt_distance(N, sift_ds, sift_validation, gt_list, paths, method,resize = False):
