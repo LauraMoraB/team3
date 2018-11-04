@@ -202,20 +202,17 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
     # select measurement for the BFMatcher  
     distance_type = define_measurement(method)
     
-    if (method== "SURF"):
-        bf = cv2.BFMatcher(distance_type)
-    else:
-        bf = cv2.BFMatcher(distance_type, crossCheck=True)
- 	if method=="FREAK":
-        descsA=descsA[1]
-        descsB=descsB[1]
+
     # Useful info about DMatch objects -> https://docs.opencv.org/java/2.4.9/org/opencv/features2d/DMatch.html
     if method =="HOG":
         bf = cv2.BFMatcher(distance_type, crossCheck=False)    
         match = bf.knnMatch(descsA, descsB, 1)
         matches = [item for sublist in match for item in sublist]
     else:
-        bf = cv2.BFMatcher(distance_type, crossCheck=True)   
+        if (method== "SURF"):
+            bf = cv2.BFMatcher(distance_type)
+        else:
+            bf = cv2.BFMatcher(distance_type, crossCheck=True)
         if method=="FREAK":
             descsA=descsA[1]
             descsB=descsB[1]
