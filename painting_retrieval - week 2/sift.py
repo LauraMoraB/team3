@@ -96,8 +96,7 @@ def compute_kp_desc(im, method, descriptor):
     
     elif method == "HOG":
         locs = []
-        winStride =(32, 32)
-        padding =(0, 0)
+
         ders = descriptor.compute(im)
         return (locs, ders)
     
