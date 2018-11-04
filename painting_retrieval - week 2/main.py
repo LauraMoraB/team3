@@ -51,9 +51,9 @@ if __name__ == "__main__":
     PLOTS = False
     
     # Define which Descriptor is used
-    # OPTIONS: SIFT/ ORB / DAISY / KAZE / FREAK
+    # OPTIONS: SIFT/ ORB / DAISY / KAZE / FREAK / HOG
     # IF ORB IS SELECTED, ROOTSIFT = FALSE
-    method = "KAZE"
+    method = "HOG"
     matcherType = "Flann"
     
     if(RELOAD):

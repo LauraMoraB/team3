@@ -23,7 +23,9 @@ def compute_threshold(matcherType, method, ROOTSIFT):
         elif method=="KAZE":
             th = 0.3
             descsMin = 5
-            
+        elif method =="HOG":
+            th = 1
+            descsMin = 5
         elif method=="FREAK":
             th = 25
             descsMin = 5
@@ -47,6 +49,10 @@ def compute_threshold(matcherType, method, ROOTSIFT):
             descsMin = 5
             
         elif method=="KAZE":
+            th = 0.3
+            descsMin = 5
+            
+        elif method =="HOG":
             th = 0.3
             descsMin = 5
         else: 
@@ -78,13 +84,13 @@ def compute_kp_desc(im, method, descriptor):
         desc = descriptor.compute(im, keypoints)   
         return keypoints, desc
     
-    else:
-    if method == "HOG":
+    elif method == "HOG":
         locs = []
         winStride =(32, 32)
         padding =(0, 0)
         ders = descriptor.compute(im)
         return (locs, ders)
+    
     else:
         return descriptor.detectAndCompute(im, None) 
         
@@ -95,6 +101,7 @@ def init_method(method):
     
     elif method == "ORB":
         return cv2.ORB_create(nfeatures=500,scoreType=cv2.ORB_HARRIS_SCORE)
+    
     elif method == "HOG":
         winSize = (32,32)
         blockSize = (16,16)
@@ -103,7 +110,6 @@ def init_method(method):
         nbins = 9
         return cv2.HOGDescriptor(winSize, blockSize, blockStride, cellSize, nbins )
 
-    
     elif method == "DAISY":
         return cv2.xfeatures2d.DAISY_create()
 
@@ -119,11 +125,14 @@ def define_measurement(method):
     
     elif method == "ORB":
         return cv2.NORM_HAMMING
+    
+    elif method == "HOG":
+        return cv2.NORM_L1
+    
     else: 
         return cv2.NORM_L2
         
-    elif method == "HOG":
-        return cv2.NORM_L1
+
 
 def define_prepared_image(method, imName, path, resize):
     if method == "HOG":
@@ -174,17 +183,17 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
     # select measurement for the BFMatcher  
     distance_type = define_measurement(method)
     
-    bf = cv2.BFMatcher(distance_type, crossCheck=True)    
-    if method=="FREAK":
-        descsA=descsA[1]
-        descsB=descsB[1]
+
     # Useful info about DMatch objects -> https://docs.opencv.org/java/2.4.9/org/opencv/features2d/DMatch.html
     if method =="HOG":
         bf = cv2.BFMatcher(distance_type, crossCheck=False)    
         match = bf.knnMatch(descsA, descsB, 1)
         matches = [item for sublist in match for item in sublist]
     else:
-        bf = cv2.BFMatcher(distance_type, crossCheck=True)    
+        bf = cv2.BFMatcher(distance_type, crossCheck=True)   
+        if method=="FREAK":
+            descsA=descsA[1]
+            descsB=descsB[1]
         matches = bf.match(descsA, descsB)
     # Sort the matches in the order of their distance.
     matches = sorted(matches, key = lambda x:x.distance)
