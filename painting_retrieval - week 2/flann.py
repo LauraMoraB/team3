@@ -20,11 +20,9 @@ def matcher(descA, descB, method):
     
     # Iteracions
     search_params = dict(checks=50)   # or pass empty dictionary
-#    search_params = dict()   # or pass empty dictionary
-    
     
     flann = cv2.FlannBasedMatcher(index_params, search_params)
-
+    
     return flann.knnMatch(descA, descB, 2)
     
 
@@ -38,7 +36,7 @@ def Flann(top, siftA, siftB, method, th=0.5):
         matches =  matcher(descsA[1], descsB[1], method)
     else:
         matches =  matcher(descsA, descsB, method)
-
+    
     
     for i, m_n in enumerate(matches):
         if len(m_n) ==2:
