@@ -239,11 +239,13 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, method=
     queriesResult = []
     distancesResult = []
     finalMatch=[]
-    
+    i = 0
+    l = len(siftQueries)
     for imNameQuery in siftQueries:
         matches = []
         siftQuery = siftQueries[imNameQuery]
-     
+        print('Query', str(i+1)+'/'+str(l),'started.')
+        i+=1    
         for imNameDs in siftDs:
             siftIm = siftDs[imNameDs]
             

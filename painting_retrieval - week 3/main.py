@@ -33,17 +33,6 @@ def init(mode):
     
     # --> END FOLDERS PREPARATION <-- #
     return paths
-
-def demo():
-    # Example for ploting a sift image
-    print('Sift kps example on random image from ds:')
-    siftA = siftDs[random.choice(list(siftDs.keys()))]
-    plot_sift(siftA, paths['pathDS'], resize = False)
-    print('Sift matching example on random image from ds:')
-    siftA = siftDs[random.choice(list(siftDs.keys()))]
-    siftB = siftDs[random.choice(list(siftDs.keys()))]
-    method = "DAISY"
-    BFMatcher(50, siftA, siftB, method, pathA = paths['pathDS'], pathB = paths['pathDS'], plot = True)   
     
 if __name__ == "__main__":
     
@@ -59,9 +48,9 @@ if __name__ == "__main__":
         general_args = parser.add_argument_group("General arguments")
     
         
-        general_args.add_argument('-me', '--method', default="ORB", choices=('SIFT', 'ORB', 'KAZE', 'SURF','HOG'))
-        general_args.add_argument('-ma', '--matcher',  default="Flann",choices=('BFMatcher', 'Flann'))
-        general_args.add_argument("-rs", "--rootsift", default=False, action='store_true', help="Only for sift method")
+        general_args.add_argument('-me', '--method', default="SIFT", choices=('SIFT', 'ORB', 'KAZE', 'SURF','HOG'))
+        general_args.add_argument('-ma', '--matcher',  default="BFMatcher",choices=('BFMatcher', 'Flann'))
+        general_args.add_argument("-rs", "--rootsift", default=True, action='store_true', help="Only for sift method")
 
         # create our group of mutually exclusive arguments
         mutually_exclusive = parser.add_mutually_exclusive_group()
@@ -86,10 +75,10 @@ if __name__ == "__main__":
 
     
     if CONSOLE_ARGUMENTS.validate == True:
-        MODE = "validation"
-    else:
         MODE = "test"
-
+    else:
+        MODE = "validation"
+        
     # Define which Descriptor is used
     # OPTIONS: SIFT/ ORB / DAISY / KAZE / FREAK
     # IF ORB IS SELECTED, ROOTSIFT ignored
@@ -101,8 +90,8 @@ if __name__ == "__main__":
         # Prepares folders
         paths = init(MODE)
         # Loads GT (from previous week, ds not available at the moment)
-        #gtFile = "queries_validation/GT/w4_query_devel.pkl"
-        #gtList = get_query_gt(gtFile)
+        gtFile = "queries_validation/GT/w5_query_devel.pkl"
+        gtList = get_query_gt(gtFile)
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
         print ("Computing Features and Descriptors for dataset..")
