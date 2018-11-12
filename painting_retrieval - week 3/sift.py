@@ -340,7 +340,8 @@ def get_distances_stats(N, matches, plot = False):
     return result
 
 def remove_kps(siftDict, area):
-#Area definition:  area = [tlx, tly, brx, bry]
+# area dictionary of list => [tlx, tly, brx, bry]
+# key same as for SiftDicts, image names.
     for entry in siftDict:
         name, kps, descs = siftDict[entry]
         tlx, tly, brx, bry = area[name]
