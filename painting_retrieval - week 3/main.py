@@ -56,7 +56,8 @@ if __name__ == "__main__":
         mutually_exclusive = parser.add_mutually_exclusive_group()
         mutually_exclusive.add_argument("--test", action='store_true', help="test excludes validate")
         mutually_exclusive.add_argument("--validate", action='store_true', help="validate excludes test")
-
+        
+        
         return parser.parse_args()
 
 
@@ -74,14 +75,17 @@ if __name__ == "__main__":
     PLOTS = config.getboolean('DEFAULT','PLOTS')
 
     
-    if CONSOLE_ARGUMENTS.validate == True:
+    QUERY_SET_TRAIN=CONSOLE_ARGUMENTS.validate  
+    QUERY_SET_TEST=CONSOLE_ARGUMENTS.test
+    
+    if QUERY_SET_TRAIN == True:
         MODE = "test"
     else:
         MODE = "validation"
         
-    # Define which Descriptor is used
-    # OPTIONS: SIFT/ ORB / DAISY / KAZE / FREAK
-    # IF ORB IS SELECTED, ROOTSIFT ignored
+
+    
+    # SET OPTION IN THE DEFAULT VALUE IN parse_arguments
     method = CONSOLE_ARGUMENTS.method
     ROOTSIFT = CONSOLE_ARGUMENTS.rootsift
     matcherType = CONSOLE_ARGUMENTS.matcher
@@ -89,15 +93,18 @@ if __name__ == "__main__":
     if(RELOAD):
         # Prepares folders
         paths = init(MODE)
-        # Loads GT (from previous week, ds not available at the moment)
+
         gtFile = "queries_validation/GT/w5_query_devel.pkl"
         gtList = get_query_gt(gtFile)
+        
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
-        print ("Computing Features and Descriptors for dataset..")
         
+        print ("Computing Features and Descriptors for dataset..")
         start = time.time()
+        
         siftDs = compute_sift(paths['pathDS'], method, resize = RESIZE, rootSift = ROOTSIFT)
+        
         end = time.time()
         tTime= end - start
         print('Total time:',tTime)
@@ -158,7 +165,9 @@ if __name__ == "__main__":
     # Save Results, modify path accordingly to the  Method beeing used
     
     if(SAVE_RESULTS):
+
         if method == "SIFT":
+            
             if(ROOTSIFT == False):
                 pathResult =  paths['pathResults1']
             else:
