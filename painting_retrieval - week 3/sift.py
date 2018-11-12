@@ -343,9 +343,9 @@ def remove_kps(siftDict, area):
 #Area definition:  area = [tlx, tly, brx, bry]
     for entry in siftDict:
         name, kps, descs = siftDict[entry]
+        tlx, tly, brx, bry = area[name]
         i = len(kps)
         for kp in reversed(kps):
-            tlx, tly, brx, bry = area[i]
             kpx, kpy = kp.pt
             if(kpy < bry and kpy > tly):
                 if(kpx < brx and kpx > tlx):
