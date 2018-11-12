@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import list_ds, get_gray_image, plot_matches, save_images, get_bgr_image
+from utils import list_ds, get_gray_image, plot_matches, save_images
 
 
 def compute_threshold(matcherType, method, ROOTSIFT):
@@ -37,7 +37,7 @@ def compute_threshold(matcherType, method, ROOTSIFT):
         else: 
             print("invalid method: ", method)
             
-    # si Flann       
+    # if Flann       
     else:
         if method=="DAISY":
             th = 0.5
@@ -338,3 +338,21 @@ def get_distances_stats(N, matches, plot = False):
         plt.show()        
         
     return result
+
+def remove_kps(siftDict, area):
+#Area definition:  area = [tlx, tly, brx, bry]
+    tlx, tly, brx, bry = area
+    for entry in siftDict:
+        name, kps, descs = siftDict[entry]
+        i = len(kps)
+        for kp in reversed(kps):
+            kpx, kpy = kp.pt
+            if(kpy < bry and kpy > tly):
+                if(kpx < brx and kpx > tlx):
+                # KPs withing forgiben area
+                    print('removing kp',i, entry)
+                    kps.pop(i-1)
+                    descs = np.delete(descs,i-1,0)                   
+            i -= 1
+                    
+    return siftDict
