@@ -350,9 +350,9 @@ def remove_kps(siftDict, area):
             if(kpy < bry and kpy > tly):
                 if(kpx < brx and kpx > tlx):
                 # KPs withing forgiben area
-                    print('removing kp',i, entry)
                     kps.pop(i-1)
-                    descs = np.delete(descs,i-1,0)                   
+                    descs = np.delete(descs,i-1,0)   
             i -= 1
+        siftDict[entry] = [name, kps, descs]
                     
     return siftDict
