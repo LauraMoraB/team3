@@ -341,11 +341,11 @@ def get_distances_stats(N, matches, plot = False):
 
 def remove_kps(siftDict, area):
 #Area definition:  area = [tlx, tly, brx, bry]
-    tlx, tly, brx, bry = area
     for entry in siftDict:
         name, kps, descs = siftDict[entry]
         i = len(kps)
         for kp in reversed(kps):
+            tlx, tly, brx, bry = area[i]
             kpx, kpy = kp.pt
             if(kpy < bry and kpy > tly):
                 if(kpx < brx and kpx > tlx):
