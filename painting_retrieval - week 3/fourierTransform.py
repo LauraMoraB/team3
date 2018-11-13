@@ -78,9 +78,9 @@ def resize(img, sizeLimit = 500):
     return img
     
 if __name__ == "__main__":
-    pathQuery = "dataset/w5_devel_random/"
-    
-    imBGR = cv2.imread(pathQuery+"ima_000000.jpg")
-    imResize = resize(imBGR, 1024)
-    imGray = cv2.cvtColor(imResize, cv2.COLOR_BGR2GRAY)
-    houghTrasnformGrouped(imGray)
+    pathQuery = "queries_validation/"
+    for i in range(30):
+        imBGR = cv2.imread(pathQuery+'ima_00000'+str(i)+'.jpg')
+        imResize = resize(imBGR, 1024)
+        imGray = cv2.cvtColor(imResize, cv2.COLOR_BGR2GRAY)
+        houghTrasnformGrouped(imGray)
