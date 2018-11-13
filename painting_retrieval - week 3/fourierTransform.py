@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from resizeImage import image_resize
 from houghTrasnform import houghTrasnform, houghTrasnformGrouped
-import matplotlib.pyplot as plt
+from utils import get_gray_image, list_ds
+
 
 def discriteFourierTransform(img):
     rows, columns = np.shape(img)
@@ -79,8 +80,10 @@ def resize(img, sizeLimit = 500):
     
 if __name__ == "__main__":
     pathQuery = "queries_validation/"
-    for i in range(30):
-        imBGR = cv2.imread(pathQuery+'ima_00000'+str(i)+'.jpg')
-        imResize = resize(imBGR, 1024)
-        imGray = cv2.cvtColor(imResize, cv2.COLOR_BGR2GRAY)
-        houghTrasnformGrouped(imGray)
+    im_list = list_ds(pathQuery)
+    for imName in im_list:
+        image = get_gray_image(imName, pathQuery, True, 256)
+        houghTrasnformGrouped(image)
+        
+        
+        
