@@ -5,7 +5,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 from resizeImage import image_resize
-from houghTrasnform import houghTrasnform, houghTrasnformGrouped
+from houghTrasnform import houghTrasnform, houghTrasnformGrouped, houghTrasnformPaired
 import matplotlib.pyplot as plt
 
 def discriteFourierTransform(img):
@@ -83,4 +83,4 @@ if __name__ == "__main__":
     imBGR = cv2.imread(pathQuery+"ima_000000.jpg")
     imResize = resize(imBGR, 1024)
     imGray = cv2.cvtColor(imResize, cv2.COLOR_BGR2GRAY)
-    houghTrasnformGrouped(imGray)
+    houghTrasnformPaired(imGray)
