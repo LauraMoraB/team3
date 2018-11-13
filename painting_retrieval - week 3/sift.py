@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from utils import list_ds, get_gray_image, plot_matches, save_images, get_bgr_image
+from utils import list_ds, get_gray_image, plot_matches, save_images
 
 
 def compute_threshold(matcherType, method, ROOTSIFT):
@@ -37,7 +37,7 @@ def compute_threshold(matcherType, method, ROOTSIFT):
         else: 
             print("invalid method: ", method)
             
-    # si Flann       
+    # if Flann       
     else:
         if method=="DAISY":
             th = 0.5
@@ -239,11 +239,13 @@ def retreive_image(siftDs, siftQueries, paths, k, th = 60, descsMin = 3, method=
     queriesResult = []
     distancesResult = []
     finalMatch=[]
-    
+    i = 0
+    l = len(siftQueries)
     for imNameQuery in siftQueries:
         matches = []
         siftQuery = siftQueries[imNameQuery]
-     
+        print('Query', str(i+1)+'/'+str(l),'started.')
+        i+=1    
         for imNameDs in siftDs:
             siftIm = siftDs[imNameDs]
             
@@ -336,3 +338,22 @@ def get_distances_stats(N, matches, plot = False):
         plt.show()        
         
     return result
+
+def remove_kps(siftDict, area):
+# area dictionary of list => [tlx, tly, brx, bry]
+# key same as for SiftDicts, image names.
+    for entry in siftDict:
+        name, kps, descs = siftDict[entry]
+        tlx, tly, brx, bry = area[name]
+        i = len(kps)
+        for kp in reversed(kps):
+            kpx, kpy = kp.pt
+            if(kpy < bry and kpy > tly):
+                if(kpx < brx and kpx > tlx):
+                # KPs withing forgiben area
+                    kps.pop(i-1)
+                    descs = np.delete(descs,i-1,0)   
+            i -= 1
+        siftDict[entry] = [name, kps, descs]
+                    
+    return siftDict
