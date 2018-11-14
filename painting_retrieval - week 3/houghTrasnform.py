@@ -3,48 +3,49 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 from utils import get_gray_image, list_ds
+from scipy.spatial import distance as dist
 
 origin =[]
 
-def getOriginPoints(points):
-    originSum = 100000000
-    for point in points:
-        x = point[0]
-        y = point[1]
-        
-        dist = np.sqrt(x**2 + y**2)
-        if dist<originSum:
-            originSum = dist
-            origin = [x,y]
-    return origin
-        
-
-def clockwiseangle_and_distance(point):
-    refvec = [0, 1]
-
-    vector = [point[0]-origin[0], point[1]-origin[1]]
-    # Length of vector: ||v||
-    lenvector = math.hypot(vector[0], vector[1])
-    # If length is zero there is no angle
-    if lenvector == 0:
-        return -math.pi, 0
-    # Normalize vector: v/||v||
-    normalized = [vector[0]/lenvector, vector[1]/lenvector]
-    dotprod  = normalized[0]*refvec[0] + normalized[1]*refvec[1]     # x1*x2 + y1*y2
-    diffprod = refvec[1]*normalized[0] - refvec[0]*normalized[1]     # x1*y2 - y1*x2
-    angle = math.atan2(diffprod, dotprod)
-    # Negative angles represent counter-clockwise angles so we need to subtract them 
-    # from 2*pi (360 degrees)
-    if angle < 0:
-        return 2*math.pi+angle, lenvector
-    # I return first the angle because that's the primary sorting criterium
-    # but if two vectors have the same angle then the shorter distance should come first.
-    return angle, lenvector
+#def getOriginPoints(points):
+#    originSum = 100000000
+#    for point in points:
+#        x = point[0]
+#        y = point[1]
+#        
+#        dist = np.sqrt(x**2 + y**2)
+#        if dist<originSum:
+#            originSum = dist
+#            origin = [x,y]
+#    return origin
+#        
+#
+#def clockwiseangle_and_distance(point):
+#    refvec = [1, 0]
+#
+#    vector = [point[0]-origin[0], point[1]-origin[1]]
+#    # Length of vector: ||v||
+#    lenvector = math.hypot(vector[0], vector[1])
+#    # If length is zero there is no angle
+#    if lenvector == 0:
+#        return -math.pi, 0
+#    # Normalize vector: v/||v||
+#    normalized = [vector[0]/lenvector, vector[1]/lenvector]
+#    dotprod  = normalized[0]*refvec[0] + normalized[1]*refvec[1]     # x1*x2 + y1*y2
+#    diffprod = refvec[1]*normalized[0] - refvec[0]*normalized[1]     # x1*y2 - y1*x2
+#    angle = math.atan2(diffprod, dotprod)
+#    # Negative angles represent counter-clockwise angles so we need to subtract them 
+#    # from 2*pi (360 degrees)
+#    if angle < 0:
+#        return 2*math.pi+angle, lenvector
+#    # I return first the angle because that's the primary sorting criterium
+#    # but if two vectors have the same angle then the shorter distance should come first.
+#    return angle, lenvector
 
 def getSizeSquare(points):
     x1, y1 = points[0]
     x2, y2 = points[3]
-    x3, y3 = points[2]
+    x3, y3 = points[1]
     
     height = int(round(np.sqrt((x1-x2)**2 + (y1-y2)**2)))
     width = int(round(np.sqrt((x1-x3)**2 + (y1-y3)**2))) 
@@ -54,8 +55,8 @@ def getSizeSquare(points):
 def cropAndRotate(img, points):
     height, width = getSizeSquare(points)
     
-    pts1 = np.float32([points[0], points[2], points[3], points[1]])
-    pts2 = np.float32([[0,0], [width,0], [0,height],[width, height]])
+    pts1 = np.float32([points[0], points[1], points[2], points[3]])
+    pts2 = np.float32([[0,0], [width,0], [width, height],[0,height]])
     M = cv2.getPerspectiveTransform(pts1,pts2)
     dst = cv2.warpPerspective(img,M,(width,height))
     
@@ -99,7 +100,6 @@ def groupLines(lines):
         if(angle>1.4 and angle<1.75):
             result.append(group)
             break            
-    print(result)    
     return result
 
 def intersection(line1, line2):
@@ -118,38 +118,17 @@ def intersection(line1, line2):
             points.append([x0,y0])
     return points
 
-
-def houghTrasnformPaired(img):
-    edges = cv2.Canny(img,100,200, None, 3)
-    lines = cv2.HoughLines(edges, 1, np.pi/180, 125, None, 0, 0)
-    groupedLines = groupLines(lines)
-    if len(groupedLines)>0:
-        pack1 = groupedLines[0]
-        pack2 = groupedLines[1]
-        
-        points = intersection(pack1, pack2)
-        global origin 
-        origin = getOriginPoints(points)
-        points = sorted(points, key=clockwiseangle_and_distance)
-        cropAndRotate(img, points)
-        for point in points:
-            img = cv2.circle(img,(point[0],point[1]), 10, (0,0,255), -1)
-        for j in range(0,2):
-            pack = groupedLines[j]
-            theta = pack[2]
-            a = np.cos(theta)
-            b = np.sin(theta)
-            for i in range(0,2):
-                x0 = a*pack[i]
-                y0 = b*pack[i]
-                x1 = int(x0 + 1000*(-b))
-                y1 = int(y0 + 1000*(a))
-                x2 = int(x0 - 1000*(-b))
-                y2 = int(y0 - 1000*(a))
-                img = cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-    plt.imshow(img)
-    plt.show()
-
+def order_points(pts):
+	xSorted = pts[np.argsort(pts[:, 0]), :]
+	leftMost = xSorted[:2, :]
+	rightMost = xSorted[2:, :]
+	leftMost = leftMost[np.argsort(leftMost[:, 1]), :]
+	(tl, bl) = leftMost
+ 
+	D = dist.cdist(tl[np.newaxis], rightMost, "euclidean")[0]
+	(br, tr) = rightMost[np.argsort(D)[::-1], :]
+ 
+	return np.array([tl, tr, br, bl], dtype="float32")
 
 def houghTrasnformGrouped(img):
     edges = auto_canny(img)
@@ -160,12 +139,13 @@ def houghTrasnformGrouped(img):
         pack2 = groupedLines[1]
         
         points = intersection(pack1, pack2)
-        global origin 
-        origin = getOriginPoints(points)
-        points = sorted(points, key=clockwiseangle_and_distance)
+        print(points)
+        points = np.array(points)
+        points = order_points(points)
+        print(points)
         cropAndRotate(img, points)
         for point in points:
-            img = cv2.circle(img,(point[0],point[1]), 10, (0,0,255), -1)
+            img = cv2.circle(img,(point[0],point[1]), 5, (0,0,255), -1)
             
         for j in range(0,2):
             pack = groupedLines[j]
