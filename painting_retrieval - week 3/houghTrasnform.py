@@ -4,43 +4,6 @@ import matplotlib.pyplot as plt
 from utils import get_gray_image, list_ds
 from scipy.spatial import distance as dist
 
-origin =[]
-
-#def getOriginPoints(points):
-#    originSum = 100000000
-#    for point in points:
-#        x = point[0]
-#        y = point[1]
-#        
-#        dist = np.sqrt(x**2 + y**2)
-#        if dist<originSum:
-#            originSum = dist
-#            origin = [x,y]
-#    return origin
-#        
-#
-#def clockwiseangle_and_distance(point):
-#    refvec = [1, 0]
-#
-#    vector = [point[0]-origin[0], point[1]-origin[1]]
-#    # Length of vector: ||v||
-#    lenvector = math.hypot(vector[0], vector[1])
-#    # If length is zero there is no angle
-#    if lenvector == 0:
-#        return -math.pi, 0
-#    # Normalize vector: v/||v||
-#    normalized = [vector[0]/lenvector, vector[1]/lenvector]
-#    dotprod  = normalized[0]*refvec[0] + normalized[1]*refvec[1]     # x1*x2 + y1*y2
-#    diffprod = refvec[1]*normalized[0] - refvec[0]*normalized[1]     # x1*y2 - y1*x2
-#    angle = math.atan2(diffprod, dotprod)
-#    # Negative angles represent counter-clockwise angles so we need to subtract them 
-#    # from 2*pi (360 degrees)
-#    if angle < 0:
-#        return 2*math.pi+angle, lenvector
-#    # I return first the angle because that's the primary sorting criterium
-#    # but if two vectors have the same angle then the shorter distance should come first.
-#    return angle, lenvector
-
 def getSizeSquare(points):
     x1, y1 = points[0]
     x2, y2 = points[3]
@@ -182,10 +145,16 @@ def auto_canny(image, sigma=0.33):
  
 	# return the edged image
 	return edged   
+
+
+def compute_hough(path):
+    im_list = list_ds(path)
+    result = []
+    for imName in im_list:
+        image = get_gray_image(imName, path, True, 256)
+        result.append(houghTrasnformGrouped(image))
+    return result
     
 if __name__ == "__main__":
     pathQuery = "queries_validation/"
-    im_list = list_ds(pathQuery)
-    for imName in im_list:
-        image = get_gray_image(imName, pathQuery, True, 256)
-        print(houghTrasnformGrouped(image))
+    result = compute_hough(pathQuery)
