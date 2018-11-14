@@ -5,7 +5,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 from resizeImage import image_resize
-from houghTrasnform import houghTrasnform, houghTrasnformGrouped
+from houghTrasnform import houghTrasnform, houghTrasnformGrouped, houghTrasnformPaired
 import matplotlib.pyplot as plt
 
 def discriteFourierTransform(img):
@@ -67,20 +67,3 @@ def fastFourierTransfomr(img):
     
 
 
-def resize(img, sizeLimit = 500):
-    (h, w) = img.shape[:2]
-    if(h>w):
-        if(h > sizeLimit):
-            img = image_resize(img, height = sizeLimit)
-    else:
-        if(w > sizeLimit):
-            img = image_resize(img, width = sizeLimit)
-    return img
-    
-if __name__ == "__main__":
-    pathQuery = "dataset/w5_devel_random/"
-    
-    imBGR = cv2.imread(pathQuery+"ima_000000.jpg")
-    imResize = resize(imBGR, 1024)
-    imGray = cv2.cvtColor(imResize, cv2.COLOR_BGR2GRAY)
-    houghTrasnformGrouped(imGray)
