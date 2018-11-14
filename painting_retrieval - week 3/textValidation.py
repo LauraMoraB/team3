@@ -29,12 +29,13 @@ def performance_accumulation_window(detections, annotations):
     annotations_used = np.zeros(len(annotations))
     annotations = [annotations]
     detections=[detections]
-    
+    iou = 0
     TP = 0
     if len(detections[0]) != 0:
         for ii in range (len(annotations)):
             for jj in range (len(detections)):
-                
+                print ("IOU: ", bbox_iou(annotations[ii], detections[jj]))
+                iou = bbox_iou(annotations[ii], detections[jj])
                 if (detections_used[ii] == 0) & (bbox_iou(annotations[ii], detections[jj]) > 0.5):
                     TP = TP+1
                     detections_used[jj]  = 1
@@ -43,7 +44,7 @@ def performance_accumulation_window(detections, annotations):
     FN = np.sum(annotations_used==0)
     FP = np.sum(detections_used==0)
 
-    return [TP,FN,FP]
+    return [TP,FN,FP,iou]
 
 def performance_evaluation_window(TP, FP, FN):
 
@@ -57,8 +58,9 @@ def validation_window(pathGT, pathResults):
     """
     Compute performance of the model
     """
-    bboxesGT = get_window_gt(pathGT)
-    bboxesResult = get_window_gt(pathResults)
+    iou_final = []
+    bboxesGT = pathGT#get_window_gt(pathGT)
+    bboxesResult = pathResults#get_window_gt(pathResults)
 
     TruePos = 0
     FalsePos = 0
@@ -66,12 +68,12 @@ def validation_window(pathGT, pathResults):
 
     for i in range(len(bboxesGT)):
         
-        [pixelTP, pixelFN, pixelFP] = performance_accumulation_window(bboxesResult[i], bboxesGT[i])
+        [pixelTP, pixelFN, pixelFP, iou] = performance_accumulation_window(bboxesResult[i], bboxesGT[i])
     
         TruePos += pixelTP
         FalsePos += pixelFP
         FalseNeg += pixelFN
-        
+        iou_final.append(iou)
             
     [precision, sensitivity, accuracy] = performance_evaluation_window(TruePos, FalsePos, FalseNeg)
     
@@ -84,5 +86,6 @@ def validation_window(pathGT, pathResults):
     #F1 = compute_f1(precision, sensitivity)
 
     #print('F1: ', F1)
+    return iou_final
 
    
