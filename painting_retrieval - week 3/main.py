@@ -4,6 +4,8 @@ from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, 
 import time
 from flann import retreive_image_withFlann
 from argparse import ArgumentParser
+from detectText import detect_text_bbox
+
 import configparser
 
 def init(mode):
@@ -50,6 +52,7 @@ if __name__ == "__main__":
         
         general_args.add_argument('-me', '--method', default="SIFT", choices=('SIFT', 'ORB', 'KAZE', 'SURF','HOG'))
         general_args.add_argument('-ma', '--matcher',  default="BFMatcher",choices=('BFMatcher', 'Flann'))
+        general_args.add_argument("-t", "--text", default=True, action='store_true', help="Detect text")
         general_args.add_argument("-rs", "--rootsift", default=True, action='store_true', help="Only for sift method")
 
         # create our group of mutually exclusive arguments
@@ -90,6 +93,8 @@ if __name__ == "__main__":
     ROOTSIFT = CONSOLE_ARGUMENTS.rootsift
     matcherType = CONSOLE_ARGUMENTS.matcher
     
+    TEXT = CONSOLE_ARGUMENTS.text
+    
     if(RELOAD):
         # Prepares folders
         paths = init(MODE)
@@ -116,6 +121,15 @@ if __name__ == "__main__":
             
         siftValidation = compute_sift(path, method, resize = RESIZE, rootSift = ROOTSIFT)
 
+    
+    if (TEXT):
+        
+        list_of_text_bbox = detect_text_bbox(paths['pathDS'], plot=True)
+    
+        # save pkl
+        save_pkl(list_of_text_bbox, "TextResults/")
+        
+    
     if(GT_MATCHING):
         
         # N Used for Stats  and plotting
