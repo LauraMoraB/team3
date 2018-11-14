@@ -2,7 +2,67 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import math
+from resizeImage import image_resize
 
+origin =[]
+
+def getOriginPoints(points):
+    originSum = 100000000
+    for point in points:
+        x = point[0]
+        y = point[1]
+        
+        dist = np.sqrt(x**2 + y**2)
+        if dist<originSum:
+            originSum = dist
+            origin = [x,y]
+    return origin
+        
+
+def clockwiseangle_and_distance(point):
+    refvec = [0, 1]
+
+    vector = [point[0]-origin[0], point[1]-origin[1]]
+    # Length of vector: ||v||
+    lenvector = math.hypot(vector[0], vector[1])
+    # If length is zero there is no angle
+    if lenvector == 0:
+        return -math.pi, 0
+    # Normalize vector: v/||v||
+    normalized = [vector[0]/lenvector, vector[1]/lenvector]
+    dotprod  = normalized[0]*refvec[0] + normalized[1]*refvec[1]     # x1*x2 + y1*y2
+    diffprod = refvec[1]*normalized[0] - refvec[0]*normalized[1]     # x1*y2 - y1*x2
+    angle = math.atan2(diffprod, dotprod)
+    # Negative angles represent counter-clockwise angles so we need to subtract them 
+    # from 2*pi (360 degrees)
+    if angle < 0:
+        return 2*math.pi+angle, lenvector
+    # I return first the angle because that's the primary sorting criterium
+    # but if two vectors have the same angle then the shorter distance should come first.
+    return angle, lenvector
+
+def getSizeSquare(points):
+    x1, y1 = points[0]
+    x2, y2 = points[3]
+    x3, y3 = points[2]
+    
+    height = int(round(np.sqrt((x1-x2)**2 + (y1-y2)**2)))
+    width = int(round(np.sqrt((x1-x3)**2 + (y1-y3)**2))) 
+    return height, width
+
+
+def cropAndRotate(img, points):
+    height, width = getSizeSquare(points)
+    
+    pts1 = np.float32([points[0], points[2], points[3], points[1]])
+    pts2 = np.float32([[0,0], [width,0], [0,height],[width, height]])
+    M = cv2.getPerspectiveTransform(pts1,pts2)
+    dst = cv2.warpPerspective(img,M,(width,height))
+    
+    plt.subplot(121),plt.imshow(img),plt.title('Input')
+    plt.subplot(122),plt.imshow(dst),plt.title('Output')
+    plt.show()
 
 def groupLines(lines):
     groupedLines = []
@@ -48,11 +108,14 @@ def houghTrasnformPaired(img):
     lines = cv2.HoughLines(edges, 1, np.pi/180, 125, None, 0, 0)
     groupedLines = groupLines(lines)
     if len(groupedLines)>0:
-#        for pack in groupedLines:
         pack1 = groupedLines[0]
         pack2 = groupedLines[1]
         
         points = intersection(pack1, pack2)
+        global origin 
+        origin = getOriginPoints(points)
+        points = sorted(points, key=clockwiseangle_and_distance)
+        cropAndRotate(img, points)
         for point in points:
             img = cv2.circle(img,(point[0],point[1]), 10, (0,0,255), -1)
         for j in range(0,2):
@@ -71,85 +134,104 @@ def houghTrasnformPaired(img):
     plt.imshow(img)
     plt.show()
 
-
-def houghTrasnformGrouped(img):
-    edges = cv2.Canny(img,100,200, None, 3)
-    lines = cv2.HoughLines(edges, 1, np.pi/180, 125, None, 0, 0)
-    groupedLines = groupLines(lines)
-    if len(groupedLines)>0:
-#        for pack in groupedLines:
-        for j in range(0,2):
-            pack = groupedLines[j]
-            theta = pack[2]
-            a = np.cos(theta)
-            b = np.sin(theta)
-            for i in range(0,2):
-                x0 = a*pack[i]
-                y0 = b*pack[i]
-                x1 = int(x0 + 1000*(-b))
-                y1 = int(y0 + 1000*(a))
-                x2 = int(x0 - 1000*(-b))
-                y2 = int(y0 - 1000*(a))
-                img = cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-    plt.imshow(img)
-    plt.show()
-
-
-
-
-def houghTrasnform(img):
-    edges = cv2.Canny(img,100,200, None, 3)
-#    edges = cv2.dilate(edges, np.ones((5,5),np.uint8) ,iterations = 1)
-        
-    lines = cv2.HoughLines(edges, 1, np.pi/180, 100, None, 0, 0)
+#
+#def houghTrasnformGrouped(img):
+#    edges = cv2.Canny(img,100,200, None, 3)
+#    lines = cv2.HoughLines(edges, 1, np.pi/180, 125, None, 0, 0)
+#    groupedLines = groupLines(lines)
+#    if len(groupedLines)>0:
+##        for pack in groupedLines:
+#        for j in range(0,2):
+#            pack = groupedLines[j]
+#            theta = pack[2]
+#            a = np.cos(theta)
+#            b = np.sin(theta)
+#            for i in range(0,2):
+#                x0 = a*pack[i]
+#                y0 = b*pack[i]
+#                x1 = int(x0 + 1000*(-b))
+#                y1 = int(y0 + 1000*(a))
+#                x2 = int(x0 - 1000*(-b))
+#                y2 = int(y0 - 1000*(a))
+#                img = cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+#    plt.imshow(img)
+#    plt.show()
+#
+#
+#
+#
+#def houghTrasnform(img):
+#    edges = cv2.Canny(img,100,200, None, 3)
+##    edges = cv2.dilate(edges, np.ones((5,5),np.uint8) ,iterations = 1)
+#        
+#    lines = cv2.HoughLines(edges, 1, np.pi/180, 100, None, 0, 0)
+#    
+##    lines_sort = sorted(lines, key=lambda a_entry: a_entry[..., 1], reverse=True)
+#    counterX = 0
+#    thetaX = 0
+#    rhoX = 0
+#    counterY = 0
+#    thetaY = 0
+#    rhoY = 0
+#    if lines is not None:
+#        for pack in lines:
+#            rho = pack[0,0]
+#            theta = pack[0,1]
+#            a = np.cos(theta)
+#            b = np.sin(theta)
+#            x0 = a*rho
+#            y0 = b*rho
+#            x1 = int(x0 + 1000*(-b))
+#            y1 = int(y0 + 1000*(a))
+#            x2 = int(x0 - 1000*(-b))
+#            y2 = int(y0 - 1000*(a))
+#            deltaX = x1 - x2
+#            deltaY = y1 - y2
+#            angle = np.arctan2(deltaY, deltaX)*180 / np.pi
+#            if (angle > -135 and angle < 135):
+#                if(abs(theta - thetaX)+abs(rho - rhoX)>50):
+#                    counterX +=  1
+#                    if (counterX<=2):
+#                        thetaX = theta
+#                        rhoX = rho
+#                        img = cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+#            else :
+#                if(abs(theta - thetaY)+abs(rho - rhoY)>50):
+#                    counterY +=  1
+#                    if (counterY<=2):
+#                        thetaY = theta
+#                        rhoY = rho
+#                        img = cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+#
+#    plt.imshow(img)
+#    plt.show()
+#    
+#def probabilisticHoughTrasnform(img):
+#    edges = cv2.Canny(img,50,150,apertureSize = 3)
+#    
+#    minLineLength = 100
+#    maxLineGap = 10
+#    lines = cv2.HoughLinesP(edges,1,np.pi/180,100,minLineLength,maxLineGap)
+#    for x1,y1,x2,y2 in lines[0]:
+#        cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
+#    plt.imshow(img)
+#    plt.show()
+#    
     
-#    lines_sort = sorted(lines, key=lambda a_entry: a_entry[..., 1], reverse=True)
-    counterX = 0
-    thetaX = 0
-    rhoX = 0
-    counterY = 0
-    thetaY = 0
-    rhoY = 0
-    if lines is not None:
-        for pack in lines:
-            rho = pack[0,0]
-            theta = pack[0,1]
-            a = np.cos(theta)
-            b = np.sin(theta)
-            x0 = a*rho
-            y0 = b*rho
-            x1 = int(x0 + 1000*(-b))
-            y1 = int(y0 + 1000*(a))
-            x2 = int(x0 - 1000*(-b))
-            y2 = int(y0 - 1000*(a))
-            deltaX = x1 - x2
-            deltaY = y1 - y2
-            angle = np.arctan2(deltaY, deltaX)*180 / np.pi
-            if (angle > -135 and angle < 135):
-                if(abs(theta - thetaX)+abs(rho - rhoX)>50):
-                    counterX +=  1
-                    if (counterX<=2):
-                        thetaX = theta
-                        rhoX = rho
-                        img = cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-            else :
-                if(abs(theta - thetaY)+abs(rho - rhoY)>50):
-                    counterY +=  1
-                    if (counterY<=2):
-                        thetaY = theta
-                        rhoY = rho
-                        img = cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
-
-    plt.imshow(img)
-    plt.show()
+def resize(img, sizeLimit = 500):
+    (h, w) = img.shape[:2]
+    if(h>w):
+        if(h > sizeLimit):
+            img = image_resize(img, height = sizeLimit)
+    else:
+        if(w > sizeLimit):
+            img = image_resize(img, width = sizeLimit)
+    return img
     
-def probabilisticHoughTrasnform(img):
-    edges = cv2.Canny(img,50,150,apertureSize = 3)
+if __name__ == "__main__":
+    pathQuery = "dataset/w5_devel_random/"
     
-    minLineLength = 100
-    maxLineGap = 10
-    lines = cv2.HoughLinesP(edges,1,np.pi/180,100,minLineLength,maxLineGap)
-    for x1,y1,x2,y2 in lines[0]:
-        cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
-    plt.imshow(img)
-    plt.show()
+    imBGR = cv2.imread(pathQuery+"ima_000000.jpg")
+    imResize = resize(imBGR, 1024)
+    imGray = cv2.cvtColor(imResize, cv2.COLOR_BGR2GRAY)
+    houghTrasnformPaired(imGray)
