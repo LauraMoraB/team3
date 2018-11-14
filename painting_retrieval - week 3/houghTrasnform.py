@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import math
 from utils import get_gray_image, list_ds
 from scipy.spatial import distance as dist
 
@@ -99,8 +98,18 @@ def groupLines(lines):
         angle = abs(mainTheta - complementTheta)
         if(angle>1.4 and angle<1.75):
             result.append(group)
-            break            
-    return result
+            break           
+    paintingTheta = 0
+    # rad to degrees
+    angles = [int(mainTheta*180/np.pi), int(complementTheta*180/np.pi)]
+    angles = sorted(angles)  
+    # get angle closer to 0º/180º
+    if(abs(angles[0]-90) > abs(angles[1]-90)):
+        paintingTheta = 180-angles[0]
+    else:
+        paintingTheta = 180-angles[1]
+        
+    return result, paintingTheta
 
 def intersection(line1, line2):
     points = []
@@ -133,16 +142,14 @@ def order_points(pts):
 def houghTrasnformGrouped(img):
     edges = auto_canny(img)
     lines = cv2.HoughLines(edges, 1, np.pi/180, 30, None, 0, 0)
-    groupedLines = groupLines(lines)
+    groupedLines, paintingTheta = groupLines(lines)
     if len(groupedLines)>1:
         pack1 = groupedLines[0]
         pack2 = groupedLines[1]
         
         points = intersection(pack1, pack2)
-        print(points)
         points = np.array(points)
         points = order_points(points)
-        print(points)
         cropAndRotate(img, points)
         for point in points:
             img = cv2.circle(img,(point[0],point[1]), 5, (0,0,255), -1)
@@ -162,6 +169,7 @@ def houghTrasnformGrouped(img):
                 img = cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
     plt.imshow(img)
     plt.show()
+    return [paintingTheta, points.tolist()]
     
 def auto_canny(image, sigma=0.33):
 	# compute the median of the single channel pixel intensities
@@ -176,8 +184,8 @@ def auto_canny(image, sigma=0.33):
 	return edged   
     
 if __name__ == "__main__":
-    pathQuery = "dataset/w5_devel_random/"
+    pathQuery = "queries_validation/"
     im_list = list_ds(pathQuery)
     for imName in im_list:
         image = get_gray_image(imName, pathQuery, True, 256)
-        houghTrasnformGrouped(image)
+        print(houghTrasnformGrouped(image))
