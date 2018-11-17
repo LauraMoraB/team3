@@ -113,6 +113,13 @@ def get_query_gt(pkl_fle):
         resultList.append(queryList)
     return resultList
 
+def get_window_gt(pkl_file):
+
+    with open(pkl_file, 'rb') as f:
+        data = pickle.load(f)    
+    return data
+
+
 # Slice dictionary as list objects
 def slice_dict(d1, no, nf):
     return dict(list(d1.items())[no:nf])
