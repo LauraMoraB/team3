@@ -182,7 +182,6 @@ def candidate_decision(list_of_detections, image_w, image_h, areaDesicion=True):
                     
                 i=i-1
                 
-            print (lista)
             if len(lista) > 0:
                 lista = lista[0]
             return lista
@@ -264,7 +263,6 @@ def detect_text_bbox(pathDS, plot):
             list_of_detections = candidate_decision(list_of_detections, w_image_complete, h_image_complete, False)
             
             # item, aspect ratio
-            print ("Candidate: ", list_of_detections)
             
             if len(list_of_detections) > 0:
                 list_of_detections=list_of_detections[0]

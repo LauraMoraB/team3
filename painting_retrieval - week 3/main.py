@@ -1,10 +1,10 @@
-import random
 from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift
-from sift import compute_sift, BFMatcher, get_gt_distance, get_distances_stats, retreive_image, compute_threshold
+from sift import compute_sift, get_gt_distance, get_distances_stats, retreive_image, compute_threshold
 import time
 from flann import retreive_image_withFlann
 from argparse import ArgumentParser
 from detectText import detect_text_bbox
+from houghTrasnform import compute_hough
 
 import configparser
 
@@ -19,6 +19,7 @@ def init(mode):
     paths['pathGTTest'] = "queries_test/GT/"
     # Results Path
     paths['pathResult'] = "results/"+mode
+    paths['pathHough'] = paths['pathResult']+"/hough/"
     
     # Delivery Methods Path
     paths['pathResults1'] = paths['pathResult']+"/sift/"
@@ -76,7 +77,7 @@ if __name__ == "__main__":
     SAVE_RESULTS = config.getboolean('DEFAULT','SAVE_RESULTS')
     RESIZE = config.getboolean('DEFAULT','RESIZE')
     PLOTS = config.getboolean('DEFAULT','PLOTS')
-
+    HOUGH = config.getboolean('DEFAULT', 'HOUGH')
     
     QUERY_SET_TRAIN=CONSOLE_ARGUMENTS.validate  
     QUERY_SET_TEST=CONSOLE_ARGUMENTS.test
@@ -119,8 +120,13 @@ if __name__ == "__main__":
         else:
             path = paths['pathQueriesTest']
             
-        siftValidation = compute_sift(path, method, resize = RESIZE, rootSift = ROOTSIFT)
-
+        siftQuery = compute_sift(path, method, resize = RESIZE, rootSift = ROOTSIFT)
+        
+    if(HOUGH):
+        
+        list_of_hough_points = compute_hough(paths['pathQueriesValidation'], RESIZE)
+        
+        save_pkl(list_of_hough_points, paths['pathHough'])
     
     if (TEXT):
         
@@ -135,7 +141,7 @@ if __name__ == "__main__":
         # N Used for Stats  and plotting
         N = 20
         # Matches Validation query with their GT correspondences
-        gtMatches = get_gt_distance(N, siftDs, siftValidation, gtList, paths, 
+        gtMatches = get_gt_distance(N, siftDs, siftQuery, gtList, paths, 
                                     method,
                                     resize = RESIZE)
         # Compute distance Stats for GT correspondences
@@ -157,11 +163,11 @@ if __name__ == "__main__":
         
         if matcherType == "Flann":
             queriesResult, distancesResult, matches = retreive_image_withFlann(siftDs, 
-                                    siftValidation, paths, k, method,th, descsMin)
+                                    siftQuery, paths, k, method,th, descsMin)
             
         elif matcherType == "BFMatcher":
             queriesResult, distancesResult, matches=retreive_image(siftDs, 
-                                    siftValidation, paths, k, th, descsMin,
+                                    siftQuery, paths, k, th, descsMin,
                                     method, PLOTS, RESIZE)
         else:
             print ("Invalid Matcher")
