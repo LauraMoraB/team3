@@ -34,7 +34,7 @@ def performance_accumulation_window(detections, annotations):
     if len(detections[0]) != 0:
         for ii in range (len(annotations)):
             for jj in range (len(detections)):
-                print ("IOU: ", bbox_iou(annotations[ii], detections[jj]))
+
                 iou = bbox_iou(annotations[ii], detections[jj])
                 if (detections_used[ii] == 0) & (bbox_iou(annotations[ii], detections[jj]) > 0.5):
                     TP = TP+1
@@ -74,7 +74,7 @@ def validation_window(pathGT, pathResults):
         FalsePos += pixelFP
         FalseNeg += pixelFN
         iou_final.append(iou)
-            
+                    
     [precision, sensitivity, accuracy] = performance_evaluation_window(TruePos, FalsePos, FalseNeg)
     
     print("\n------ FINAL RESULT Window Validation -------")

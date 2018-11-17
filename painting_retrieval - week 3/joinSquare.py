@@ -1,8 +1,7 @@
-def compare_squares(current_value, next_value):
+def compare_squares(current_value, next_value, thw=60, thh=60):
     # compare distances for width
     joined = False
-    # estic suposant 10 pixels per fer la logica
-    if abs(current_value[2]-next_value[0]) < 60 and abs(current_value[1]-next_value[1]) < 60: 
+    if abs(current_value[2]-next_value[0]) < thw and abs(current_value[1]-next_value[1]) < thh: 
         
         x_peque = current_value[0]
         y_peque = current_value[1]
