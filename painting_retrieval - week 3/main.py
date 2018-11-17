@@ -4,6 +4,7 @@ import time
 from flann import retreive_image_withFlann
 from argparse import ArgumentParser
 from detectText import detect_text_bbox
+from houghTrasnform import compute_hough
 
 import configparser
 
@@ -18,6 +19,7 @@ def init(mode):
     paths['pathGTTest'] = "queries_test/GT/"
     # Results Path
     paths['pathResult'] = "results/"+mode
+    paths['pathHough'] = paths['pathResult']+"/hough/"
     
     # Delivery Methods Path
     paths['pathResults1'] = paths['pathResult']+"/sift/"
@@ -75,7 +77,7 @@ if __name__ == "__main__":
     SAVE_RESULTS = config.getboolean('DEFAULT','SAVE_RESULTS')
     RESIZE = config.getboolean('DEFAULT','RESIZE')
     PLOTS = config.getboolean('DEFAULT','PLOTS')
-
+    HOUGH = config.getboolean('DEFAULT', 'HOUGH')
     
     QUERY_SET_TRAIN=CONSOLE_ARGUMENTS.validate  
     QUERY_SET_TEST=CONSOLE_ARGUMENTS.test
@@ -119,7 +121,12 @@ if __name__ == "__main__":
             path = paths['pathQueriesTest']
             
         siftQuery = compute_sift(path, method, resize = RESIZE, rootSift = ROOTSIFT)
-
+        
+    if(HOUGH):
+        
+        list_of_hough_points = compute_hough(paths['pathQueriesValidation'], RESIZE)
+        
+        save_pkl(list_of_hough_points, paths['pathHough'])
     
     if (TEXT):
         
