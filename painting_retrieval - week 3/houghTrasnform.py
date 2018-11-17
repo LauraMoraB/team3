@@ -105,6 +105,8 @@ def order_points(pts):
 
 def houghTrasnformGrouped(img, percent_h, percent_w, imgOrig):
     edges = auto_canny(img)
+    plt.imshow(edges)
+    plt.show()
     lines = cv2.HoughLines(edges, 1, np.pi/180, 30, None, 0, 0)
     groupedLines, paintingTheta = groupLines(lines)
     if len(groupedLines)>1:
@@ -169,6 +171,6 @@ def compute_hough(path, resize):
         result.append(houghTrasnformGrouped(image, percent_h, percent_w, imgOrig))
     return result
     
-#if __name__ == "__main__":
-#    pathQuery = "queries_validation/"
-#    result = compute_hough(pathQuery, True)
+if __name__ == "__main__":
+    pathQuery = "dataset/"
+    result = compute_hough(pathQuery, True)

@@ -2,10 +2,10 @@ import numpy as np
 from matplotlib import pyplot as plt
 import cv2
 from resizeImage import image_resize
-from utils import list_ds, create_dir, save_pkl
+from utils import list_ds, create_dir, save_pkl, get_window_gt
 from joinSquare import compare_squares
 from textValidation import validation_window
-
+import operator
 
 def plot_images(after_morph, border_del, final_total, image_with_square, final_image_color):
    
@@ -27,11 +27,19 @@ def plot_images(after_morph, border_del, final_total, image_with_square, final_i
     plt.show()   
     
 def apply_morphology(img_back, perH, perW):
- 
+    h,w=img_back.shape
+    
+    openk = int(h*0.01)
+    #dilk= int(h*0.01)#int(h*0.02)
+    dilk1= int(h*0.01)#5
+    dilk2= int(w*0.01)
+    erok1 = int(h*0.01)#5
+    erok2 = int(w*0.02) #10
+
     # Define kernels
-    kernelOpen = np.ones((10,10), np.uint8)
-    kernelDilate  = np.ones((20,20),np.uint8)
-    kernetEro  = np.ones((20,20),np.uint8)
+    kernelOpen = np.ones((openk,openk), np.uint8)
+    kernelDilate  = np.ones((dilk1,dilk2),np.uint8)
+    kernetEro  = np.ones((erok1,erok2),np.uint8)
     
     # Compute filters
     opened = cv2.morphologyEx(img_back, cv2.MORPH_OPEN, kernelOpen)
@@ -135,24 +143,69 @@ def validate_results(pathGT, pathResults):
     validation_window(pathGT, pathResults)
 
 
+def candidate_decision(list_of_detections, image_w, image_h, areaDesicion=True):
+    lista = []
+   
+    if areaDesicion:
+        area = np.array([ (item[2]-item[0])*(item[3]-item[1]) for item in list_of_detections])  
+        ids = np.argsort(-area)
+        return list_of_detections[ids[0]]
+    
+    else:
+        # check aspect ratio
+        if len(list_of_detections) > 1:
+            for item in list_of_detections:
+                w = item[2]-item[0]
+                h = item[3]-item[1]
+                
+                aspect_ratio =abs(8-w/h)
+                lista.append([item,aspect_ratio])        
+        else:
+            lista.append([list_of_detections[0],100])
+        
+        # now, remove 
+        if len(lista) > 0:
+            lista = sorted(lista, key = lambda x:x[1])
+            i = len(lista)
+            for item in reversed(lista):
+                # check if 
+                h_midImage = image_h // 2 # punto medio
+                h_tercioImage = image_h // 6  #+/- por el tercio
+                
+                h_midBB = ((item[0][3]+item[0][1]) // 2) #+ h_midImage
+                
+                thup = h_midImage - h_tercioImage
+                thdown = h_midImage + h_tercioImage
+                
+                if ( (item[0][2]-item[0][0]) < 0.5*image_w) or (h_midBB > thup and h_midBB < thdown):
+                    lista.pop(i-1) 
+                    
+                i=i-1
+                
+            if len(lista) > 0:
+                lista = lista[0]
+            return lista
+        
+        else:
+            return lista
+
 def detect_text_bbox(pathDS, plot):
     
     list_of_detections_total = []
     im_list = list_ds(pathDS)
     
-    #im_list = ["ima_000002.jpg"]
+    #im_list = ["ima_000041.jpg"]
     for imName in im_list:
         print (imName)
         img = cv2.imread(pathDS+imName)
         final_image = img.copy()
-                
+        # Filter out anything not color
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         
         (h_image_complete, w_image_complete) = gray.shape
         
         # resize
-       # gray = image_resize(gray, 500)
-#        res = image_resize(final_image, 500)
+        gray = image_resize(gray, 364)
 
         (h_image, w_image) = gray.shape
        
@@ -161,8 +214,9 @@ def detect_text_bbox(pathDS, plot):
         
         img_back = high_pass(gray, h_image, w_image)
         
-        plt.imshow(img_back)
-        plt.show()
+        if plot:
+            plt.imshow(img_back)
+            plt.show()
         
         # Morph
         after_morph = apply_morphology(img_back, percentatge_reduccio_h, percentatge_reduccio_w)
@@ -173,27 +227,32 @@ def detect_text_bbox(pathDS, plot):
         # Delete components in the surroundings   
         delete_borders(thresh, w_image, h_image, w_per=0.1, h_per=0.01)
         
-        kernelDil  = np.ones((1,60),np.uint8)
+        dilk = int(0.1*w_image) #60
+        kernelDil  = np.ones((1,dilk),np.uint8)
         
         # Final Image
         final_total_bin = cv2.dilate(thresh, kernelDil, iterations=1)
-        
+        delete_borders(final_total_bin, w_image, h_image, w_per=0.1, h_per=0.05)
         
         image_with_square, list_of_detections = draw_square(final_total_bin, img, w_image, h_image, percentatge_reduccio_h, percentatge_reduccio_w)
         
-        
+        # sort by x and y
+        list_of_detections = sorted(list_of_detections, key = operator.itemgetter(0, 1))
+
         if len(list_of_detections) > 0:
             
             # Join boxxes if they are really close
             index = 0
-                  
+            thx = 0.2*w_image
+            thy = 0.2*h_image
+
             while (index < len(list_of_detections)-1):
                 current_value = list_of_detections[index]
                 next_value = list_of_detections[index+1]
                 
-                # compare distances for width
-                rectangle, joined = compare_squares(current_value, next_value)
-                
+                # compare distances
+                rectangle, joined = compare_squares(current_value, next_value, thx, thy)
+
                 if joined:
                     list_of_detections.pop(index+1)
                     list_of_detections[index]=rectangle
@@ -201,28 +260,38 @@ def detect_text_bbox(pathDS, plot):
                     index+=1
   
             # Get the bigger one and remove others
-            area = np.array([ (item[2]-item[0])*(item[3]-item[1]) for item in list_of_detections])  
-            ids = np.argsort(-area)
-            list_of_detections = list_of_detections[ids[0]]
+            list_of_detections = candidate_decision(list_of_detections, w_image_complete, h_image_complete, False)
             
+            # item, aspect ratio
+            
+            if len(list_of_detections) > 0:
+                list_of_detections=list_of_detections[0]
+           
+            print(list_of_detections)
+           
             
             # Draw final Square
-            print ("After: ", list_of_detections)
-            final_detection(final_image, list_of_detections)
+            if len(list_of_detections) > 0:
+                final_detection(final_image, list_of_detections)
        
         
         list_of_detections_total.append(list_of_detections)
     
-        if plot == True:
+        if plot:
             plot_images(after_morph, thresh, final_total_bin, image_with_square, final_image)
-            
-            
+        
+        cv2.imwrite("results/multiple/better/"+imName, image_with_square)
+        cv2.imwrite("results/final/better/"+imName, final_image)
+        
+        
     return list_of_detections_total  
     
 if __name__ == "__main__":   
     
-    list_of_text_bbox = detect_text_bbox("dataset/", plot=True)
+    list_of_text_bbox = detect_text_bbox("dataset/", plot=False)
     
+    bboxGT = get_window_gt("dataset/GT/w5_text_bbox_list.pkl")
+    validate_results(bboxGT, list_of_text_bbox)
     # save pkl
     #save_pkl(list_of_text_bbox, "TextResults/")
        
