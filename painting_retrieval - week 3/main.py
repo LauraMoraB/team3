@@ -1,10 +1,13 @@
-from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift
-from sift import compute_sift, get_gt_distance, get_distances_stats, retreive_image, compute_threshold
+from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift, get_window_gt, area_resized
+from sift import compute_sift, get_gt_distance, get_distances_stats, retreive_image, compute_threshold, remove_kps
 import time
 from flann import retreive_image_withFlann
 from argparse import ArgumentParser
 from detectText import detect_text_bbox
 from houghTrasnform import compute_hough
+from textValidation import validation_window
+
+
 
 import configparser
 
@@ -51,10 +54,10 @@ if __name__ == "__main__":
         general_args = parser.add_argument_group("General arguments")
     
         
-        general_args.add_argument('-me', '--method', default="SIFT", choices=('SIFT', 'ORB', 'KAZE', 'SURF','HOG'))
+        general_args.add_argument('-me', '--method', default="KAZE", choices=('SIFT', 'ORB', 'KAZE', 'SURF','HOG'))
         general_args.add_argument('-ma', '--matcher',  default="BFMatcher",choices=('BFMatcher', 'Flann'))
         general_args.add_argument("-t", "--text", default=True, action='store_true', help="Detect text")
-        general_args.add_argument("-rs", "--rootsift", default=True, action='store_true', help="Only for sift method")
+        general_args.add_argument("-rs", "--rootsift", default=False, action='store_true', help="Only for sift method")
 
         # create our group of mutually exclusive arguments
         mutually_exclusive = parser.add_mutually_exclusive_group()
@@ -81,6 +84,8 @@ if __name__ == "__main__":
     
     QUERY_SET_TRAIN=CONSOLE_ARGUMENTS.validate  
     QUERY_SET_TEST=CONSOLE_ARGUMENTS.test
+    
+    VALIDATE = True
     
     if QUERY_SET_TRAIN == True:
         MODE = "test"
@@ -111,6 +116,13 @@ if __name__ == "__main__":
         
         siftDs = compute_sift(paths['pathDS'], method, resize = RESIZE, rootSift = ROOTSIFT)
         
+        if (TEXT):
+            print("Computing Text BBoxes...")
+            list_of_text_bbox, imDic = detect_text_bbox(paths['pathDS'], plot=False)
+            area_resized(imDic, paths['pathDS'])
+            
+            siftDs = remove_kps(siftDs, imDic)
+        
         end = time.time()
         tTime= end - start
         print('Total time:',tTime)
@@ -128,13 +140,6 @@ if __name__ == "__main__":
         
         save_pkl(list_of_hough_points, paths['pathHough'])
     
-    if (TEXT):
-        
-        list_of_text_bbox = detect_text_bbox(paths['pathDS'], plot=True)
-    
-        # save pkl
-        save_pkl(list_of_text_bbox, "TextResults/")
-        
     
     if(GT_MATCHING):
         
@@ -202,8 +207,13 @@ if __name__ == "__main__":
         elif method=="SURF":
             pathResult =  paths['pathResults5']
         
-        
+        save_pkl(list_of_text_bbox, "TextResults/", "text.pkl")
         save_pkl(queriesResult, pathResult)
 
 
+     # Validate results
+    if VALIDATE:
         
+        bboxGT = get_window_gt("dataset/GT/w5_text_bbox_list.pkl")
+        validation_window(bboxGT, list_of_text_bbox)
+     
