@@ -23,8 +23,9 @@ def cropAndRotate(img, points):
     M = cv2.getPerspectiveTransform(pts1,pts2)
     dst = cv2.warpPerspective(img,M,(width,height))
     
-    plt.subplot(121),plt.imshow(img),plt.title('Input')
-    plt.subplot(122),plt.imshow(dst),plt.title('Output')
+#    plt.subplot(121),plt.imshow(img),plt.title('Input')
+#    plt.subplot(122),plt.imshow(dst),plt.title('Output')
+    plt.imshow(dst)
     plt.show()
 
 def groupLines(lines):
@@ -105,6 +106,8 @@ def order_points(pts):
 
 def houghTrasnformGrouped(img, percent_h, percent_w, imgOrig):
     edges = auto_canny(img)
+    plt.imshow(edges)
+    plt.show()
     lines = cv2.HoughLines(edges, 1, np.pi/180, 30, None, 0, 0)
     groupedLines, paintingTheta = groupLines(lines)
     if len(groupedLines)>1:
@@ -115,10 +118,12 @@ def houghTrasnformGrouped(img, percent_h, percent_w, imgOrig):
         points = np.array(points)
         points = order_points(points)
         cropAndRotate(img, points)
-        for point in points:
-            img = cv2.circle(img,(point[0],point[1]), 5, (0,0,255), -1)
-            
-        for j in range(0,2):
+#        for point in points:
+#            img = cv2.circle(img,(point[0],point[1]), 5, (0,0,255), -1)
+#            
+        for j in range(len(groupedLines)):
+#        for j in range(0,2):
+
             pack = groupedLines[j]
             theta = pack[2]
             a = np.cos(theta)
@@ -146,6 +151,29 @@ def houghTrasnformGrouped(img, percent_h, percent_w, imgOrig):
     
     return [paintingTheta, points.tolist()]
     
+def printhoughTrasnformGrouped(img, percent_h, percent_w, imgOrig):
+    edges = auto_canny(img)
+    plt.imshow(edges)
+    plt.show()
+    lines = cv2.HoughLines(edges, 1, np.pi/180, 30, None, 0, 0)
+    
+    for pack in lines:
+        theta = pack[0,1]
+        rho = pack[0,0]
+        a = np.cos(theta)
+        b = np.sin(theta)
+        x0 = a*rho
+        y0 = b*rho
+        x1 = int(x0 + 1000*(-b))
+        y1 = int(y0 + 1000*(a))
+        x2 = int(x0 - 1000*(-b))
+        y2 = int(y0 - 1000*(a))
+        img = cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+
+    plt.imshow(img)
+    plt.show()
+    
+    
 def auto_canny(image, sigma=0.33):
 	# compute the median of the single channel pixel intensities
 	v = np.median(image)
@@ -169,6 +197,6 @@ def compute_hough(path, resize):
         result.append(houghTrasnformGrouped(image, percent_h, percent_w, imgOrig))
     return result
     
-#if __name__ == "__main__":
-#    pathQuery = "queries_validation/"
-#    result = compute_hough(pathQuery, True)
+if __name__ == "__main__":
+    pathQuery = "queries_validation/"
+    result = compute_hough(pathQuery, True)
