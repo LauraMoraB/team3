@@ -128,7 +128,6 @@ def init_method(method):
         return cv2.KAZE_create(extended=True, upright=True, threshold=0.001)
     
     elif method == "SURF":
-#        return cv2.xfeatures2d.SURF_create(300, nOctaves=3, nOctaveLayers=4, extended=False, upright=True)
         return cv2.xfeatures2d.SURF_create(1200)
 
     
@@ -142,7 +141,6 @@ def define_measurement(method):
     
     elif method == "SURF": #set to NORM_L1 or NORM_L2.
         return cv2.NORM_L1
-
     
     elif method == "HOG":
         return cv2.NORM_L2
@@ -167,8 +165,9 @@ def compute_sift(path, method, resize = False, rootSift = False, eps = 1e-7, sav
     
     # Creates SIFT object
     desc_init = init_method(method)
-    
+
     for imName in im_list:
+        print(imName)
         # Load Gray version of each image
         imSource = define_prepared_image(method, imName, path, resize)
         
@@ -220,7 +219,9 @@ def BFMatcher(N, siftA, siftB, method, pathA = '', pathB = '', plot = False, res
     if method == "HOG":
         match = bf.knnMatch(descsA, descsB, 1)
         matches = [item for sublist in match for item in sublist]
+        
     else:
+        
         matches = bf.match(descsA, descsB)
     
     # Sort the matches in the order of their distance.
@@ -344,16 +345,17 @@ def remove_kps(siftDict, area):
 # key same as for SiftDicts, image names.
     for entry in siftDict:
         name, kps, descs = siftDict[entry]
-        tlx, tly, brx, bry = area[name]
-        i = len(kps)
-        for kp in reversed(kps):
-            kpx, kpy = kp.pt
-            if(kpy < bry and kpy > tly):
-                if(kpx < brx and kpx > tlx):
-                # KPs withing forgiben area
-                    kps.pop(i-1)
-                    descs = np.delete(descs,i-1,0)   
-            i -= 1
-        siftDict[entry] = [name, kps, descs]
-                    
+        
+        if len(area[name]) >0:    
+            tlx, tly, brx, bry = area[name]
+            i = len(kps)
+            for kp in reversed(kps):
+                kpx, kpy = kp.pt
+                if(kpy < bry and kpy > tly):
+                    if(kpx < brx and kpx > tlx):
+                    # KPs withing forgiben area
+                        kps.pop(i-1)
+                        descs = np.delete(descs,i-1,0)   
+                i -= 1
+            siftDict[entry] = [name, kps, descs]
     return siftDict

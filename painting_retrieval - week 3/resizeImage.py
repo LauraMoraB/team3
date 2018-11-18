@@ -1,5 +1,6 @@
 import cv2
-import numpy as np 
+import numpy as np
+
 
 def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # initialize the dimensions of the image to be resized and
@@ -39,3 +40,5 @@ def image_save_original_sizes(imgOrig, imgDest):
     precent_h =  orig_h / dest_h
     
     return percent_w, precent_h
+
+        

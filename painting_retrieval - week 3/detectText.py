@@ -176,8 +176,7 @@ def candidate_decision(list_of_detections, image_w, image_h, areaDesicion=True):
                 thdown = h_midImage + h_tercioImage
                 
                 if ( (item[0][2]-item[0][0]) < 0.5*image_w) or (h_midBB > thup and h_midBB < thdown):
-                    lista.pop(i-1) 
-                    
+                    lista.pop(i-1)        
                 i=i-1
                 
             if len(lista) > 0:
@@ -188,7 +187,7 @@ def candidate_decision(list_of_detections, image_w, image_h, areaDesicion=True):
             return lista
 
 def detect_text_bbox(pathDS, plot):
-    
+    results = {}
     list_of_detections_total = []
     im_list = list_ds(pathDS)
     
@@ -263,9 +262,6 @@ def detect_text_bbox(pathDS, plot):
             
             if len(list_of_detections) > 0:
                 list_of_detections=list_of_detections[0]
-           
-            print(list_of_detections)
-           
             
             # Draw final Square
             if len(list_of_detections) > 0:
@@ -273,6 +269,7 @@ def detect_text_bbox(pathDS, plot):
        
         
         list_of_detections_total.append(list_of_detections)
+        results[imName]=list_of_detections.copy()
     
         if plot:
             plot_images(after_morph, thresh, final_total_bin, image_with_square, final_image)
