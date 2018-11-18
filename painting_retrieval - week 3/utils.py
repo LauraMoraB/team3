@@ -4,7 +4,18 @@ import cv2
 from matplotlib import pyplot as plt
 import numpy as np
 import random
-from resizeImage import image_resize
+from resizeImage import image_save_original_sizes, image_resize
+
+
+def area_resized(imDic, path):
+    
+    for key in imDic:
+        value = imDic[key]
+        imgOrig = get_gray_image(key, path) # grande
+        imgDest = get_gray_image(key, path, True)   # petita  
+        percent_w, percent_h = image_save_original_sizes(imgOrig, imgDest)
+        
+        value[:] = [(np.floor(x / percent_h)).astype(int) for x in value]
 
 def save_images(kp, imName, image):
     
@@ -93,9 +104,9 @@ def plot_matches(siftA, siftB, pathA, pathB, matches, resize = False):
     plot_rgb(match_img)    
  
 # Save list in PKL format    
-def save_pkl(list_of_list, path):
+def save_pkl(list_of_list, path, filename):
     create_dir(path)
-    with open(path+'result.pkl', 'wb') as f:
+    with open(path+filename, 'wb') as f:
         pickle.dump(list_of_list, f)
         
 # Read pkl file GT and returns it as a list        
@@ -112,6 +123,13 @@ def get_query_gt(pkl_fle):
                 queryList.append(-1)
         resultList.append(queryList)
     return resultList
+
+def get_window_gt(pkl_file):
+
+    with open(pkl_file, 'rb') as f:
+        data = pickle.load(f)    
+    return data
+
 
 # Slice dictionary as list objects
 def slice_dict(d1, no, nf):

@@ -1,8 +1,14 @@
-from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift
-from sift import compute_sift, get_gt_distance, get_distances_stats, retreive_image, compute_threshold
+from utils import save_pkl, mapk, create_dir, get_query_gt, slice_dict, plot_sift, get_window_gt, area_resized
+from sift import compute_sift, get_gt_distance, get_distances_stats, retreive_image, compute_threshold, remove_kps
 import time
 from flann import retreive_image_withFlann
 from argparse import ArgumentParser
+from detectText import detect_text_bbox
+from houghTrasnform import compute_hough
+from textValidation import validation_window
+
+
+
 import configparser
 
 def init(mode):
@@ -16,6 +22,7 @@ def init(mode):
     paths['pathGTTest'] = "queries_test/GT/"
     # Results Path
     paths['pathResult'] = "results/"+mode
+    paths['pathHough'] = paths['pathResult']+"/hough/"
     
     # Delivery Methods Path
     paths['pathResults1'] = paths['pathResult']+"/sift/"
@@ -47,15 +54,17 @@ if __name__ == "__main__":
         general_args = parser.add_argument_group("General arguments")
     
         
-        general_args.add_argument('-me', '--method', default="SIFT", choices=('SIFT', 'ORB', 'KAZE', 'SURF','HOG'))
+        general_args.add_argument('-me', '--method', default="KAZE", choices=('SIFT', 'ORB', 'KAZE', 'SURF','HOG'))
         general_args.add_argument('-ma', '--matcher',  default="BFMatcher",choices=('BFMatcher', 'Flann'))
-        general_args.add_argument("-rs", "--rootsift", default=True, action='store_true', help="Only for sift method")
+        general_args.add_argument("-t", "--text", default=True, action='store_true', help="Detect text")
+        general_args.add_argument("-rs", "--rootsift", default=False, action='store_true', help="Only for sift method")
 
         # create our group of mutually exclusive arguments
         mutually_exclusive = parser.add_mutually_exclusive_group()
         mutually_exclusive.add_argument("--test", action='store_true', help="test excludes validate")
         mutually_exclusive.add_argument("--validate", action='store_true', help="validate excludes test")
-
+        
+        
         return parser.parse_args()
 
 
@@ -71,32 +80,49 @@ if __name__ == "__main__":
     SAVE_RESULTS = config.getboolean('DEFAULT','SAVE_RESULTS')
     RESIZE = config.getboolean('DEFAULT','RESIZE')
     PLOTS = config.getboolean('DEFAULT','PLOTS')
-
+    HOUGH = config.getboolean('DEFAULT', 'HOUGH')
     
-    if CONSOLE_ARGUMENTS.validate == True:
+    QUERY_SET_TRAIN=CONSOLE_ARGUMENTS.validate  
+    QUERY_SET_TEST=CONSOLE_ARGUMENTS.test
+    
+    VALIDATE = True
+    
+    if QUERY_SET_TRAIN == True:
         MODE = "test"
     else:
         MODE = "validation"
         
-    # Define which Descriptor is used
-    # OPTIONS: SIFT/ ORB / DAISY / KAZE / FREAK
-    # IF ORB IS SELECTED, ROOTSIFT ignored
+
+    
+    # SET OPTION IN THE DEFAULT VALUE IN parse_arguments
     method = CONSOLE_ARGUMENTS.method
     ROOTSIFT = CONSOLE_ARGUMENTS.rootsift
     matcherType = CONSOLE_ARGUMENTS.matcher
     
+    TEXT = CONSOLE_ARGUMENTS.text
+    
     if(RELOAD):
         # Prepares folders
         paths = init(MODE)
-        # Loads GT (from previous week, ds not available at the moment)
+
         gtFile = "queries_validation/GT/w5_query_devel.pkl"
         gtList = get_query_gt(gtFile)
+        
         # Creates dictionary of list with SIFT kps and descriptors  
         # FORMAT-> sift['imName']= [imName, kps, descs]
-        print ("Computing Features and Descriptors for dataset..")
         
+        print ("Computing Features and Descriptors for dataset..")
         start = time.time()
+        
         siftDs = compute_sift(paths['pathDS'], method, resize = RESIZE, rootSift = ROOTSIFT)
+        
+        if (TEXT):
+            print("Computing Text BBoxes...")
+            list_of_text_bbox, imDic = detect_text_bbox(paths['pathDS'], plot=False)
+            area_resized(imDic, paths['pathDS'])
+            
+            siftDs = remove_kps(siftDs, imDic)
+        
         end = time.time()
         tTime= end - start
         print('Total time:',tTime)
@@ -107,7 +133,14 @@ if __name__ == "__main__":
             path = paths['pathQueriesTest']
             
         siftQuery = compute_sift(path, method, resize = RESIZE, rootSift = ROOTSIFT)
-
+        
+    if(HOUGH):
+        
+        list_of_hough_points = compute_hough(paths['pathQueriesValidation'], RESIZE)
+        
+        save_pkl(list_of_hough_points, paths['pathHough'])
+    
+    
     if(GT_MATCHING):
         
         # N Used for Stats  and plotting
@@ -157,7 +190,9 @@ if __name__ == "__main__":
     # Save Results, modify path accordingly to the  Method beeing used
     
     if(SAVE_RESULTS):
+
         if method == "SIFT":
+            
             if(ROOTSIFT == False):
                 pathResult =  paths['pathResults1']
             else:
@@ -172,8 +207,13 @@ if __name__ == "__main__":
         elif method=="SURF":
             pathResult =  paths['pathResults5']
         
-        
+        save_pkl(list_of_text_bbox, "TextResults/", "text.pkl")
         save_pkl(queriesResult, pathResult)
 
 
+     # Validate results
+    if VALIDATE:
         
+        bboxGT = get_window_gt("dataset/GT/w5_text_bbox_list.pkl")
+        validation_window(bboxGT, list_of_text_bbox)
+     

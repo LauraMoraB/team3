@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from utils import get_gray_image, list_ds
 from scipy.spatial import distance as dist
+from resizeImage import image_save_original_sizes
 
 def getSizeSquare(points):
     x1, y1 = points[0]
@@ -102,8 +103,10 @@ def order_points(pts):
 
 	return np.array([tl, tr, br, bl], dtype="float32")
 
-def houghTrasnformGrouped(img):
+def houghTrasnformGrouped(img, percent_h, percent_w, imgOrig):
     edges = auto_canny(img)
+    plt.imshow(edges)
+    plt.show()
     lines = cv2.HoughLines(edges, 1, np.pi/180, 30, None, 0, 0)
     groupedLines, paintingTheta = groupLines(lines)
     if len(groupedLines)>1:
@@ -130,8 +133,19 @@ def houghTrasnformGrouped(img):
                 x2 = int(x0 - 1000*(-b))
                 y2 = int(y0 - 1000*(a))
                 img = cv2.line(img,(x1,y1),(x2,y2),(0,0,255),2)
+
     plt.imshow(img)
     plt.show()
+
+    points = points * percent_h
+    points = np.floor(points)
+    points = points.astype(int)
+
+    for point in points:
+        imgOrig = cv2.circle(imgOrig,(point[0],point[1]), 20, (0,0,255), -1)
+    plt.imshow(imgOrig)
+    plt.show()
+
     return [paintingTheta, points.tolist()]
 
 def auto_canny(image, sigma=0.33):
@@ -147,12 +161,14 @@ def auto_canny(image, sigma=0.33):
 	return edged
 
 
-def compute_hough(path):
+def compute_hough(path, resize):
     im_list = list_ds(path)
     result = []
     for imName in im_list:
-        image = get_gray_image(imName, path, True, 256)
-        result.append(houghTrasnformGrouped(image))
+        imgOrig = get_gray_image(imName, path)
+        image = get_gray_image(imName, path, resize, 256)
+        percent_w, percent_h = image_save_original_sizes(imgOrig, image)
+        result.append(houghTrasnformGrouped(image, percent_h, percent_w, imgOrig))
     return result
 
 if __name__ == "__main__":
