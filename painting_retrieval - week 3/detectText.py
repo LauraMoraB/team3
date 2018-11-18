@@ -30,7 +30,6 @@ def apply_morphology(img_back, perH, perW):
     h,w=img_back.shape
     
     openk = int(h*0.01)
-    #dilk= int(h*0.01)#int(h*0.02)
     dilk1= int(h*0.01)#5
     dilk2= int(w*0.01)
     erok1 = int(h*0.01)#5
@@ -75,7 +74,6 @@ def high_pass(img, h, w):
     ## compute FFT
     f = np.fft.fft2(img)
     fshift = np.fft.fftshift(f)
-   # magnitude_spectrum = 20*np.log(np.abs(fshift))
     
     # Filter to remove low freq
     fshift[h_mid-50:h_mid+50, w_mid-50:w_mid+50] = 0
@@ -194,7 +192,6 @@ def detect_text_bbox(pathDS, plot):
     list_of_detections_total = []
     im_list = list_ds(pathDS)
     
-    #im_list = ["ima_000041.jpg"]
     for imName in im_list:
         print (imName)
         img = cv2.imread(pathDS+imName)
@@ -279,21 +276,11 @@ def detect_text_bbox(pathDS, plot):
     
         if plot:
             plot_images(after_morph, thresh, final_total_bin, image_with_square, final_image)
+            
+#        cv2.imwrite("results/multiple/better/"+imName, image_with_square)
+#        cv2.imwrite("results/final/better/"+imName, final_image)     
         
-        cv2.imwrite("results/multiple/better/"+imName, image_with_square)
-        cv2.imwrite("results/final/better/"+imName, final_image)
-        
-        
-    return list_of_detections_total  
-    
-if __name__ == "__main__":   
-    
-    list_of_text_bbox = detect_text_bbox("dataset/", plot=False)
-    
-    bboxGT = get_window_gt("dataset/GT/w5_text_bbox_list.pkl")
-    validate_results(bboxGT, list_of_text_bbox)
-    # save pkl
-    #save_pkl(list_of_text_bbox, "TextResults/")
+    return list_of_detections_total
        
         
         
